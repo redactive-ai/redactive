@@ -18,18 +18,7 @@ class SearchClient:
         self.host = host
         self.port = port
 
-    def authenticate(self, access_token: str) -> None:
-        """
-        Set the access token for authentication.
-
-        Parameters:
-            access_token (str): The access token to be used for authentication.
-        """
-        self.access_token = access_token
-
-    async def query_chunks(self, semantic_query: str, count: int = 1) -> List[RelevantChunk]:
-        if self.access_token is None:
-            raise Exception("Missing access token")
+    async def query_chunks(self, access_token: str, semantic_query: str, count: int = 1) -> List[RelevantChunk]:
         """
         Query for relevant chunks based on a semantic query.
 
@@ -41,7 +30,7 @@ class SearchClient:
             List[RelevantChunk]: A list of relevant chunks that match the query.
         """
         async with Channel(self.host, self.port, ssl=True) as channel:
-            stub = SearchStub(channel, metadata=(dict(authorization=f"Bearer {self.access_token}")))
+            stub = SearchStub(channel, metadata=(dict(authorization=f"Bearer {access_token}")))
             request = QueryRequest(count=count, query=Query(semantic_query=semantic_query))
             response = await stub.query_chunks(request)
             return response.relevant_chunks

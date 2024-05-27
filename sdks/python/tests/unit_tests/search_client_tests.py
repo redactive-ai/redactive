@@ -24,8 +24,7 @@ async def test_query_chunks(mock_channel_context):
 
     with mock.patch("redactive.grpc.v1.SearchStub.query_chunks", side_effect=mock.AsyncMock()) as mock_query_chunks:
         client = SearchClient()
-        client.authenticate(access_token)
-        await client.query_chunks(semantic_query, count)
+        await client.query_chunks(access_token, semantic_query, count)
         mock_query_chunks.assert_called_once_with(
             QueryRequest(
                 count=count,
