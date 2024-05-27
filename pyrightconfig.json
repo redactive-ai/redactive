@@ -1,0 +1,12 @@
+{
+    "typeCheckingMode": "basic",
+    "include": [
+        "sdk/python"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+    ],
+    // Rules: https://microsoft.github.io/pyright/#/configuration?id=type-check-diagnostics-settings
+    "reportUnusedCoroutine": true,
+}
