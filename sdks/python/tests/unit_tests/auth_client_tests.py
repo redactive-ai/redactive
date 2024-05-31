@@ -1,6 +1,10 @@
 import pytest
 
-from redactive.auth_client import AuthClient, ExchangeTokenResponse
+from redactive.auth_client import (
+    AuthClient,
+    BeginConnectionResponse,
+    ExchangeTokenResponse,
+)
 
 
 @pytest.fixture
@@ -12,9 +16,9 @@ def mock_client():
 async def test_begin_connection(mock_client, httpx_mock):
     redirect_uri = "https://redirect.uri"
     expected_url = f"https://mock.api/api/auth/connect/provider/url?redirect_uri={redirect_uri}"
-    httpx_mock.add_response(json=expected_url)
-    url = await mock_client.begin_connection("provider", redirect_uri)
-    assert url == expected_url
+    httpx_mock.add_response(json={"url": expected_url})
+    response = await mock_client.begin_connection("provider", redirect_uri)
+    assert response == BeginConnectionResponse(url=expected_url)
 
 
 @pytest.mark.asyncio

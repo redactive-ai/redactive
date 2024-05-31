@@ -10,6 +10,10 @@ class ExchangeTokenResponse(BaseModel):
     expiresIn: int
 
 
+class BeginConnectionResponse(BaseModel):
+    url: str
+
+
 class AuthClient:
     def __init__(self, api_key: str, base_url: str = "https://api.redactive.ai"):
         """
@@ -23,7 +27,7 @@ class AuthClient:
         """
         self._client = httpx.AsyncClient(base_url=f"{base_url}", auth=BearerAuth(api_key))
 
-    async def begin_connection(self, provider: str, redirect_uri: str) -> str:
+    async def begin_connection(self, provider: str, redirect_uri: str) -> BeginConnectionResponse:
         """
         Initiates a connection process with a specified provider.
 
@@ -42,7 +46,7 @@ class AuthClient:
             url=f"/api/auth/connect/{provider}/url", params={"redirect_uri": redirect_uri}
         )
         if response.status_code == 200:
-            return response.json()
+            return BeginConnectionResponse(**response.json())
         else:
             raise httpx.RequestError(response.text)
 
