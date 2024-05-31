@@ -4,6 +4,7 @@
 # This file has been @generated
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 import betterproto
@@ -15,6 +16,15 @@ if TYPE_CHECKING:
     import grpclib.server
     from betterproto.grpc.grpclib_client import MetadataLike
     from grpclib.metadata import Deadline
+
+
+@dataclass(eq=False, repr=False)
+class ChunkMetadata(betterproto.Message):
+    created_at: Optional[datetime] = betterproto.message_field(1, optional=True, group="_created_at")
+    """Chunk content's creation timestamp"""
+
+    modified_at: Optional[datetime] = betterproto.message_field(2, optional=True, group="_modified_at")
+    """Chunk content's last modified timestamp"""
 
 
 @dataclass(eq=False, repr=False)
@@ -43,6 +53,12 @@ class SourceReference(betterproto.Message):
     """
     Document version in the source system e.g. confluence page version, slack
     message version, local file version hash
+    """
+
+    document_path: Optional[str] = betterproto.string_field(6, optional=True, group="_document_path")
+    """
+    Document path in the source system e.g. "My Drive/document.txt", "slack-
+    channel-name"
     """
 
 
@@ -77,14 +93,14 @@ class RelevantChunk(betterproto.Message):
     chunk_body: str = betterproto.string_field(4)
     """Chunk body"""
 
-    document_metadata: "betterproto_lib_google_protobuf.Struct" = betterproto.message_field(5)
+    document_metadata: "ChunkMetadata" = betterproto.message_field(5)
     """Document metadata"""
 
 
 @dataclass(eq=False, repr=False)
 class RelevantChunkRelevance(betterproto.Message):
     similarity_score: float = betterproto.float_field(1)
-    """Simiarlity score of the chunk"""
+    """Similarity score of the chunk"""
 
 
 @dataclass(eq=False, repr=False)
@@ -94,12 +110,36 @@ class Query(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class TimeSpan(betterproto.Message):
+    after: Optional[datetime] = betterproto.message_field(1, optional=True, group="_after")
+    before: Optional[datetime] = betterproto.message_field(2, optional=True, group="_before")
+
+
+@dataclass(eq=False, repr=False)
+class Filters(betterproto.Message):
+    scope: List[str] = betterproto.string_field(1)
+    """
+    Scope e.g. "confluence", "slack://channel-name", "google-
+    drive://CompanyDrive/document.docx"
+    """
+
+    created: Optional["TimeSpan"] = betterproto.message_field(2, optional=True, group="_created")
+    """Timespan of response chunk's creation"""
+
+    modified: Optional["TimeSpan"] = betterproto.message_field(3, optional=True, group="_modified")
+    """Timespan of response chunk's last modification"""
+
+
+@dataclass(eq=False, repr=False)
 class QueryRequest(betterproto.Message):
     count: Optional[int] = betterproto.uint32_field(1, optional=True, group="_count")
     """How many results to try to return (maximum number of results)"""
 
     query: "Query" = betterproto.message_field(2)
     """The query to execute"""
+
+    filters: Optional["Filters"] = betterproto.message_field(3, optional=True, group="_filters")
+    """Filters to apply to query"""
 
 
 @dataclass(eq=False, repr=False)
