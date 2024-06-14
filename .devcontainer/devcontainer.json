@@ -16,11 +16,7 @@
         "eamodio.gitlens",
         "zxh404.vscode-proto3",
         "esbenp.prettier-vscode"
-      ],
-      "settings": {
-        "editor.formatOnSave": true,
-        "protolint.path": null
-      }
+      ]
     }
   }
 }
