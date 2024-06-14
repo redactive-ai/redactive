@@ -4,7 +4,6 @@ package redactive.grpc.v1;
 
 import "google/protobuf/timestamp.proto";
 
-
 message ChunkMetadata {
     // Chunk content's creation timestamp
     optional google.protobuf.Timestamp created_at = 1;

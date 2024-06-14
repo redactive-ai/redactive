@@ -16,6 +16,6 @@ repos:
   - repo: local
     hooks:
       - id: prettier
-        name: Check files format with prettier
-        entry: bash -c 'prettier -c *'
+        name: Format files with prettier
+        entry: bash -c 'prettier -w *'
         language: system
