@@ -13,5 +13,27 @@
 - Here is an example to generate search service
 
 ```bash
-python3 -m grpc_tools.protoc -I protos --python_betterproto_out={{OUTPUT_PATH}} search.proto
+OUTPUT_PATH=
+python3 -m grpc_tools.protoc \
+  -I protos \
+  --python_betterproto_out=${OUTPUT_PATH} \
+   search.proto
+```
+
+### Node
+
+- Install protobuf compiler https://grpc.io/docs/protoc-installation
+- Install required packages `npm install -g ts-proto`
+- Here is an example to generate search service
+
+```bash
+NODE_MODULES_DIR=$(npm root -g)
+OUTPUT_PATH=
+protoc \
+  -I protos \
+  --experimental_allow_proto3_optional=1 \
+  --plugin=${NODE_MODULES_DIR}/ts-proto/protoc-gen-ts_proto \
+   --ts_proto_opt=outputServices=grpc-js \
+   --ts_proto_out=${OUTPUT_PATH} \
+ search.proto
 ```
