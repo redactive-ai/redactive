@@ -1,4 +1,6 @@
 # Git files
 .git/
 
+# Proto files
+**/*.proto
 LICENSE

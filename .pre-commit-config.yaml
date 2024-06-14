@@ -22,5 +22,5 @@ repos:
     hooks:
       - id: prettier
         name: Check files format with prettier
-        entry: bash -c 'prettier --write *'
+        entry: bash -c 'prettier --write **/*'
         language: system
