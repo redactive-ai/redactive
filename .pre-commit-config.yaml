@@ -1,26 +1,26 @@
 default_install_hook_types: [commit-msg, pre-commit, pre-push]
 default_language_version:
-  python: python3.12
+    python: python3.12
 fail_fast: true
 # pre-commit hooks references: https://pre-commit.com/hooks.html
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
-    hooks:
-      # prevents giant files from being committed
-      - id: check-added-large-files
-      # checks for files that contain merge conflict strings
-      - id: check-merge-conflict
-      # detects the presence of private keys
-      - id: detect-private-key
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.27.0
-    hooks:
-      - id: commitizen
-        name: Check commit message format
-  - repo: local
-    hooks:
-      - id: prettier
-        name: Check files format with prettier
-        entry: bash -c 'prettier --write **/*'
-        language: system
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v3.2.0
+      hooks:
+          # prevents giant files from being committed
+          - id: check-added-large-files
+          # checks for files that contain merge conflict strings
+          - id: check-merge-conflict
+          # detects the presence of private keys
+          - id: detect-private-key
+    - repo: https://github.com/commitizen-tools/commitizen
+      rev: v3.27.0
+      hooks:
+          - id: commitizen
+            name: Check commit message format
+    - repo: local
+      hooks:
+          - id: prettier
+            name: Check files format with prettier
+            entry: bash -c 'prettier --write **/*'
+            language: system
