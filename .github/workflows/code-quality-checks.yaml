@@ -1,37 +1,37 @@
 name: Check code quality
 on:
-    pull_request:
-        branches:
-            - main
+  pull_request:
+    branches:
+      - main
 jobs:
-    checks:
-        runs-on: ubuntu-22.04
-        defaults:
-            run:
-                working-directory: ./
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - python-version: "3.12"
-                      python-version-str: "py312"
-                    - node-version: [20]
-        steps:
-            - name: Checkout
-              uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-              with:
-                  fetch-depth: 0
-            - name: Set up ${{ matrix.python-version-str }}
-              uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
-              with:
-                  python-version: ${{ matrix.python-version }}
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
-              with:
-                  node-version: ${{ matrix.node-version }}
-            - name: Install node dependencies
-              run: npm install -g prettier
-            - name: Run pre-commit hooks
-              uses: pre-commit/action@c7d159c2092cbfaab7352e2d8211ab536aa2267c # Nov 20, 2023
-              with:
-                  extra_args: --hook-stage={pre-commit,pre-push} --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}
+  checks:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: "3.12"
+            python-version-str: "py312"
+          - node-version: [20]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+      - name: Set up ${{ matrix.python-version-str }}
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install node dependencies
+        run: npm install -g prettier
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@c7d159c2092cbfaab7352e2d8211ab536aa2267c # Nov 20, 2023
+        with:
+          extra_args: --hook-stage={pre-commit,pre-push} --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}

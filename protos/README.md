@@ -9,8 +9,8 @@
 
 ### Python
 
--   Install required packages `pip install grpcio-tools betterproto[compiler]==2.0.0b6`
--   Here is an example to generate search service
+- Install required packages `pip install grpcio-tools betterproto[compiler]==2.0.0b6`
+- Here is an example to generate search service
 
 ```bash
 OUTPUT_PATH=
@@ -22,9 +22,9 @@ python3 -m grpc_tools.protoc \
 
 ### Node
 
--   Install protobuf compiler https://grpc.io/docs/protoc-installation
--   Install required packages `npm install -g ts-proto`
--   Here is an example to generate search service
+- Install protobuf compiler https://grpc.io/docs/protoc-installation
+- Install required packages `npm install -g ts-proto`
+- Here is an example to generate search service
 
 ```bash
 NODE_MODULES_DIR=$(npm root -g)
