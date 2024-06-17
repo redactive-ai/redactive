@@ -13,15 +13,15 @@ message ChunkMetadata {
 }
 
 message SourceReference {
-    // Source system of the document e.g. confluence, slack, local_file_system
+    // Source system of the document e.g. confluence, slack, google-drive
     string system = 1;
     // Version of the source system e.g. 1.0.0
     string system_version = 2;
-    // Connection id to the source system e.g. confluence space id, slack channel id, local file hostname
+    // Connection id to the source system e.g. confluence space id, slack channel id, google-drive drive id
     string connection_id = 3;
-    // Document id in the source system e.g. confluence page id, slack message id, local file path
+    // Document id in the source system e.g. confluence page id, slack message id, google-drive document id
     string document_id = 4;
-    // Document version in the source system e.g. confluence page version, slack message version, local file version hash
+    // Document version in the source system e.g. confluence page version, slack message version, google-drive document version
     string document_version = 5;
     // Document path in the source system e.g. "My Drive/document.txt", "slack-channel-name"
     optional string document_path = 6;
@@ -30,7 +30,7 @@ message SourceReference {
 message ChunkReference {
     // Chunking version e.g. 1.0.0
     string chunking_version = 1;
-    // chunk id is unique within the document, but not globally unique, it's actually the index of the chunk in the document
+    // chunk id is unique within the document, but not globally unique.
     string chunk_id = 2;
     // SHA256 hash of the chunk body
     string chunk_hash = 3;
