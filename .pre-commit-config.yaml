@@ -25,12 +25,6 @@ repos:
         entry: bash -c 'prettier --write **/*'
         language: system
   # Python SDK pre-commit hooks
-  - repo: https://github.com/asottile/setup-cfg-fmt
-    rev: v2.5.0
-    hooks:
-      - id: setup-cfg-fmt
-        name: Check setup.cfg format
-        files: "^sdks/python/"
   - repo: https://github.com/psf/black
     rev: 23.11.0
     hooks:

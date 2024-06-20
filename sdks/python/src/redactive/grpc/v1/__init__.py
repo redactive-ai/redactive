@@ -26,13 +26,13 @@ class ChunkMetadata(betterproto.Message):
     modified_at: Optional[datetime] = betterproto.message_field(2, optional=True, group="_modified_at")
     """Chunk content's last modified timestamp"""
 
+    link: Optional[str] = betterproto.string_field(3, optional=True, group="_link")
+
 
 @dataclass(eq=False, repr=False)
 class SourceReference(betterproto.Message):
     system: str = betterproto.string_field(1)
-    """
-    Source system of the document e.g. confluence, slack, local_file_system
-    """
+    """Source system of the document e.g. confluence, slack, google-drive"""
 
     system_version: str = betterproto.string_field(2)
     """Version of the source system e.g. 1.0.0"""
@@ -40,19 +40,19 @@ class SourceReference(betterproto.Message):
     connection_id: str = betterproto.string_field(3)
     """
     Connection id to the source system e.g. confluence space id, slack channel
-    id, local file hostname
+    id, google-drive drive id
     """
 
     document_id: str = betterproto.string_field(4)
     """
     Document id in the source system e.g. confluence page id, slack message id,
-    local file path
+    google-drive document id
     """
 
     document_version: str = betterproto.string_field(5)
     """
     Document version in the source system e.g. confluence page version, slack
-    message version, local file version hash
+    message version, google-drive document version
     """
 
     document_path: Optional[str] = betterproto.string_field(6, optional=True, group="_document_path")
@@ -68,10 +68,7 @@ class ChunkReference(betterproto.Message):
     """Chunking version e.g. 1.0.0"""
 
     chunk_id: str = betterproto.string_field(2)
-    """
-    chunk id is unique within the document, but not globally unique, it's
-    actually the index of the chunk in the document
-    """
+    """chunk id is unique within the document, but not globally unique."""
 
     chunk_hash: str = betterproto.string_field(3)
     """SHA256 hash of the chunk body"""
@@ -128,6 +125,9 @@ class Filters(betterproto.Message):
 
     modified: Optional["TimeSpan"] = betterproto.message_field(3, optional=True, group="_modified")
     """Timespan of response chunk's last modification"""
+
+    user_emails: List[str] = betterproto.string_field(4)
+    """List of user emails associated with response chunk"""
 
 
 @dataclass(eq=False, repr=False)
