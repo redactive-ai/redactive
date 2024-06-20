@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package redactive.grpc.v1;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "chunks.proto";
+
+service Search {
+    // Query the index for relevant chunks
+    rpc QueryChunks(QueryRequest) returns (QueryResponse);
+}
+
+message Query {
+    // Semantic query to execute
+    string semantic_query = 1;
+}
+
+message TimeSpan {
+    optional google.protobuf.Timestamp after = 1;
+    optional google.protobuf.Timestamp before = 2;
+}
+
+message Filters {
+    // Scope e.g. "confluence", "slack://channel-name", "google-drive://CompanyDrive/document.docx"
+    repeated string scope = 1;
+    // Timespan of response chunk's creation
+    optional TimeSpan created = 2;
+    // Timespan of response chunk's last modification
+    optional TimeSpan modified = 3;
+    // List of user emails associated with response chunk
+    repeated string user_emails = 4;
+}
+
+message QueryRequest {
+    // How many results to try to return (maximum number of results)
+    optional uint32 count = 1;
+    // The query to execute
+    Query query = 2;
+    // Filters to apply to query
+    optional Filters filters = 3;
+}
+
+message QueryResponse {
+    // Query was successful
+    bool success = 1;
+    // Error message if query failed
+    optional google.protobuf.Struct error = 2;
+    // List of relevant chunks
+    repeated RelevantChunk relevant_chunks = 3;
+}
