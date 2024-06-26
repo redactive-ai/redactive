@@ -48,8 +48,9 @@ body:
       options:
         - Google Cloud
         - AWS Cloud
-        - Local with Docker container
+        - Other Cloud
         - Local
+        - Local with Docker container
     validations:
       required: true
   - type: dropdown
@@ -83,7 +84,7 @@ body:
       description: What version of SDK you are using?
       placeholder: e.g. v1.3.0
     validations:
-      required: true
+      required: false
   - type: textarea
     id: additional-context
     attributes:
