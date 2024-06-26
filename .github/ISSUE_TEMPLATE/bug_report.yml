@@ -81,7 +81,7 @@ body:
     attributes:
       label: SDK version
       description: What version of SDK you are using?
-      placeholder: v1.3.0
+      placeholder: e.g. v1.3.0
     validations:
       required: true
   - type: textarea
@@ -89,5 +89,6 @@ body:
     attributes:
       label: Additional context
       description: Add any other context about the problem here.
+      placeholder: e.g. error logs
     validations:
       required: false
