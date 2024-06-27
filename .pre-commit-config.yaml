@@ -1,6 +1,6 @@
 default_install_hook_types: [pre-commit, pre-push]
 default_language_version:
-  python: python3.12
+  python: python3.11
 
 fail_fast: true
 # pre-commit hooks references: https://pre-commit.com/hooks.html
@@ -37,7 +37,7 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pyright'
+        entry: bash -c 'cd sdks/python && pip install .[dev] &&pyright'
         additional_dependencies: ["pyright"]
 
       # Run the linter
@@ -64,4 +64,4 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pip install .[test] && pytest'
+        entry: bash -c 'cd sdks/python && python install .[test] && pytest'
