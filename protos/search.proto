@@ -13,8 +13,8 @@ service Search {
 }
 
 message Query {
-    // Semantic query
-    string semantic_query = 2;
+    // Semantic query to execute
+    string semantic_query = 1;
 }
 
 message TimeSpan {

@@ -107,8 +107,8 @@ class RelevantChunkRelevance(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class Query(betterproto.Message):
-    semantic_query: str = betterproto.string_field(2)
-    """Semantic query"""
+    semantic_query: str = betterproto.string_field(1)
+    """Semantic query to execute"""
 
 
 @dataclass(eq=False, repr=False)
