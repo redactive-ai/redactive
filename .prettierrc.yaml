@@ -1,7 +1,3 @@
 tabWidth: 2
 useTabs: false
 singleQuote: false
-overrides:
-  - files: \*.py
-    options:
-      tabWidth: 4

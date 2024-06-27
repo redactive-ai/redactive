@@ -25,25 +25,20 @@ repos:
     hooks:
       - id: prettier
         name: Check files format with prettier
-        entry: bash -c 'prettier --write **/*'
+        entry: bash -c 'prettier --write .'
         language: system
 
   # Python SDK hooks
   - repo: local
     hooks:
-      #  SDK code generator
-      - id: python-sdk-generate-grpc-code
-        name: Generate Redactive Python SDK gRrc code
-        language: system
-        entry: bash -c "protos/gen_python.sh"
-
       # Run type checking
       - id: python-sdk-pyright
         name: Check typing with pyright
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pip install .[dev] && pyright'
+        entry: bash -c 'cd sdks/python && pyright'
+        additional_dependencies: ["pyright"]
 
       # Run the linter
       - id: python-sdk-ruff-lint
