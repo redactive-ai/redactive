@@ -31,13 +31,21 @@ repos:
   # Python SDK hooks
   - repo: local
     hooks:
+      # Install Python SDK
+      - id: python-sdk-install
+        name: Install python SDK
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && pip install .[dev,test]'
+
       # Run type checking
       - id: python-sdk-pyright
         name: Check typing with pyright
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pip install .[dev] &&pyright'
+        entry: bash -c 'cd sdks/python && pyright'
         additional_dependencies: ["pyright"]
 
       # Run the linter
@@ -64,4 +72,4 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && python install .[test] && pytest'
+        entry: bash -c 'cd sdks/python && pytest'
