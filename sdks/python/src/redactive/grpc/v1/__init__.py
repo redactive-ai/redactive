@@ -5,7 +5,12 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    List,
+    Optional,
+)
 
 import betterproto
 import betterproto.lib.google.protobuf as betterproto_lib_google_protobuf
@@ -102,8 +107,8 @@ class RelevantChunkRelevance(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class Query(betterproto.Message):
-    semantic_query: str = betterproto.string_field(1)
-    """Semantic query to execute"""
+    semantic_query: str = betterproto.string_field(2)
+    """Semantic query"""
 
 
 @dataclass(eq=False, repr=False)

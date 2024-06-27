@@ -1,13 +1,54 @@
 [build-system]
-requires = [
-    "setuptools>=60",
-    "wheel",
-]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.black]
+[project]
+name = "redactive"
+version = "0.0.5"
+description = "Redactive Python SDK"
+requires-python = ">=3.11"
+keywords = []
+authors = [{ name = "Redactive ai", email = "support@redactive.ai" }]
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "pydantic",
+    "betterproto[compiler]==2.0.0b6",
+    "grpclib[protobuf]",
+    "httpx",
+]
+
+[project.optional-dependencies]
+dev = ["ruff", "pyright"]
+test = ["pytest", "pytest-asyncio", "pytest-httpx"]
+
+[project.urls]
+"Homepage" = "https://github.com/redactive-ai/redactive"
+"Bug Reports" = "https://github.com/redactive-ai/redactive/labels/sdk:python"
+"Source" = "https://github.com/redactive-ai/redactive"
+
+[tool.pyright]
+include = ["src"]
+exclude = ["src/redactive/grpc/*"]
+typeCheckingMode = "basic"
+
+[tool.ruff]
 line-length = 120
-target-version = ["py310"]
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+extend-select = [
+    "I",  # isort
+    "UP", # pyupgrade
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Python 3.10+ typing is not work well with generated grpc code
+"**/redactive/grpc/*" = ["UP"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

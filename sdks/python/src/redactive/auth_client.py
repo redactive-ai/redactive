@@ -1,5 +1,3 @@
-from typing import Optional
-
 import httpx
 from pydantic import BaseModel
 
@@ -19,28 +17,25 @@ class AuthClient:
         """
         Initialize the connection settings for the service.
 
-        Parameters:
-            api_key (str): The API key used for authentication.
-            base_url (str, optional): The base URL for the HTTP client. Defaults to "https://api.redactive.ai".
-        Attributes:
-            _client (httpx.AsyncClient): The HTTP client configured with base URL and Bearer authentication.
+        :param api_key: The API key used for authentication.
+        :type api_key: str
+        :param base_url: The base URL for the HTTP client, defaults to "https://api.redactive.ai"
+        :type base_url: str, optional
         """
+
         self._client = httpx.AsyncClient(base_url=f"{base_url}", auth=BearerAuth(api_key))
 
     async def begin_connection(self, provider: str, redirect_uri: str) -> BeginConnectionResponse:
         """
         Initiates a connection process with a specified provider.
 
-        Parameters:
-            provider (str): The name of the provider to connect with.
-            redirect_uri (str): The URI to redirect to after initiating the connection. Defaults to an empty string.
-
-        Returns:
-            str: The URL to redirect the user to for beginning the connection.
-
-        Raises:
-            httpx.HTTPStatusError: If the HTTP request returns an unsuccessful status code.
-            httpx.RequestError: If an error occurs while making the HTTP request.
+        :param provider: The name of the provider to connect with.
+        :type provider: str
+        :param redirect_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
+        :type redirect_uri: str
+        :raises httpx.RequestError: If an error occurs while making the HTTP request.
+        :return: The URL to redirect the user to for beginning the connection.
+        :rtype: BeginConnectionResponse
         """
         response = await self._client.post(
             url=f"/api/auth/connect/{provider}/url", params={"redirect_uri": redirect_uri}
@@ -50,22 +45,17 @@ class AuthClient:
         else:
             raise httpx.RequestError(response.text)
 
-    async def exchange_tokens(
-        self, code: Optional[str] = None, refresh_token: Optional[str] = None
-    ) -> ExchangeTokenResponse:
+    async def exchange_tokens(self, code: str | None = None, refresh_token: str | None = None) -> ExchangeTokenResponse:
         """
         Exchange an authorization code and refresh token for access tokens.
 
-        Parameters:
-            code (str): The authorization code received from the OAuth flow.
-            refresh_token (str): The refresh token used for token refreshing.
-
-        Returns:
-            ExchangeTokenResponse: An object containing access token and other token information.
-
-        Raises:
-            httpx.HTTPStatusError: If the HTTP request returns an unsuccessful status code.
-            httpx.RequestError: If an error occurs while making the HTTP request.
+        :param code: The authorization code received from the OAuth flow, defaults to None
+        :type code: str | None, optional
+        :param refresh_token: The refresh token used for token refreshing, defaults to None
+        :type refresh_token: str | None, optional
+        :raises httpx.RequestError: If an error occurs while making the HTTP request.
+        :return: An object containing access token and other token information.
+        :rtype: ExchangeTokenResponse
         """
 
         body = dict()

@@ -1,6 +1,7 @@
-default_install_hook_types: [commit-msg, pre-commit, pre-push]
+default_install_hook_types: [pre-commit, pre-push]
 default_language_version:
   python: python3.12
+
 fail_fast: true
 # pre-commit hooks references: https://pre-commit.com/hooks.html
 repos:
@@ -13,54 +14,59 @@ repos:
       - id: check-merge-conflict
       # detects the presence of private keys
       - id: detect-private-key
+
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.27.0
     hooks:
       - id: commitizen
         name: Check commit message format
+
   - repo: local
     hooks:
       - id: prettier
         name: Check files format with prettier
         entry: bash -c 'prettier --write **/*'
         language: system
-  # Python SDK pre-commit hooks
-  - repo: https://github.com/psf/black
-    rev: 23.11.0
-    hooks:
-      - id: black
-        name: Format code with black
-        args: ["--target-version=py311", "--line-length=120", "--preview"]
-        files: "^sdks/python/"
-  - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.356
-    hooks:
-      - id: pyright
-        name: Static type check with pyright
-        entry: bash -c 'cd sdks/python/ && pip install .[tests] && pyright'
-        files: "^sdks/python/"
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-        name: Lint python code with flake8
-        args: ["--extend-ignore=E203,E125", "--max-line-length=120"]
-        files: "^sdks/python/"
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.1
-    hooks:
-      - id: isort
-        name: Organize imports with isort
-        args: ["--profile=black", "--project=redactive"]
-        files: "^sdks/python/"
+
+  # Python SDK hooks
   - repo: local
     hooks:
-      - id: redactive-python-sdk-tests
-        name: Run unit tests on Python SDK
-        stages: ["pre-commit", "pre-push"]
-        entry: bash -c 'cd sdks/python/ && pip install .[tests] && pytest'
+      #  SDK code generator
+      - id: python-sdk-generate-grpc-code
+        name: Generate Redactive Python SDK gRrc code
+        language: system
+        entry: bash -c "protos/gen_python.sh"
+
+      # Run type checking
+      - id: python-sdk-pyright
+        name: Check typing with pyright
         language: python
         types: [python]
-        pass_filenames: false
-        always_run: true
-        files: "^sdks/python/"
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && pip install .[dev] && pyright'
+
+      # Run the linter
+      - id: python-sdk-ruff-lint
+        name: Lint Redactive Python SDK codebase with ruff
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && ruff check --fix'
+        additional_dependencies: ["ruff"]
+
+      # Run the formatter
+      - id: python-sdk-ruff-format
+        name: Format Redactive Python SDK codebase with ruff
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && ruff format'
+        additional_dependencies: ["ruff"]
+
+      # Run unit tests
+      - id: python-sdk-unit-tests
+        name: Run Python SDK unit tests
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && pip install .[test] && pytest'

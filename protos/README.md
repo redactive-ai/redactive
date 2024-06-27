@@ -15,7 +15,7 @@
 ```bash
 OUTPUT_PATH=
 python3 -m grpc_tools.protoc \
-  -I protos \
+  --proto_path=protos \
   --python_betterproto_out=${OUTPUT_PATH} \
    search.proto
 ```
@@ -23,6 +23,7 @@ python3 -m grpc_tools.protoc \
 ### Node
 
 - Install protobuf compiler https://grpc.io/docs/protoc-installation
+- Install libprotobuf-dev for Linux
 - Install required packages `npm install -g ts-proto`
 - Here is an example to generate search service
 

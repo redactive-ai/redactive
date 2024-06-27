@@ -1,6 +1,14 @@
+# Bash
+**/*.sh
+
+# Ruff cache
+.ruff_cache/
+
+
 # Git files
 .git/
 
 # Proto files
 **/*.proto
+
 LICENSE
