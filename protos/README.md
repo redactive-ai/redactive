@@ -38,3 +38,5 @@ protoc \
    --ts_proto_out=${OUTPUT_PATH} \
  search.proto
 ```
+
+ps. Use Redactive devcontainer for best outcome.
