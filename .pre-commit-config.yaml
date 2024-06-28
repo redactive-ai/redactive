@@ -31,14 +31,13 @@ repos:
   # Python SDK hooks
   - repo: local
     hooks:
-      # Run type checking
+      # Run Python SDK gRpc codegen
       - id: python-sdk-grpc-codegen
         name: Generate gRpc python code
         language: system
-        always_run: true
         entry: bash -c 'sdks/codegen/python_sdk.sh'
         pass_filenames: false
-        files: ^sdks/
+        files: ^protos/
         require_serial: true
 
       # Run type checking
