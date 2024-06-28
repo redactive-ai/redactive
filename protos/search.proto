@@ -4,6 +4,7 @@ package redactive.grpc.v1;
 
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
+
 import "chunks.proto";
 
 service Search {

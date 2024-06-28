@@ -1,6 +1,9 @@
+# Only run for these files
+!**/*.(md|yaml|yml|json)
+
+# Ruff cache
+.ruff_cache/
+
+
 # Git files
 .git/
-
-# Proto files
-**/*.proto
-LICENSE

@@ -1,6 +1,7 @@
-default_install_hook_types: [commit-msg, pre-commit, pre-push]
+default_install_hook_types: [pre-commit, pre-push]
 default_language_version:
   python: python3.12
+
 fail_fast: true
 # pre-commit hooks references: https://pre-commit.com/hooks.html
 repos:
@@ -13,14 +14,75 @@ repos:
       - id: check-merge-conflict
       # detects the presence of private keys
       - id: detect-private-key
+
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.27.0
     hooks:
       - id: commitizen
         name: Check commit message format
+
   - repo: local
     hooks:
       - id: prettier
         name: Check files format with prettier
-        entry: bash -c 'prettier --write **/*'
+        entry: bash -c 'prettier --write .'
         language: system
+
+  # Python SDK hooks
+  - repo: local
+    hooks:
+      # Run Python SDK gRpc codegen
+      - id: python-sdk-grpc-codegen
+        name: Generate gRpc python code
+        language: system
+        entry: bash -c 'sdks/codegen/python_sdk.sh'
+        pass_filenames: false
+        files: ^protos/
+        require_serial: true
+
+      # Run type checking
+      - id: python-sdk-pyright
+        name: Check typing with pyright
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && pip install --quiet .[dev] && pyright'
+        # Important config for monorepo
+        pass_filenames: false
+        additional_dependencies: ["pyright"]
+        files: ^sdks/python/
+
+      # Run the linter
+      - id: python-sdk-ruff-lint
+        name: Lint Redactive Python SDK codebase with ruff
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && ruff check --fix'
+        # Important config for monorepo
+        pass_filenames: false
+        additional_dependencies: ["ruff"]
+        files: ^sdks/python/
+
+      # Run the formatter
+      - id: python-sdk-ruff-format
+        name: Format Redactive Python SDK codebase with ruff
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && ruff format'
+        # Important config for monorepo
+        pass_filenames: false
+        additional_dependencies: ["ruff"]
+        files: ^sdks/python/
+
+      # Run unit tests
+      - id: python-sdk-unit-tests
+        name: Run Python SDK unit tests
+        language: python
+        types: [python]
+        # Custom command for monorepo
+        entry: bash -c 'cd sdks/python && pip install --quiet .[test] && pytest'
+        # Important config for monorepo
+        pass_filenames: false
+        files: ^sdks/python/
