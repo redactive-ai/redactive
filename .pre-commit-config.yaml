@@ -31,13 +31,15 @@ repos:
   # Python SDK hooks
   - repo: local
     hooks:
-      # Install Python SDK
-      - id: python-sdk-install
-        name: Install python SDK
-        language: python
-        types: [python]
-        # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pip install .[dev,test]'
+      # Run type checking
+      - id: python-sdk-grpc-codegen
+        name: Generate gRpc python code
+        language: system
+        always_run: true
+        entry: bash -c 'sdks/codegen/python_sdk.sh'
+        pass_filenames: false
+        files: ^sdks/
+        require_serial: true
 
       # Run type checking
       - id: python-sdk-pyright
@@ -45,8 +47,11 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pyright'
+        entry: bash -c 'cd sdks/python && pip install --quiet .[dev] && pyright'
+        # Important config for monorepo
+        pass_filenames: false
         additional_dependencies: ["pyright"]
+        files: ^sdks/python/
 
       # Run the linter
       - id: python-sdk-ruff-lint
@@ -55,7 +60,10 @@ repos:
         types: [python]
         # Custom command for monorepo
         entry: bash -c 'cd sdks/python && ruff check --fix'
+        # Important config for monorepo
+        pass_filenames: false
         additional_dependencies: ["ruff"]
+        files: ^sdks/python/
 
       # Run the formatter
       - id: python-sdk-ruff-format
@@ -64,7 +72,10 @@ repos:
         types: [python]
         # Custom command for monorepo
         entry: bash -c 'cd sdks/python && ruff format'
+        # Important config for monorepo
+        pass_filenames: false
         additional_dependencies: ["ruff"]
+        files: ^sdks/python/
 
       # Run unit tests
       - id: python-sdk-unit-tests
@@ -72,4 +83,7 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pytest'
+        entry: bash -c 'cd sdks/python && pip install --quiet .[test] && pytest'
+        # Important config for monorepo
+        pass_filenames: false
+        files: ^sdks/python/
