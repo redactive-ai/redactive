@@ -12,7 +12,6 @@ requires-python = ">=3.11"
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
@@ -64,6 +63,6 @@ extend-select = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Python 3.10+ typing is not work well with generated grpc code
+# Generated code
 "**/redactive/grpc/*" = ["UP", "RUF009", "TCH004", "ARG002"]
 "tests/*" = ["INP", "S"]
