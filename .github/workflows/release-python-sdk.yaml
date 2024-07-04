@@ -25,6 +25,8 @@ jobs:
           pip install
           hatch
           --user
+      - name: Update version
+        run: hatch version "1.4.3"
       - name: Build a binary wheel and a source tarball
         run: hatch build
       - name: Store the distribution packages

@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "redactive"
+readme = "README.md"
 dynamic = ["version"]
 description = "Redactive Python SDK"
 authors = [{ name = "Redactive ai", email = "support@redactive.ai" }]
