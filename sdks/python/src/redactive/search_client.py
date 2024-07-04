@@ -18,7 +18,11 @@ class SearchClient:
         self.port = port
 
     async def query_chunks(
-        self, access_token: str, semantic_query: str, count: int = 1, filter: dict | None = None
+        self,
+        access_token: str,
+        semantic_query: str,
+        count: int = 1,
+        filter: dict | None = None,  # noqa: A002
     ) -> list[RelevantChunk]:
         """
         Query for relevant chunks based on a semantic query.
@@ -35,7 +39,7 @@ class SearchClient:
         :rtype: list[RelevantChunk]
         """
         async with Channel(self.host, self.port, ssl=True) as channel:
-            stub = SearchStub(channel, metadata=(dict(authorization=f"Bearer {access_token}")))
+            stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
 
             filters = None
             if filter is not None:

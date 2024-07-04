@@ -1,11 +1,13 @@
+import http
+
 import httpx
 from pydantic import BaseModel
 
 
 class ExchangeTokenResponse(BaseModel):
-    idToken: str
-    refreshToken: str
-    expiresIn: int
+    idToken: str  # noqa: N815
+    refreshToken: str  # noqa: N815
+    expiresIn: int  # noqa: N815
 
 
 class BeginConnectionResponse(BaseModel):
@@ -38,12 +40,13 @@ class AuthClient:
         :rtype: BeginConnectionResponse
         """
         response = await self._client.post(
-            url=f"/api/auth/connect/{provider}/url", params={"redirect_uri": redirect_uri}
+            url=f"/api/auth/connect/{provider}/url",
+            params={"redirect_uri": redirect_uri},
         )
-        if response.status_code == 200:
-            return BeginConnectionResponse(**response.json())
-        else:
+        if response.status_code != http.HTTPStatus.OK:
             raise httpx.RequestError(response.text)
+
+        return BeginConnectionResponse(**response.json())
 
     async def exchange_tokens(self, code: str | None = None, refresh_token: str | None = None) -> ExchangeTokenResponse:
         """
@@ -58,17 +61,17 @@ class AuthClient:
         :rtype: ExchangeTokenResponse
         """
 
-        body = dict()
+        body = {}
         if code:
             body["code"] = code
         if refresh_token:
             body["refresh_token"] = refresh_token
 
         response = await self._client.post(url="/api/auth/token", json=body)
-        if response.status_code == 200:
-            return ExchangeTokenResponse(**response.json())
-        else:
+        if response.status_code != http.HTTPStatus.OK:
             raise httpx.RequestError(response.text)
+
+        return ExchangeTokenResponse(**response.json())
 
 
 class BearerAuth(httpx.Auth):

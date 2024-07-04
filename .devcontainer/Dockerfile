@@ -10,11 +10,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install/upgrade pip, build, twine
 RUN python -m pip install --upgrade \
     pip \
-    build \
-    twine \
+    hatch \
     grpcio-tools \
     betterproto[compiler]==2.0.0b6 \
-    ruff \
     pre-commit
 
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh \

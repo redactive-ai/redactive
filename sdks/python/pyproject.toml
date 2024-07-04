@@ -1,17 +1,20 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "redactive"
-version = "0.0.5"
+dynamic = ["version"]
 description = "Redactive Python SDK"
-requires-python = ">=3.11"
-keywords = []
 authors = [{ name = "Redactive ai", email = "support@redactive.ai" }]
+keywords = []
+requires-python = ">=3.11"
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
@@ -21,24 +24,38 @@ dependencies = [
     "httpx",
 ]
 
-[project.optional-dependencies]
-dev = ["ruff", "pyright"]
-test = ["pytest", "pytest-asyncio", "pytest-httpx"]
-
 [project.urls]
-"Homepage" = "https://github.com/redactive-ai/redactive"
-"Bug Reports" = "https://github.com/redactive-ai/redactive/labels/sdk:python"
-"Source" = "https://github.com/redactive-ai/redactive"
+Homepage = "https://github.com/redactive-ai/redactive"
+Issues = "https://github.com/redactive-ai/redactive/labels/sdk:python"
+Source = "https://github.com/redactive-ai/redactive"
+
+[tool.hatch.version]
+path = "src/redactive/__about__.py"
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = ["pytest", "pytest-asyncio", "pytest-httpx"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = "tests"
+python_files = "*.py"
+python_classes = "*Tests"
+python_functions = "test_*"
+
+[tool.hatch.envs.types]
+extra-dependencies = ["redactive>=1.0.0", "pyright"]
+
+[tool.hatch.envs.types.scripts]
+check = "pyright"
 
 [tool.pyright]
 include = ["src"]
-exclude = ["src/redactive/grpc/*"]
-typeCheckingMode = "basic"
+exclude = ["src/redactive/grpc/*/__init__.py"]
+typeCheckingMode = "standard"
 
 [tool.ruff]
 line-length = 120
-target-version = "py311"
-src = ["src", "tests"]
+include = ["src/*", "tests/*"]
 
 [tool.ruff.lint]
 extend-select = [
@@ -48,11 +65,5 @@ extend-select = [
 
 [tool.ruff.lint.per-file-ignores]
 # Python 3.10+ typing is not work well with generated grpc code
-"**/redactive/grpc/*" = ["UP"]
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
-testpaths = "tests"
-python_files = "*.py"
-python_classes = "*Tests"
-python_functions = "test_*"
+"**/redactive/grpc/*" = ["UP", "RUF009", "TCH004", "ARG002"]
+"tests/*" = ["INP", "S"]
