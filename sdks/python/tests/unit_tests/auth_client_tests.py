@@ -25,6 +25,12 @@ async def test_begin_connection(mock_client, httpx_mock):
 async def test_exchange_tokens(mock_client, httpx_mock):
     code = "mock_code"
     refresh_token = "mock_refresh_token"
-    httpx_mock.add_response(json={"idToken": "test-id-token", "refreshToken": "test-refresh-token", "expiresIn": 3600})
+    httpx_mock.add_response(
+        json={
+            "idToken": "test-id-token",
+            "refreshToken": "test-refresh-token",
+            "expiresIn": 3600,
+        }
+    )
     exchange_response = await mock_client.exchange_tokens(code, refresh_token)
     assert isinstance(exchange_response, ExchangeTokenResponse)

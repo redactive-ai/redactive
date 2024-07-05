@@ -34,11 +34,13 @@ repos:
       # Run Python SDK gRpc codegen
       - id: python-sdk-grpc-codegen
         name: Generate gRpc python code
-        language: system
-        entry: bash -c 'sdks/codegen/python_sdk.sh'
+        language: python
+        entry: bash -c 'sdks/codegen/python_sdk.sh && cd sdks/python && hatch fmt'
+        additional_dependencies:
+          ["hatch", "grpcio-tools", "betterproto[compiler]==2.0.0b6"]
         pass_filenames: false
+        fail_fast: false
         files: ^protos/
-        require_serial: true
 
       # Run type checking
       - id: python-sdk-pyright
@@ -46,22 +48,10 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pip install --quiet .[dev] && pyright'
+        entry: bash -c 'cd sdks/python && hatch run types:check'
         # Important config for monorepo
         pass_filenames: false
-        additional_dependencies: ["pyright"]
-        files: ^sdks/python/
-
-      # Run the linter
-      - id: python-sdk-ruff-lint
-        name: Lint Redactive Python SDK codebase with ruff
-        language: python
-        types: [python]
-        # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && ruff check --fix'
-        # Important config for monorepo
-        pass_filenames: false
-        additional_dependencies: ["ruff"]
+        additional_dependencies: ["hatch"]
         files: ^sdks/python/
 
       # Run the formatter
@@ -70,10 +60,10 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && ruff format'
+        entry: bash -c 'cd sdks/python && hatch fmt'
         # Important config for monorepo
         pass_filenames: false
-        additional_dependencies: ["ruff"]
+        additional_dependencies: ["hatch"]
         files: ^sdks/python/
 
       # Run unit tests
@@ -82,7 +72,8 @@ repos:
         language: python
         types: [python]
         # Custom command for monorepo
-        entry: bash -c 'cd sdks/python && pip install --quiet .[test] && pytest'
+        entry: bash -c 'cd sdks/python && hatch test'
+        additional_dependencies: ["hatch"]
         # Important config for monorepo
         pass_filenames: false
         files: ^sdks/python/

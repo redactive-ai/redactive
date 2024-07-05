@@ -1,0 +1,59 @@
+name: Python SDK
+
+on:
+  push:
+    paths:
+      - "sdks/python/**"
+
+jobs:
+  build:
+    name: 📦 Build distribution
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Write version
+    defaults:
+      run:
+        working-directory: ./sdks/python
+
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.x"
+      - name: Install pypa/build
+        run: >-
+          python3 -m
+          pip install
+          hatch
+          --user
+      - name: Update version
+        if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
+        run: hatch version ${GITHUB_REF#refs/*/} # Get version tag
+      - name: Build a binary wheel and a source tarball
+        run: hatch build
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: redactive-python-sdk
+          path: ./sdks/python/dist/
+
+  publish:
+    name: >-
+      🚚 Publish Python SDK to PyPI
+    if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: redactive-python-sdk
+          path: dist/
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0 # v1.9.0
+        with:
+          repository-url: https://test.pypi.org/legacy/

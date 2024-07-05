@@ -5,6 +5,7 @@ on:
       - main
 jobs:
   checks:
+    name: 🔬 Check code changes
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -15,7 +16,7 @@ jobs:
         include:
           - python-version: "3.12"
             python-version-str: "py312"
-          - node-version: [20]
+            node-version: 20
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
