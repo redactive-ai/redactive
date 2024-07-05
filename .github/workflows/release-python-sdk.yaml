@@ -28,6 +28,7 @@ jobs:
           hatch
           --user
       - name: Update version
+        if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
         run: hatch version ${GITHUB_REF#refs/*/} # Get version tag
       - name: Build a binary wheel and a source tarball
         run: hatch build
