@@ -1,4 +1,4 @@
-name: Publish to PyPI
+name: Python SDK
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
       - name: Store the distribution packages
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
-          name: redactive-sdk
+          name: redactive-python-sdk
           path: ./sdks/python/dist/
 
   publish:
@@ -51,7 +51,7 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
-          name: redactive-sdk
+          name: redactive-python-sdk
           path: dist/
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0 # v1.9.0

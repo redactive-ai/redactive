@@ -64,6 +64,6 @@ extend-select = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Generated code
+# Generated gRpc code
 "**/redactive/grpc/*" = ["UP", "RUF009", "TCH004", "ARG002"]
 "tests/*" = ["INP", "S"]
