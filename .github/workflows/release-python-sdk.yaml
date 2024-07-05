@@ -6,9 +6,11 @@ on:
       - "sdks/python/**"
 
 jobs:
-  build:
-    name: 📦 Build distribution
+  versioning:
+    name: 🔢 Update package version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Write version
     defaults:
       run:
         working-directory: ./sdks/python
@@ -26,7 +28,28 @@ jobs:
           hatch
           --user
       - name: Update version
-        run: hatch version "1.4.3"
+        run: hatch version ${GITHUB_REF#refs/*/} # Get version tag
+
+  build:
+    name: 📦 Build distribution
+    runs-on: ubuntu-latest
+    needs: [versioning]
+    defaults:
+      run:
+        working-directory: ./sdks/python
+
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.x"
+      - name: Install pypa/build
+        run: >-
+          python3 -m
+          pip install
+          hatch
+          --user
       - name: Build a binary wheel and a source tarball
         run: hatch build
       - name: Store the distribution packages
@@ -39,8 +62,7 @@ jobs:
     name: >-
       🚚 Publish Python SDK to PyPI
     if: startsWith(github.ref, 'refs/tags/') # only publish to PyPI on tag pushes
-    needs:
-      - build
+    needs: [versioning, build]
     runs-on: ubuntu-latest
     environment: release
     permissions:

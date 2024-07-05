@@ -14,7 +14,8 @@
         "tamasfe.even-better-toml",
         "njpwerner.autodocstring",
         "leonhard-s.python-sphinx-highlight",
-        "charliermarsh.ruff"
+        "charliermarsh.ruff",
+        "github.vscode-github-actions"
       ]
     }
   },
