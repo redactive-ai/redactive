@@ -20,3 +20,9 @@ The Redactive Application, Docs &amp; Samples
 
 `python -m build`
 
+`python install -e .`
+
+## Building the optional reranker
+
+`cd sdks/python`
+`pip install -e ".[reranker]"`

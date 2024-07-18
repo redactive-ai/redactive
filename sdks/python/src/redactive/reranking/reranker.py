@@ -1,0 +1,71 @@
+import asyncio
+from dataclasses import dataclass
+from pprint import pprint
+
+from rerankers import Reranker
+
+from redactive import search_client
+from redactive.grpc.v1 import RelevantChunk
+
+
+@dataclass
+class RerankingConfig:
+    max_fetch_results: int = 100
+    """ Maximum number of results to fetch from Redactive's search """
+    fetch_multiplier: int = 10
+    """ Multiply the number of results required by this multiplier before fetching them. 
+        The reranker will rerank all these results, and then pick the top_k based on
+        the total number of results requested.
+    """
+    reranking_algorithm: str = "cross-encoder"
+    """ Reranking algorithm from https://github.com/AnswerDotAI/rerankers/tree/main """
+
+
+class RerankingSearchClient(search_client.SearchClient):
+
+    def __init__(self, host: str = "grpc.redactive.ai", port: int = 443) -> None:
+        super(RerankingSearchClient, self).__init__(host, port)
+        self.conf = RerankingConfig
+
+    async def query_chunks(
+        self,
+        access_token: str,
+        semantic_query: str,
+        count: int = 3,
+        filter: dict | None = None,
+    ) -> list[RelevantChunk]:
+        # Get many more results than the uesr is asking for, then
+        # rerank them
+        big_fetch_count = count * self.conf.fetch_multiplier
+        if big_fetch_count > self.conf.max_fetch_results:
+            big_fetch_count = self.conf.max_fetch_results
+
+        fetched_chunks = await super(RerankingSearchClient, self).query_chunks(
+            access_token, semantic_query, count, filter
+        )
+        ranker = Reranker(self.conf.reranking_algorithm)
+        reranked_chunks = self.rerank(semantic_query, fetched_chunks, ranker, count)
+
+        return reranked_chunks
+
+    def rerank(
+        self, query_string: str, fetched_chunks: list[RelevantChunk], ranker, top_k
+    ):
+        docs = [c.chunk_body for c in fetched_chunks]
+        ranker_results = ranker.rank(query_string, docs)
+        merged_results = []
+        for res in ranker_results:
+            original_chunk = fetched_chunks[res.doc_id]
+            original_chunk.relevance.similarity_score = res.score
+            merged_results.append(original_chunk)
+
+        return merged_results[:top_k]
+
+
+if __name__ == "__main__":
+    """Test out your reranker from the command line."""
+    access_token = "get your access token from dashboard and api"
+    query_str = "when is the 2025 kickoff event?"
+    rsc = RerankingSearchClient(host="grpc.staging.redactive.ai")
+    chunks = asyncio.run(rsc.query_chunks(access_token, query_str, 10))
+    pprint(chunks)

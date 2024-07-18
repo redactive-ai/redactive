@@ -24,6 +24,11 @@ dependencies = [
     "httpx",
 ]
 
+[project.optional-dependencies]
+reranking = [
+    "rerankers[all]"
+]
+
 [project.urls]
 Homepage = "https://github.com/redactive-ai/redactive"
 Issues = "https://github.com/redactive-ai/redactive/labels/sdk:python"
