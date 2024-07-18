@@ -26,7 +26,7 @@ dependencies = [
 
 [project.optional-dependencies]
 reranking = [
-    "rerankers[all]"
+    "rerankers[cross-encoder]"
 ]
 
 [project.urls]
@@ -38,7 +38,7 @@ Source = "https://github.com/redactive-ai/redactive"
 path = "src/redactive/__about__.py"
 
 [tool.hatch.envs.hatch-test]
-extra-dependencies = ["pytest", "pytest-asyncio", "pytest-httpx", "rerankers[all]"]
+extra-dependencies = ["pytest", "pytest-asyncio", "pytest-httpx", "rerankers[cross-encooder]"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

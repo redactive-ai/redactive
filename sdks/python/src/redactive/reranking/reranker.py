@@ -18,7 +18,11 @@ class RerankingConfig:
         the total number of results requested.
     """
     reranking_algorithm: str = "cross-encoder"
-    """ Reranking algorithm from https://github.com/AnswerDotAI/rerankers/tree/main """
+    """ 
+    Reranking algorithm from https://github.com/AnswerDotAI/rerankers/tree/main
+    If you would like to try a different algorithm, add it to the pyproject.toml dependencies for
+    reranking.
+    """
 
 
 class RerankingSearchClient(search_client.SearchClient):
