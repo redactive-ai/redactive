@@ -11,3 +11,12 @@ The Redactive Application, Docs &amp; Samples
 `├──`[`sdks`](sdks/python/) — Redactive SDKs<br>
 `├──`[`.pre-commit-config.yaml`](.pre-commit-config.yaml) — Pre-commit hooks<br>
 `└──`[`.prettierrc.yaml`](.prettierrc.yaml) — Prettier configuration<br>
+
+## Building the Python SDK
+
+`cd sdks/python`
+
+`python -m pip install --upgrade build`
+
+`python -m build`
+
