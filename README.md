@@ -12,17 +12,4 @@ The Redactive Application, Docs &amp; Samples
 `├──`[`.pre-commit-config.yaml`](.pre-commit-config.yaml) — Pre-commit hooks<br>
 `└──`[`.prettierrc.yaml`](.prettierrc.yaml) — Prettier configuration<br>
 
-## Building the Python SDK
 
-`cd sdks/python`
-
-`python -m pip install --upgrade build`
-
-`python -m build`
-
-`python install -e .`
-
-## Building the optional reranker
-
-`cd sdks/python`
-`pip install -e ".[reranker]"`
