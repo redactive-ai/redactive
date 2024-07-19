@@ -25,7 +25,6 @@ class RerankingConfig:
 
 
 class RerankingSearchClient(search_client.SearchClient):
-
     def __init__(self, host: str = "grpc.redactive.ai", port: int = 443) -> None:
         super().__init__(host, port)
         self.conf = RerankingConfig
