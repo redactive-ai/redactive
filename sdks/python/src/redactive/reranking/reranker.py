@@ -13,12 +13,12 @@ class RerankingConfig:
     max_fetch_results: int = 100
     """ Maximum number of results to fetch from Redactive's search """
     fetch_multiplier: int = 10
-    """ Multiply the number of results required by this multiplier before fetching them. 
+    """ Multiply the number of results required by this multiplier before fetching them.
         The reranker will rerank all these results, and then pick the top_k based on
         the total number of results requested.
     """
     reranking_algorithm: str = "cross-encoder"
-    """ 
+    """
     Reranking algorithm from https://github.com/AnswerDotAI/rerankers/tree/main
     If you would like to try a different algorithm, add it to the pyproject.toml dependencies for
     reranking.
@@ -28,7 +28,7 @@ class RerankingConfig:
 class RerankingSearchClient(search_client.SearchClient):
 
     def __init__(self, host: str = "grpc.redactive.ai", port: int = 443) -> None:
-        super(RerankingSearchClient, self).__init__(host, port)
+        super().__init__(host, port)
         self.conf = RerankingConfig
 
     async def query_chunks(
@@ -44,13 +44,11 @@ class RerankingSearchClient(search_client.SearchClient):
         if big_fetch_count > self.conf.max_fetch_results:
             big_fetch_count = self.conf.max_fetch_results
 
-        fetched_chunks = await super(RerankingSearchClient, self).query_chunks(
+        fetched_chunks = await super().query_chunks(
             access_token, semantic_query, big_fetch_count, filter
         )
         ranker = Reranker(self.conf.reranking_algorithm)
-        reranked_chunks = self.rerank(semantic_query, fetched_chunks, ranker, count)
-
-        return reranked_chunks
+        return self.rerank(semantic_query, fetched_chunks, ranker, count)
 
     def rerank(
         self, query_string: str, fetched_chunks: list[RelevantChunk], ranker, top_k
@@ -68,8 +66,9 @@ class RerankingSearchClient(search_client.SearchClient):
 
 if __name__ == "__main__":
     """Test out your reranker from the command line."""
-    access_token = "get your access token from dashboard and api"
+    # get your access token from dashboard and api
+    access_token = ""
     query_str = "when is the 2025 kickoff event?"
     rsc = RerankingSearchClient(host="grpc.staging.redactive.ai")
     chunks = asyncio.run(rsc.query_chunks(access_token, query_str, 10))
-    pprint(chunks)
+    print(chunks)
