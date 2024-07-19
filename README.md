@@ -8,6 +8,6 @@ The Redactive Application, Docs &amp; Samples
 `├──`[`.github`](.github/) — GitHub configuration including CI/CD workflows<br>
 `├──`[`.vscode`](.vscode/) — VS Code configuration<br>
 `├──`[`protos`](protos/) — Redactive gRpc protocol<br>
-`├──`[`sdks`](sdks/python/) — Redactive Python SDKs<br>
+`├──`[`sdks`](sdks) — Redactive SDKs<br>
 `├──`[`.pre-commit-config.yaml`](.pre-commit-config.yaml) — Pre-commit hooks<br>
 `└──`[`.prettierrc.yaml`](.prettierrc.yaml) — Prettier configuration<br>
