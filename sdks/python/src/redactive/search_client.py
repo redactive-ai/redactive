@@ -33,8 +33,8 @@ class SearchClient:
         :type semantic_query: str
         :param count: The number of relevant chunks to retrieve, defaults to 1
         :type count: int, optional
-        :param filter: The filters for filtering chunks, defaults to None
-        :type filter: dict | None, optional
+        :param query_filter: The filters for filtering chunks, defaults to None
+        :type query_filter: dict | None, optional
         :return: A list of relevant chunks that match the query
         :rtype: list[RelevantChunk]
         """
@@ -44,8 +44,8 @@ class SearchClient:
             )
 
             filters = None
-            if filter is not None:
-                filters = Filters(**filter)
+            if query_filter is not None:
+                filters = Filters(**query_filter)
 
             request = QueryRequest(
                 count=count, query=Query(semantic_query=semantic_query), filters=filters
