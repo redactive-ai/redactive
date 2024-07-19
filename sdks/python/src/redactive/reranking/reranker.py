@@ -1,6 +1,5 @@
 import asyncio
 from dataclasses import dataclass
-from pprint import pprint
 
 from rerankers import Reranker
 
@@ -36,7 +35,7 @@ class RerankingSearchClient(search_client.SearchClient):
         access_token: str,
         semantic_query: str,
         count: int = 3,
-        filter: dict | None = None,
+        query_filter: dict | None = None,
     ) -> list[RelevantChunk]:
         # Get many more results than the uesr is asking for, then
         # rerank them
@@ -45,7 +44,7 @@ class RerankingSearchClient(search_client.SearchClient):
             big_fetch_count = self.conf.max_fetch_results
 
         fetched_chunks = await super().query_chunks(
-            access_token, semantic_query, big_fetch_count, filter
+            access_token, semantic_query, big_fetch_count, query_filter
         )
         ranker = Reranker(self.conf.reranking_algorithm)
         return self.rerank(semantic_query, fetched_chunks, ranker, count)
@@ -71,4 +70,3 @@ if __name__ == "__main__":
     query_str = "when is the 2025 kickoff event?"
     rsc = RerankingSearchClient(host="grpc.staging.redactive.ai")
     chunks = asyncio.run(rsc.query_chunks(access_token, query_str, 10))
-    print(chunks)
