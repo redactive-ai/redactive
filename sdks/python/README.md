@@ -16,4 +16,4 @@ The Redactive Python SDK provides a robust and intuitive interface for interacti
 
 `cd sdks/python`
 
-`pip install -e ".[reranker]"`
+`pip install -e ".[reranking]"`
