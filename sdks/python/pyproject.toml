@@ -24,6 +24,12 @@ dependencies = [
     "httpx",
 ]
 
+[project.optional-dependencies]
+reranking = [
+    "rerankers",
+    "rerankers[transformers]"
+]
+
 [project.urls]
 Homepage = "https://github.com/redactive-ai/redactive"
 Issues = "https://github.com/redactive-ai/redactive/labels/sdk:python"
@@ -43,7 +49,7 @@ python_classes = "*Tests"
 python_functions = "test_*"
 
 [tool.hatch.envs.types]
-extra-dependencies = ["redactive>=1.0.0", "pyright"]
+extra-dependencies = ["redactive>=1.0.0", "pyright", "rerankers", "rerankers[transformers]"]
 
 [tool.hatch.envs.types.scripts]
 check = "pyright"
