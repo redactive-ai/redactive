@@ -41,17 +41,13 @@ class RerankingSearchClient(search_client.SearchClient):
         if big_fetch_count > self.conf.max_fetch_results:
             big_fetch_count = self.conf.max_fetch_results
 
-        fetched_chunks = await super().query_chunks(
-            access_token, semantic_query, big_fetch_count, query_filter
-        )
+        fetched_chunks = await super().query_chunks(access_token, semantic_query, big_fetch_count, query_filter)
         ranker = Reranker(self.conf.reranking_algorithm)
         return self.rerank(semantic_query, fetched_chunks, ranker, count)
 
-    def rerank(
-        self, query_string: str, fetched_chunks: list[RelevantChunk], ranker, top_k
-    ):
+    def rerank(self, query_string: str, fetched_chunks: list[RelevantChunk], ranker, top_k):
         """
-        Rerank the results using reranking library, return top_k
+        Rerank the results using reranking library, return top_k, as per original request
 
         :param query_string: Original query string
         :type query_string: str
