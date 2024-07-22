@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 
 from rerankers import Reranker
