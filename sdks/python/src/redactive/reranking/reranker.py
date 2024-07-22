@@ -46,6 +46,14 @@ class RerankingSearchClient(search_client.SearchClient):
         return self.rerank(semantic_query, fetched_chunks, ranker, count)
 
     def rerank(self, query_string: str, fetched_chunks: list[RelevantChunk], ranker, top_k):
+        """
+        Rerank the results using reranking library, return top_k, as per original request
+
+        :param query_string: Original query string
+        :type query_string: str
+        :param fetched_chunks: Chunks fetched from original query
+        :type fetched_chunks: list[RelevantChunk]
+        """
         docs = [c.chunk_body for c in fetched_chunks]
         ranker_results = ranker.rank(query_string, docs)
         merged_results = []
