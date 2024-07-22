@@ -56,12 +56,3 @@ class RerankingSearchClient(search_client.SearchClient):
             merged_results.append(original_chunk)
 
         return merged_results[:top_k]
-
-
-if __name__ == "__main__":
-    """Test out your reranker from the command line."""
-    # get your access token from dashboard and api
-    access_token = ""
-    query_str = "when is the 2025 kickoff event?"
-    rsc = RerankingSearchClient(host="grpc.staging.redactive.ai")
-    chunks = asyncio.run(rsc.query_chunks(access_token, query_str, 10))
