@@ -19,5 +19,6 @@
       ]
     }
   },
+  "postAttachCommand": ["pre-commit", "install"],
   "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
 }
