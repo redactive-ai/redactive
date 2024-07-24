@@ -1,19 +1,28 @@
 from grpclib.client import Channel
 
+from redactive._connection_mode import get_default_grpc_host_and_port as _get_default_grpc_host_and_port
 from redactive.grpc.v1 import Filters, Query, QueryRequest, RelevantChunk, SearchStub
 
 
 class SearchClient:
-    def __init__(self, host: str = "grpc.redactive.ai", port: int = 443) -> None:
+    def __init__(self, host: str | None = None, port: int | None = None) -> None:
         """
         Initialize the connection settings for the service.
 
-        :param host: The hostname or IP address of the service, defaults to "grpc.redactive.ai"
+        :param host: The hostname or IP address of the service
         :type host: str, optional
-        :param port: The port number to connect to, defaults to 443
+        :param port: The port number to connect to
         :type port: int, optional
         """
-        self.access_token = None
+        if host is not None and port is None:
+            msg = "Port must also be specified if host is specified"
+            raise ValueError(msg)
+        if port is not None and host is None:
+            msg = "Host must also be specified if port is specified"
+            raise ValueError(msg)
+        if host is None and port is None:
+            host, port = _get_default_grpc_host_and_port()
+
         self.host = host
         self.port = port
 
