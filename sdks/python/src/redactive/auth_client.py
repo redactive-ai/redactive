@@ -3,6 +3,8 @@ import http
 import httpx
 from pydantic import BaseModel
 
+from redactive._connection_mode import get_default_http_endpoint as _get_default_http_endpoint
+
 
 class ExchangeTokenResponse(BaseModel):
     idToken: str  # noqa: N815
@@ -15,15 +17,17 @@ class BeginConnectionResponse(BaseModel):
 
 
 class AuthClient:
-    def __init__(self, api_key: str, base_url: str = "https://api.redactive.ai"):
+    def __init__(self, api_key: str, base_url: str | None = None):
         """
         Initialize the connection settings for the service.
 
         :param api_key: The API key used for authentication.
         :type api_key: str
-        :param base_url: The base URL for the HTTP client, defaults to "https://api.redactive.ai"
+        :param base_url: The base URL to use for Redactive.
         :type base_url: str, optional
         """
+        if base_url is None:
+            base_url = _get_default_http_endpoint()
 
         self._client = httpx.AsyncClient(base_url=f"{base_url}", auth=BearerAuth(api_key))
 
