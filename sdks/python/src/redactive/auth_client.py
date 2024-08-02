@@ -37,18 +37,17 @@ class AuthClient:
             """
             Initiates a connection process with a specified provider.
 
-            Parameters:
-                provider (str): The name of the provider to connect with.
-                redirect_uri (str): The URI to redirect to after initiating the connection. Defaults to an empty string.
-                endpoint (str, optional): The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk. Defaults to None.
-                code_param_alias (str, optional): The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
-
-            Returns:
-                str: The URL to redirect the user to for beginning the connection.
-
-            Raises:
-                httpx.HTTPStatusError: If the HTTP request returns an unsuccessful status code.
-                httpx.RequestError: If an error occurs while making the HTTP request.
+            :param provider: The name of the provider to connect with.
+            :type provider: str
+            :param redirect_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
+            :type redirect_uri: str
+            :param endpoint: The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk. Defaults to None.
+            :type endpoint: str, optional
+            :param code_param_alias: The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
+            :type code_param_alias: str, optional
+            :raises httpx.RequestError: If an error occurs while making the HTTP request.
+            :return: The URL to redirect the user to for beginning the connection.
+            :rtype: BeginConnectionResponse
             """
             params = {"redirect_uri": redirect_uri}
             if endpoint:
