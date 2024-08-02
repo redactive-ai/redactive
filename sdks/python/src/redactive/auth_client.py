@@ -33,7 +33,7 @@ class AuthClient:
 
     async def begin_connection(
             self, provider: str, redirect_uri: str, endpoint: str | None = None, code_param_alias: str | None = None
-        ) -> str:
+        ) -> BeginConnectionResponse:
             """
             Initiates a connection process with a specified provider.
 
