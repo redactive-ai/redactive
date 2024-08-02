@@ -31,7 +31,9 @@ class AuthClient:
 
         self._client = httpx.AsyncClient(base_url=f"{base_url}", auth=BearerAuth(api_key))
 
-    async def begin_connection(self, provider: str, redirect_uri: str) -> BeginConnectionResponse:
+    async def begin_connection(
+        self, provider: str, redirect_uri: str, endpoint: str | None = None, code_param_alias: str | None = None
+    ) -> BeginConnectionResponse:
         """
         Initiates a connection process with a specified provider.
 
@@ -39,14 +41,20 @@ class AuthClient:
         :type provider: str
         :param redirect_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
         :type redirect_uri: str
+        :param endpoint: The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk. Defaults to None.
+        :type endpoint: str, optional
+        :param code_param_alias: The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
+        :type code_param_alias: str, optional
         :raises httpx.RequestError: If an error occurs while making the HTTP request.
         :return: The URL to redirect the user to for beginning the connection.
         :rtype: BeginConnectionResponse
         """
-        response = await self._client.post(
-            url=f"/api/auth/connect/{provider}/url",
-            params={"redirect_uri": redirect_uri},
-        )
+        params = {"redirect_uri": redirect_uri}
+        if endpoint:
+            params["endpoint"] = endpoint
+        if code_param_alias:
+            params["code_param_alias"] = code_param_alias
+        response = await self._client.post(url=f"/api/auth/connect/{provider}/url", params=params)
         if response.status_code != http.HTTPStatus.OK:
             raise httpx.RequestError(response.text)
 
