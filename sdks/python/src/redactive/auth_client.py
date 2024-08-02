@@ -32,8 +32,8 @@ class AuthClient:
         self._client = httpx.AsyncClient(base_url=f"{base_url}", auth=BearerAuth(api_key))
 
     async def begin_connection(
-            self, provider: str, redirect_uri: str, endpoint: str | None = None, code_param_alias: str | None = None
-        ) -> BeginConnectionResponse:
+        self, provider: str, redirect_uri: str, endpoint: str | None = None, code_param_alias: str | None = None
+    ) -> BeginConnectionResponse:
         """
         Initiates a connection process with a specified provider.
 
