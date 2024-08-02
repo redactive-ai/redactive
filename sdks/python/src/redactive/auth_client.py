@@ -34,31 +34,31 @@ class AuthClient:
     async def begin_connection(
             self, provider: str, redirect_uri: str, endpoint: str | None = None, code_param_alias: str | None = None
         ) -> BeginConnectionResponse:
-            """
-            Initiates a connection process with a specified provider.
+        """
+        Initiates a connection process with a specified provider.
 
-            :param provider: The name of the provider to connect with.
-            :type provider: str
-            :param redirect_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
-            :type redirect_uri: str
-            :param endpoint: The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk. Defaults to None.
-            :type endpoint: str, optional
-            :param code_param_alias: The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
-            :type code_param_alias: str, optional
-            :raises httpx.RequestError: If an error occurs while making the HTTP request.
-            :return: The URL to redirect the user to for beginning the connection.
-            :rtype: BeginConnectionResponse
-            """
-            params = {"redirect_uri": redirect_uri}
-            if endpoint:
-                params["endpoint"] = endpoint
-            if code_param_alias:
-                params["code_param_alias"] = code_param_alias
-            response = await self._client.post(url=f"/api/auth/connect/{provider}/url", params=params)
-            if response.status_code != http.HTTPStatus.OK:
-               raise httpx.RequestError(response.text)
+        :param provider: The name of the provider to connect with.
+        :type provider: str
+        :param redirect_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
+        :type redirect_uri: str
+        :param endpoint: The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk. Defaults to None.
+        :type endpoint: str, optional
+        :param code_param_alias: The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
+        :type code_param_alias: str, optional
+        :raises httpx.RequestError: If an error occurs while making the HTTP request.
+        :return: The URL to redirect the user to for beginning the connection.
+        :rtype: BeginConnectionResponse
+        """
+        params = {"redirect_uri": redirect_uri}
+        if endpoint:
+            params["endpoint"] = endpoint
+        if code_param_alias:
+            params["code_param_alias"] = code_param_alias
+        response = await self._client.post(url=f"/api/auth/connect/{provider}/url", params=params)
+        if response.status_code != http.HTTPStatus.OK:
+            raise httpx.RequestError(response.text)
 
-            return BeginConnectionResponse(**response.json())
+        return BeginConnectionResponse(**response.json())
 
     async def exchange_tokens(self, code: str | None = None, refresh_token: str | None = None) -> ExchangeTokenResponse:
         """
