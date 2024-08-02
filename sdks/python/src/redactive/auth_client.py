@@ -31,26 +31,35 @@ class AuthClient:
 
         self._client = httpx.AsyncClient(base_url=f"{base_url}", auth=BearerAuth(api_key))
 
-    async def begin_connection(self, provider: str, redirect_uri: str) -> BeginConnectionResponse:
-        """
-        Initiates a connection process with a specified provider.
+    async def begin_connection(
+            self, provider: str, redirect_uri: str, endpoint: str | None = None, code_param_alias: str | None = None
+        ) -> str:
+            """
+            Initiates a connection process with a specified provider.
 
-        :param provider: The name of the provider to connect with.
-        :type provider: str
-        :param redirect_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
-        :type redirect_uri: str
-        :raises httpx.RequestError: If an error occurs while making the HTTP request.
-        :return: The URL to redirect the user to for beginning the connection.
-        :rtype: BeginConnectionResponse
-        """
-        response = await self._client.post(
-            url=f"/api/auth/connect/{provider}/url",
-            params={"redirect_uri": redirect_uri},
-        )
-        if response.status_code != http.HTTPStatus.OK:
-            raise httpx.RequestError(response.text)
+            Parameters:
+                provider (str): The name of the provider to connect with.
+                redirect_uri (str): The URI to redirect to after initiating the connection. Defaults to an empty string.
+                endpoint (str, optional): The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk. Defaults to None.
+                code_param_alias (str, optional): The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
 
-        return BeginConnectionResponse(**response.json())
+            Returns:
+                str: The URL to redirect the user to for beginning the connection.
+
+            Raises:
+                httpx.HTTPStatusError: If the HTTP request returns an unsuccessful status code.
+                httpx.RequestError: If an error occurs while making the HTTP request.
+            """
+            params = {"redirect_uri": redirect_uri}
+            if endpoint:
+                params["endpoint"] = endpoint
+            if code_param_alias:
+                params["code_param_alias"] = code_param_alias
+            response = await self._client.post(url=f"/api/auth/connect/{provider}/url", params=params)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise httpx.RequestError(response.text)
 
     async def exchange_tokens(self, code: str | None = None, refresh_token: str | None = None) -> ExchangeTokenResponse:
         """
