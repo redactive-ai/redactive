@@ -55,10 +55,10 @@ class AuthClient:
             if code_param_alias:
                 params["code_param_alias"] = code_param_alias
             response = await self._client.post(url=f"/api/auth/connect/{provider}/url", params=params)
-            if response.status_code == 200:
-                return response.json()
-            else:
-                raise httpx.RequestError(response.text)
+            if response.status_code != http.HTTPStatus.OK:
+               raise httpx.RequestError(response.text)
+
+            return BeginConnectionResponse(**response.json())
 
     async def exchange_tokens(self, code: str | None = None, refresh_token: str | None = None) -> ExchangeTokenResponse:
         """
