@@ -121,14 +121,10 @@ await client.query_chunks(access_token=credential, semantic_query=semantic_query
 
 It's advised to use the `devcontainer` or `virtual env` to run this app.
 
-Please make sure you have a copy of `redactive-0.0.5-py3-none-any.whl` in the root directory of this project. (We're in the process of uploading to PyPi)
+The SDK is available on [PyPI](https://pypi.org/project/redactive/) and will be automatically installed when instaling this application.
 
-```console
+```shell
 pip install .
 ```
 
 After the app is installed you can run `redactive_test_app` and start querying!
-
-## License
-
-`redactive-test-app` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
