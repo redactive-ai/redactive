@@ -78,6 +78,45 @@ redactive_test_app query \
     --port 443
 ```
 
+#### Filter Queries
+
+The SDK allows your limited filtering of chunks on the server, this allows you to specify specific datasources or chunks from a recent date.
+
+| Filter      | Type                          | Example                                                                             |
+| ----------- | ----------------------------- | ----------------------------------------------------------------------------------- |
+| scope       | `list[str]`                   | ["confluence", "slack://channel-name", "google-drive://CompanyDrive/document.docx"] |
+| created     | dict`[before:str, after:str]` | {"before": datetime.now(), after: datetime.now() }                                  |
+| modified    | dict`[before:str, after:str]` | {"before": datetime.now(), after: datetime.now() }                                  |
+| user_emails | `list[str]`                   | ["alice@example.com"]                                                               |
+
+- **Scope** limits the returned chunks to a subset of a datasource. This can be used to filter results based on a datasource, a channel, or a folder depending on the structure of the datasource.
+- **Created** limits chunks based on when the source document was created, in a filesystem this is the metadata of the file, in a SaaS system this normally when the chunk was created and is immutable.
+- **Modified** is similar to created but instead works on the modified data of the document. This is mutable and will change in the source based on editing rules.
+- **User Emails** will let you filter based on if the specified email address is associated with the chunk in anyway. This might mean for example, that the Jira issue has a comment from this email address, or that the Confluence document has been edited by this email address.
+
+```python
+filter_dict = dict(
+    scope=[
+        "jira",
+        "confluence"
+    ],
+    created=dict(
+        before=datetime()
+        after=datetime()
+    ),
+    modified=dict(
+        before=datetime()
+        after=datetime()
+    ),
+    user_emails=[
+        "alice@example.com",
+        "bob@example.com"
+    ]
+)
+
+await client.query_chunks(access_token=credential, semantic_query=semantic_query, count=count, query_filter=filter_dict)
+```
+
 ## Installation
 
 It's advised to use the `devcontainer` or `virtual env` to run this app.
