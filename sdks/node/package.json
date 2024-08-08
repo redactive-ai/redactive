@@ -1,0 +1,44 @@
+{
+  "name": "@redactive/redactive",
+  "version": "1.0.0",
+  "description": "Redactive AI Node SDK",
+  "keywords": [
+    "AI/ML"
+  ],
+  "author": "Redactive AI <redactive.ai>",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsup",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format:check": "prettier .",
+    "format:fix": "prettier --write .",
+    "test": "vitest"
+  },
+  "directories": {},
+  "dependencies": {
+    "@grpc/grpc-js": "^1.11.1",
+    "node-fetch": "^2.7.0",
+    "protobufjs": "^7.3.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.5.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/eslint__js": "^8.42.3",
+    "eslint": "^9.5.0",
+    "prettier": "^3.3.2",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2",
+    "typescript-eslint": "^7.14.1",
+    "vitest": "^1.6.0"
+  }
+}
