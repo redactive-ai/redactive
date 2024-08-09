@@ -77,3 +77,42 @@ repos:
         # Important config for monorepo
         pass_filenames: false
         files: ^sdks/python/
+  # Node SDK hooks
+  - repo: local
+    hooks:
+      # Run Node SDK gRpc codegen
+      - id: node-sdk-grpc-codegen
+        name: Generate gRpc Nodejs code
+        language: node
+        entry: bash -c 'sdks/codegen/node_sdk.sh && cd sdks/node && pnpm lint:fix && pnpm format:fix'
+        additional_dependencies: ["ts-proto", "pnpm"]
+        pass_filenames: false
+        fail_fast: false
+        files: ^protos/
+      # Run Node SDK linting
+      - id: node-sdk-linting
+        name: Lint Node SDK codebase
+        language: node
+        entry: bash -c 'cd sdks/node && pnpm lint:fix'
+        additional_dependencies: ["pnpm"]
+        pass_filenames: false
+        fail_fast: false
+        files: ^sdks/node/
+      # Run Node SDK formatting
+      - id: node-sdk-formatting
+        name: Format Node SDK codebase
+        language: node
+        entry: bash -c 'cd sdks/node && pnpm format:fix'
+        additional_dependencies: ["pnpm"]
+        pass_filenames: false
+        fail_fast: false
+        files: ^sdks/node/
+      # Run Node SDK testing
+      - id: node-sdk-testing
+        name: Test Node SDK
+        language: node
+        entry: bash -c 'cd sdks/node && pnpm test'
+        additional_dependencies: ["pnpm"]
+        pass_filenames: false
+        fail_fast: false
+        files: ^sdks/node/
