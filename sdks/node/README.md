@@ -20,7 +20,7 @@ npm install ./sdks/node
 
 ### Requirements
 
-- Node v22+
+- Node v20+
 
 ## Usage
 
