@@ -8,4 +8,5 @@
 # Git files
 .git/
 
+# Node SDK handle formatting itself
 sdks/node
