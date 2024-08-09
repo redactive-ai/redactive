@@ -21,11 +21,12 @@
     "lint:fix": "eslint . --fix",
     "format:check": "prettier .",
     "format:fix": "prettier --write .",
-    "test": "vitest"
+    "test": "vitest --run"
   },
   "directories": {},
   "dependencies": {
     "@grpc/grpc-js": "^1.11.1",
+    "long": "^5.2.3",
     "node-fetch": "^2.7.0",
     "protobufjs": "^7.3.2"
   },

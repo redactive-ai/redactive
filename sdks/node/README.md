@@ -69,25 +69,25 @@ In order to comply with the repository style guide, we recommend running the fol
 To format your code, run:
 
 ```sh
-pnpm run format:fix
+pnpm format:fix
 ```
 
 To lint your code, run:
 
 ```sh
-pnpm run lint:fix
+pnpm lint:fix
 ```
 
 To test changes, run:
 
 ```sh
-pnpm run test
+pnpm test
 ```
 
 To build Python SDK, run:
 
 ```sh
-pnpm run build
+pnpm build
 ```
 
 To install local version, run:

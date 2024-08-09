@@ -7,10 +7,6 @@ NODE_SDK_OUTPUT_DIR=sdks/node/src/grpc
 mkdir -p ${NODE_SDK_OUTPUT_DIR}
 PROTO_DIR=protos
 
-pnpm \
-   --filter=@redactive/redactive \
-   install
-
 protoc \
    -I protos \
    --experimental_allow_proto3_optional=1 \
@@ -18,14 +14,3 @@ protoc \
    --ts_proto_opt=outputServices=grpc-js \
    --ts_proto_out=${NODE_SDK_OUTPUT_DIR} \
    search.proto
-
-
-pnpm \
-   -r \
-   --filter=@redactive/redactive \
-   lint:fix
-
-pnpm \
-   -r \
-   --filter=@redactive/redactive \
-   format:fix
