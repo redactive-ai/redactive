@@ -1,7 +1,7 @@
-# Redactive Test App
+# Redactive Sample Command Line App
 
-[![PyPI - Version](https://img.shields.io/pypi/v/redactive-test-app.svg)](https://pypi.org/project/redactive-test-app)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/redactive-test-app.svg)](https://pypi.org/project/redactive-test-app)
+[![PyPI - Version](https://img.shields.io/pypi/v/redactive-test-app.svg)](https://pypi.org/project/redactive-sample-app)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/redactive-test-app.svg)](https://pypi.org/project/redactive-sample-app)
 
 This sample app can be used to connect to the Redactive platform. With this aopp you can connect to different datasources including Jira, Confluence, Slack, and Sharepoint. Once connected you can then query these sources using Redactive semantic search.
 
@@ -31,7 +31,7 @@ First, create an application API key on the [dashboard](https://dashboard.redact
 ```bash
 # Datasources can be jira | confluence | google-drive | sharepoint | slack | zendesk
 
-redactive_test_app setup-datasource \
+redactive_sample_app setup-datasource \
     --app-key=${REDACTIVE_APP_KEY} \
     --datasource="jira" \
     --host="https://api.redactive.ai"
@@ -44,7 +44,7 @@ Once this is done the consent page will redirect to the pre-defined `redirect_ur
 > Note for Zendesk connections you must also specify the `--endpoint` flag. This tells Redactive which subdomain to use to connect to Zendesk with as there is no global authentication endpoint.
 >
 > ```bash
-> redactive_test_app setup-datasource \
+> redactive_sample_app setup-datasource \
 >    --app-key=${REDACTIVE_APP_KEY} \
 >    --datasource="zendesk" \
 >    --endpoint="d3v-redactive-ai" \
@@ -58,7 +58,7 @@ Once you have connected at least one datasource you can now run a semantic searc
 To run a query enter the following in your shell. The app will then use the Redactive SDK to run semantic search.
 
 ```bash
-redactive_test_app query \
+redactive_sample_app query \
     --credential $TOKEN \
     --count 3 \
     --host grpc.redactive.ai \
@@ -70,7 +70,7 @@ This will return a list of chunks that can be used. The `--count` flag is the nu
 You can also search a specific datasource by specifying `--datasource`
 
 ```bash
-redactive_test_app query \
+redactive_sample_app query \
     --credential $TOKEN \
     --count 3 \
 	--datasource "jira" \
@@ -127,4 +127,4 @@ The SDK is available on [PyPI](https://pypi.org/project/redactive/) and will be 
 pip install .
 ```
 
-After the app is installed you can run `redactive_test_app` and start querying!
+After the app is installed you can run `redactive_sample_app` and start querying!
