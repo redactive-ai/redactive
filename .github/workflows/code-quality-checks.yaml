@@ -35,8 +35,8 @@ jobs:
       - name: Install Node SDK dependencies
         run: npm install -g pnpm && pnpm install
         working-directory: ./sdks/node
-      - name: Install protobuf-compiler
-        run: apt-get update && apt-get install -y protobuf-compiler
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
       - name: Run pre-commit hooks
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
