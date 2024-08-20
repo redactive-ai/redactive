@@ -2,7 +2,6 @@ default_install_hook_types: [pre-commit, pre-push]
 default_language_version:
   python: python3.12
 
-fail_fast: true
 # pre-commit hooks references: https://pre-commit.com/hooks.html
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -10,21 +9,26 @@ repos:
     hooks:
       # prevents giant files from being committed
       - id: check-added-large-files
+        fail_fast: true
       # checks for files that contain merge conflict strings
       - id: check-merge-conflict
+        fail_fast: true
       # detects the presence of private keys
       - id: detect-private-key
+        fail_fast: true
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: v3.27.0
     hooks:
       - id: commitizen
         name: Check commit message format
+        fail_fast: true
 
   - repo: local
     hooks:
       - id: prettier
         name: Check files format with prettier
+        fail_fast: true
         stages: ["pre-commit"]
         entry: bash -c 'prettier --write .'
         language: system
@@ -41,7 +45,6 @@ repos:
         additional_dependencies:
           ["hatch", "grpcio-tools", "betterproto[compiler]==2.0.0b6"]
         pass_filenames: false
-        fail_fast: false
         files: ^protos/
 
       # Run type checking
@@ -73,6 +76,7 @@ repos:
       # Run unit tests
       - id: python-sdk-unit-tests
         name: Run Python SDK unit tests
+        fail_fast: true
         stages: ["pre-commit", "pre-push"]
         language: python
         types: [python]
@@ -93,7 +97,6 @@ repos:
         entry: bash -c 'sdks/codegen/node_sdk.sh && cd sdks/node && pnpm lint:fix && pnpm format:fix'
         additional_dependencies: ["ts-proto", "pnpm"]
         pass_filenames: false
-        fail_fast: false
         files: ^protos/
       # Run Node SDK linting
       - id: node-sdk-linting
@@ -103,7 +106,6 @@ repos:
         entry: bash -c 'cd sdks/node && pnpm lint:fix'
         additional_dependencies: ["pnpm"]
         pass_filenames: false
-        fail_fast: false
         files: ^sdks/node/
       # Run Node SDK formatting
       - id: node-sdk-formatting
@@ -113,7 +115,6 @@ repos:
         entry: bash -c 'cd sdks/node && pnpm format:fix'
         additional_dependencies: ["pnpm"]
         pass_filenames: false
-        fail_fast: false
         files: ^sdks/node/
       # Run Node SDK testing
       - id: node-sdk-testing
@@ -123,5 +124,5 @@ repos:
         entry: bash -c 'cd sdks/node && pnpm test'
         additional_dependencies: ["pnpm"]
         pass_filenames: false
-        fail_fast: false
+        fail_fast: true
         files: ^sdks/node/
