@@ -25,6 +25,7 @@ repos:
     hooks:
       - id: prettier
         name: Check files format with prettier
+        stages: ["pre-commit"]
         entry: bash -c 'prettier --write .'
         language: system
 
@@ -45,6 +46,7 @@ repos:
 
       # Run type checking
       - id: python-sdk-pyright
+        stages: ["pre-commit", "pre-push"]
         name: Check typing with pyright
         language: python
         types: [python]
@@ -58,6 +60,7 @@ repos:
       # Run the formatter
       - id: python-sdk-ruff-format
         name: Format Redactive Python SDK codebase with ruff
+        stages: ["pre-commit", "pre-push"]
         language: python
         types: [python]
         # Custom command for monorepo
@@ -70,6 +73,7 @@ repos:
       # Run unit tests
       - id: python-sdk-unit-tests
         name: Run Python SDK unit tests
+        stages: ["pre-commit", "pre-push"]
         language: python
         types: [python]
         # Custom command for monorepo
@@ -94,6 +98,7 @@ repos:
       # Run Node SDK linting
       - id: node-sdk-linting
         name: Lint Node SDK codebase
+        stages: ["pre-commit", "pre-push"]
         language: node
         entry: bash -c 'cd sdks/node && pnpm lint:fix'
         additional_dependencies: ["pnpm"]
@@ -103,6 +108,7 @@ repos:
       # Run Node SDK formatting
       - id: node-sdk-formatting
         name: Format Node SDK codebase
+        stages: ["pre-commit", "pre-push"]
         language: node
         entry: bash -c 'cd sdks/node && pnpm format:fix'
         additional_dependencies: ["pnpm"]
@@ -111,7 +117,8 @@ repos:
         files: ^sdks/node/
       # Run Node SDK testing
       - id: node-sdk-testing
-        name: Test Node SDK
+        name: Run Node SDK unit tests
+        stages: ["pre-commit", "pre-push"]
         language: node
         entry: bash -c 'cd sdks/node && pnpm test'
         additional_dependencies: ["pnpm"]
