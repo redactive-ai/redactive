@@ -24,5 +24,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN npm install --no-fund -g \
     prettier \
-    ts-proto \
+    ts-proto@2.0.2 \
     pnpm
