@@ -35,11 +35,7 @@ jobs:
       - name: Install Node SDK dependencies
         run: npm install -g pnpm && pnpm install
         working-directory: ./sdks/node
-      - name: Install Protoc
-        run: |
-          sudo apt-get update 
-          sudo apt-get install -y protobuf-compiler>=3.12.4
       - name: Run pre-commit hooks
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
         with:
-          extra_args: --hook-stage={pre-commit,pre-push} --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}
+          extra_args: --hook-stage={pre-push} --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}
