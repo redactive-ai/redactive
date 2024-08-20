@@ -3,8 +3,8 @@ FROM mcr.microsoft.com/vscode/devcontainers/python:${VARIANT}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    protobuf-compiler \
-    libprotobuf-dev \
+    protobuf-compiler>=3.12.4 \
+    libprotobuf-dev>=3.12.4 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install/upgrade pip, build, twine
