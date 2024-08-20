@@ -77,6 +77,7 @@ repos:
       - id: python-sdk-unit-tests
         name: Run Python SDK unit tests
         fail_fast: true
+        always_run: true
         stages: ["pre-commit", "pre-push"]
         language: python
         types: [python]
@@ -119,10 +120,11 @@ repos:
       # Run Node SDK testing
       - id: node-sdk-testing
         name: Run Node SDK unit tests
+        fail_fast: true
+        always_run: true
         stages: ["pre-commit", "pre-push"]
         language: node
         entry: bash -c 'cd sdks/node && pnpm test'
         additional_dependencies: ["pnpm"]
         pass_filenames: false
-        fail_fast: true
         files: ^sdks/node/
