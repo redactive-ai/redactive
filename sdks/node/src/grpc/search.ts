@@ -44,8 +44,8 @@ export interface Filters {
   modified?: TimeSpan | undefined;
   /** List of user emails associated with response chunk */
   userEmails: string[];
-  /** Include chunks from deleted documents */
-  includeDeleted?: boolean | undefined;
+  /** Include content from documents in trash */
+  includeContentInTrash?: boolean | undefined;
 }
 
 export interface QueryRequest {
@@ -198,7 +198,7 @@ export const TimeSpan = {
 };
 
 function createBaseFilters(): Filters {
-  return { scope: [], created: undefined, modified: undefined, userEmails: [], includeDeleted: undefined };
+  return { scope: [], created: undefined, modified: undefined, userEmails: [], includeContentInTrash: undefined };
 }
 
 export const Filters = {
@@ -215,8 +215,8 @@ export const Filters = {
     for (const v of message.userEmails) {
       writer.uint32(34).string(v!);
     }
-    if (message.includeDeleted !== undefined) {
-      writer.uint32(40).bool(message.includeDeleted);
+    if (message.includeContentInTrash !== undefined) {
+      writer.uint32(40).bool(message.includeContentInTrash);
     }
     return writer;
   },
@@ -261,7 +261,7 @@ export const Filters = {
             break;
           }
 
-          message.includeDeleted = reader.bool();
+          message.includeContentInTrash = reader.bool();
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -280,7 +280,9 @@ export const Filters = {
       userEmails: globalThis.Array.isArray(object?.userEmails)
         ? object.userEmails.map((e: any) => globalThis.String(e))
         : [],
-      includeDeleted: isSet(object.includeDeleted) ? globalThis.Boolean(object.includeDeleted) : undefined
+      includeContentInTrash: isSet(object.includeContentInTrash)
+        ? globalThis.Boolean(object.includeContentInTrash)
+        : undefined
     };
   },
 
@@ -298,8 +300,8 @@ export const Filters = {
     if (message.userEmails?.length) {
       obj.userEmails = message.userEmails;
     }
-    if (message.includeDeleted !== undefined) {
-      obj.includeDeleted = message.includeDeleted;
+    if (message.includeContentInTrash !== undefined) {
+      obj.includeContentInTrash = message.includeContentInTrash;
     }
     return obj;
   },
@@ -315,7 +317,7 @@ export const Filters = {
     message.modified =
       object.modified !== undefined && object.modified !== null ? TimeSpan.fromPartial(object.modified) : undefined;
     message.userEmails = object.userEmails?.map((e) => e) || [];
-    message.includeDeleted = object.includeDeleted ?? undefined;
+    message.includeContentInTrash = object.includeContentInTrash ?? undefined;
     return message;
   }
 };
