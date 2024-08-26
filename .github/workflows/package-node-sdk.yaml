@@ -32,6 +32,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        with:
+          name: redactive-node-sdk
+          path: ./sdks/node/dist/
 
   publish:
     name: 🚚 Publish Node SDK to NPM
@@ -42,6 +47,11 @@ jobs:
     permissions:
       id-token: write
     steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: redactive-node-sdk
+          path: ./sdks/node/dist/
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Set up Node
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
@@ -53,10 +63,6 @@ jobs:
         with:
           version: 9
           run_install: false
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build
-        run: pnpm build
       - name: Publish Node SDK to NPM
         shell: bash
         run: pnpm version ${GITHUB_REF#refs/*/} && pnpm publish --access public --no-git-checks
