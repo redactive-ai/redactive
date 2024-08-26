@@ -134,6 +134,11 @@ class Filters(betterproto.Message):
     user_emails: List[str] = betterproto.string_field(4)
     """List of user emails associated with response chunk"""
 
+    include_content_in_trash: Optional[bool] = betterproto.bool_field(
+        5, optional=True, group="_include_content_in_trash"
+    )
+    """Include content from documents in trash"""
+
 
 @dataclass(eq=False, repr=False)
 class QueryRequest(betterproto.Message):

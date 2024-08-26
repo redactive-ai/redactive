@@ -31,6 +31,8 @@ message Filters {
     optional TimeSpan modified = 3;
     // List of user emails associated with response chunk
     repeated string user_emails = 4;
+    // Include content from documents in trash
+    optional bool include_content_in_trash = 5;
 }
 
 message QueryRequest {

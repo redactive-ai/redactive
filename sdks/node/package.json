@@ -25,10 +25,10 @@
   },
   "directories": {},
   "dependencies": {
+    "@bufbuild/protobuf": "^2.0.0",
     "@grpc/grpc-js": "^1.11.1",
     "long": "^5.2.3",
-    "node-fetch": "^2.7.0",
-    "protobufjs": "^7.3.2"
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.5.0",
