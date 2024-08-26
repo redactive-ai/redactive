@@ -29,11 +29,9 @@ jobs:
           node-version: "22.x"
           registry-url: "https://registry.npmjs.org"
           cache: pnpm
-      - name: 📦️ Install dependencies
+      - name: 📦️ Install dependencies & build
+        run: pnpm install --frozen-lockfile && pnpm build
         working-directory: ./sdks/node
-        run: pnpm install --frozen-lockfile
-      - name: 🔨 Build
-        run: pnpm build
       - name: Store the distribution packages
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
