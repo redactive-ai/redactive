@@ -38,7 +38,7 @@ jobs:
       - name: Install prettier dependencies
         run: npm install -g prettier
       - name: Install Node SDK dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
         working-directory: ./sdks/node
       - name: Run pre-commit hooks
         uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
