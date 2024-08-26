@@ -28,8 +28,11 @@ jobs:
         with:
           version: 9
           run_install: false
-      - name: 📦️ Install dependencies & build
-        run: pnpm install --frozen-lockfile && pnpm build
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ./sdks/node
+      - name: Build
+        run: pnpm build
         working-directory: ./sdks/node
       - name: Store the distribution packages
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
