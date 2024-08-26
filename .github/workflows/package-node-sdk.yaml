@@ -18,8 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
-        name: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
         with:
           version: 9
           run_install: false
@@ -30,6 +30,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           cache: pnpm
       - name: 📦️ Install dependencies
+        working-directory: ./sdks/node
         run: pnpm install --frozen-lockfile
       - name: 🔨 Build
         run: pnpm build
