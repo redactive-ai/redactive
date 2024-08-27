@@ -40,7 +40,7 @@ jobs:
 
   publish:
     name: 🚚 Publish Node SDK to NPM
-    if: startsWith(github.ref, 'refs/tags/') # only publish to NPM on tag pushes
+    # if: startsWith(github.ref, 'refs/tags/') # only publish to NPM on tag pushes
     needs: build
     runs-on: ubuntu-latest
     environment: release
@@ -66,8 +66,12 @@ jobs:
         with:
           version: 9
           run_install: false
+      - name: Detect package version tag # Set to beta if any tag is in version string
+        id: version_tag
+        run: |
+          echo "tag=$(if [[ ${GITHUB_REF#refs/*/} =~ ^v[0-9.]+$ ]]; then echo 'latest' ; else echo 'beta'; fi)" >> $GITHUB_OUTPUT
       - name: Publish Node SDK to NPM
         shell: bash
-        run: pnpm version ${GITHUB_REF#refs/*/} && pnpm publish --access public --no-git-checks
+        run: pnpm version ${GITHUB_REF#refs/*/} && pnpm publish --access public --no-git-checks --tag ${{steps.version_tag.outputs.tag}}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
