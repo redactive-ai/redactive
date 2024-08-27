@@ -40,12 +40,15 @@ jobs:
 
   publish:
     name: 🚚 Publish Node SDK to NPM
-    if: startsWith(github.ref, 'refs/tags/') # only publish to NPM on tag pushes
+    # if: startsWith(github.ref, 'refs/tags/') # only publish to NPM on tag pushes
     needs: build
     runs-on: ubuntu-latest
     environment: release
     permissions:
       id-token: write
+    defaults:
+      run:
+        working-directory: ./sdks/node
     steps:
       - name: Download all the dists
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
