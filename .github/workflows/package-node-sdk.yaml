@@ -30,10 +30,8 @@ jobs:
           run_install: false
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        working-directory: ./sdks/node
       - name: Build
         run: pnpm build
-        working-directory: ./sdks/node
       - name: Store the distribution packages
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
@@ -48,13 +46,27 @@ jobs:
     environment: release
     permissions:
       id-token: write
+    defaults:
+      run:
+        working-directory: ./sdks/node
     steps:
       - name: Download all the dists
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: redactive-node-sdk
-          path: dist/
-      - name: Publish 🚀
+          path: ./sdks/node/dist/
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Set up Node
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
+      - name: Install pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        with:
+          version: 9
+          run_install: false
+      - name: Publish Node SDK to NPM
         shell: bash
         run: pnpm version ${GITHUB_REF#refs/*/} && pnpm publish --access public --no-git-checks
         env:
