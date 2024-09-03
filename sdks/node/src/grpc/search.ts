@@ -19,7 +19,7 @@ import {
   type UntypedServiceImplementation
 } from "@grpc/grpc-js";
 
-import { RelevantChunk } from "./chunks";
+import { Chunk, RelevantChunk } from "./chunks";
 import { Struct } from "./google/protobuf/struct";
 import { Timestamp } from "./google/protobuf/timestamp";
 
@@ -64,6 +64,20 @@ export interface QueryResponse {
   error?: { [key: string]: any } | undefined;
   /** List of relevant chunks */
   relevantChunks: RelevantChunk[];
+}
+
+export interface GetChunksByUrlRequest {
+  /** URL to document */
+  url: string;
+}
+
+export interface GetChunksByUrlResponse {
+  /** Fetch was successful */
+  success: boolean;
+  /** Error message if fetch failed */
+  error?: { [key: string]: any } | undefined;
+  /** List of chunks */
+  chunks: Chunk[];
 }
 
 function createBaseQuery(): Query {
@@ -503,6 +517,152 @@ export const QueryResponse = {
   }
 };
 
+function createBaseGetChunksByUrlRequest(): GetChunksByUrlRequest {
+  return { url: "" };
+}
+
+export const GetChunksByUrlRequest = {
+  encode(message: GetChunksByUrlRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.url !== "") {
+      writer.uint32(10).string(message.url);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChunksByUrlRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChunksByUrlRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.url = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChunksByUrlRequest {
+    return { url: isSet(object.url) ? globalThis.String(object.url) : "" };
+  },
+
+  toJSON(message: GetChunksByUrlRequest): unknown {
+    const obj: any = {};
+    if (message.url !== "") {
+      obj.url = message.url;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetChunksByUrlRequest>, I>>(base?: I): GetChunksByUrlRequest {
+    return GetChunksByUrlRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetChunksByUrlRequest>, I>>(object: I): GetChunksByUrlRequest {
+    const message = createBaseGetChunksByUrlRequest();
+    message.url = object.url ?? "";
+    return message;
+  }
+};
+
+function createBaseGetChunksByUrlResponse(): GetChunksByUrlResponse {
+  return { success: false, error: undefined, chunks: [] };
+}
+
+export const GetChunksByUrlResponse = {
+  encode(message: GetChunksByUrlResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.error !== undefined) {
+      Struct.encode(Struct.wrap(message.error), writer.uint32(18).fork()).join();
+    }
+    for (const v of message.chunks) {
+      Chunk.encode(v!, writer.uint32(26).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetChunksByUrlResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetChunksByUrlResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.error = Struct.unwrap(Struct.decode(reader, reader.uint32()));
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.chunks.push(Chunk.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetChunksByUrlResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      error: isObject(object.error) ? object.error : undefined,
+      chunks: globalThis.Array.isArray(object?.chunks) ? object.chunks.map((e: any) => Chunk.fromJSON(e)) : []
+    };
+  },
+
+  toJSON(message: GetChunksByUrlResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.error !== undefined) {
+      obj.error = message.error;
+    }
+    if (message.chunks?.length) {
+      obj.chunks = message.chunks.map((e) => Chunk.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetChunksByUrlResponse>, I>>(base?: I): GetChunksByUrlResponse {
+    return GetChunksByUrlResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetChunksByUrlResponse>, I>>(object: I): GetChunksByUrlResponse {
+    const message = createBaseGetChunksByUrlResponse();
+    message.success = object.success ?? false;
+    message.error = object.error ?? undefined;
+    message.chunks = object.chunks?.map((e) => Chunk.fromPartial(e)) || [];
+    return message;
+  }
+};
+
 export type SearchService = typeof SearchService;
 export const SearchService = {
   /** Query the index for relevant chunks */
@@ -514,12 +674,24 @@ export const SearchService = {
     requestDeserialize: (value: Buffer) => QueryRequest.decode(value),
     responseSerialize: (value: QueryResponse) => Buffer.from(QueryResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => QueryResponse.decode(value)
+  },
+  /** Get chunks by URL */
+  getChunksByUrl: {
+    path: "/redactive.grpc.v1.Search/GetChunksByUrl",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetChunksByUrlRequest) => Buffer.from(GetChunksByUrlRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetChunksByUrlRequest.decode(value),
+    responseSerialize: (value: GetChunksByUrlResponse) => Buffer.from(GetChunksByUrlResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetChunksByUrlResponse.decode(value)
   }
 } as const;
 
 export interface SearchServer extends UntypedServiceImplementation {
   /** Query the index for relevant chunks */
   queryChunks: handleUnaryCall<QueryRequest, QueryResponse>;
+  /** Get chunks by URL */
+  getChunksByUrl: handleUnaryCall<GetChunksByUrlRequest, GetChunksByUrlResponse>;
 }
 
 export interface SearchClient extends Client {
@@ -538,6 +710,22 @@ export interface SearchClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: QueryResponse) => void
+  ): ClientUnaryCall;
+  /** Get chunks by URL */
+  getChunksByUrl(
+    request: GetChunksByUrlRequest,
+    callback: (error: ServiceError | null, response: GetChunksByUrlResponse) => void
+  ): ClientUnaryCall;
+  getChunksByUrl(
+    request: GetChunksByUrlRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetChunksByUrlResponse) => void
+  ): ClientUnaryCall;
+  getChunksByUrl(
+    request: GetChunksByUrlRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetChunksByUrlResponse) => void
   ): ClientUnaryCall;
 }
 

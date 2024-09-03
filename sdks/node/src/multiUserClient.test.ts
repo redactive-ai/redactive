@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { beforeEach, describe, expect, it, Mock, Mocked, MockedFunction, vi } from "vitest";
 
 import { AuthClient } from "./authClient";
-import { RelevantChunk } from "./grpc/chunks";
+import { Chunk, RelevantChunk } from "./grpc/chunks";
 import { MultiUserClient, UserData } from "./multiUserClient";
 import { SearchClient } from "./searchClient";
 
@@ -169,5 +169,34 @@ describe("MultiUserClient", () => {
 
     expect(result).toEqual(chunks);
     expect(mockSearchClient.queryChunks).toHaveBeenCalledWith(idToken, semanticQuery, 10);
+  });
+
+  it("should get chunks by url after refreshing idToken", async () => {
+    const userId = "user123";
+    const url = "https://example.com";
+    const idToken = "idToken123";
+    const refreshToken = "refreshToken123";
+    const chunks = [{ chunk: "chunk1" }, { chunk: "chunk2" }];
+
+    const expiredUserData: UserData = {
+      idToken,
+      idTokenExpiry: new Date(Date.now() - 1000),
+      refreshToken
+    };
+    const refreshedUserData: UserData = {
+      idToken,
+      idTokenExpiry: new Date(Date.now() + 3600 * 1000),
+      refreshToken
+    };
+
+    readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
+    multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
+    mockSearchClient.getChunksByUrl.mockResolvedValue(chunks as unknown as Chunk[]);
+
+    multiUserClient.searchClient = mockSearchClient;
+    const result = await multiUserClient.getChunksByUrl(userId, url);
+
+    expect(result).toEqual(chunks);
+    expect(mockSearchClient.getChunksByUrl).toHaveBeenCalledWith(idToken, url);
   });
 });

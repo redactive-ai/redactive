@@ -2,10 +2,8 @@
 
 # Generate Node SDK
 NODE_MODULES_DIR=$(npm root -g)
-NODE_SDK_DIR=sdks/node
 NODE_SDK_OUTPUT_DIR=sdks/node/src/grpc
 mkdir -p ${NODE_SDK_OUTPUT_DIR}
-PROTO_DIR=protos
 
 protoc \
    -I protos \

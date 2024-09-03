@@ -1,6 +1,7 @@
 default_install_hook_types: [pre-commit, pre-push]
 default_language_version:
   python: python3.12
+  node: 20.17.0
 
 # pre-commit hooks references: https://pre-commit.com/hooks.html
 repos:

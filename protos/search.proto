@@ -10,6 +10,8 @@ import "chunks.proto";
 service Search {
     // Query the index for relevant chunks
     rpc QueryChunks(QueryRequest) returns (QueryResponse);
+    // Get chunks by URL
+    rpc GetChunksByUrl(GetChunksByUrlRequest) returns (GetChunksByUrlResponse);
 }
 
 message Query {
@@ -51,4 +53,18 @@ message QueryResponse {
     optional google.protobuf.Struct error = 2;
     // List of relevant chunks
     repeated RelevantChunk relevant_chunks = 3;
+}
+
+message GetChunksByUrlRequest {
+    // URL to document
+    string url = 1;
+}
+
+message GetChunksByUrlResponse {
+    // Fetch was successful
+    bool success = 1;
+    // Error message if fetch failed
+    optional google.protobuf.Struct error = 2;
+    // List of chunks
+    repeated Chunk chunks = 3;
 }
