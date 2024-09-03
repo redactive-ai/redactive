@@ -1,7 +1,14 @@
 import { Client, credentials, Metadata } from "@grpc/grpc-js";
 
-import { RelevantChunk } from "./grpc/chunks";
-import { Query, QueryRequest, QueryResponse, SearchClient as SearchServiceClient } from "./grpc/search";
+import { Chunk, RelevantChunk } from "./grpc/chunks";
+import {
+  GetChunksByUrlRequest,
+  GetChunksByUrlResponse,
+  Query,
+  QueryRequest,
+  QueryResponse,
+  SearchClient as SearchServiceClient
+} from "./grpc/search";
 
 export class SearchClient {
   host: string = "grpc.redactive.ai";
@@ -49,5 +56,28 @@ export class SearchClient {
       });
     });
     return response.relevantChunks;
+  }
+
+  async getChunksByUrl(accessToken: string, url: string): Promise<Chunk[]> {
+    const requestMetadata = new Metadata();
+    requestMetadata.set("Authorization", `Bearer ${accessToken}`);
+    requestMetadata.set("User-Agent", "redactive-sdk-node");
+
+    const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
+    const queryRequest: GetChunksByUrlRequest = {
+      url
+    };
+
+    const response = await new Promise<GetChunksByUrlResponse>((resolve, reject) => {
+      client.getChunksByUrl(queryRequest, requestMetadata, (err, response) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        return resolve(response);
+      });
+    });
+    return response.chunks;
   }
 }

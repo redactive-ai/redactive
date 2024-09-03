@@ -54,3 +54,15 @@ message RelevantChunk {
     // Document metadata
     ChunkMetadata document_metadata = 5;
 }
+
+// A chunk is a part of a document
+message Chunk {
+    // Source reference of the document
+    SourceReference source = 1;
+    // Chunk reference of the chunk
+    ChunkReference chunk = 2;
+    // Chunk body
+    string chunk_body = 3;
+    // Document metadata
+    ChunkMetadata document_metadata = 4;
+}

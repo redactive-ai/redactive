@@ -1,7 +1,9 @@
+from urllib.parse import urlparse
+
 from grpclib.client import Channel
 
 from redactive._connection_mode import get_default_grpc_host_and_port as _get_default_grpc_host_and_port
-from redactive.grpc.v1 import Filters, Query, QueryRequest, RelevantChunk, SearchStub
+from redactive.grpc.v1 import Chunk, Filters, GetChunksByUrlRequest, Query, QueryRequest, RelevantChunk, SearchStub
 
 
 class SearchClient:
@@ -57,3 +59,30 @@ class SearchClient:
             request = QueryRequest(count=count, query=Query(semantic_query=semantic_query), filters=filters)
             response = await stub.query_chunks(request)
             return response.relevant_chunks
+
+    async def get_chunks_by_url(
+        self,
+        access_token: str,
+        url: str,
+    ) -> list[Chunk]:
+        """
+        Get chunks from a document by its URL.
+
+        :param access_token: The user access token
+        :type access_token: str
+        :param url: URL to source document to retrieve chunks
+        :type url: str
+        :return: A list of chunks from URL source document
+        :rtype: list[Chunk]
+        """
+        async with Channel(self.host, self.port, ssl=True) as channel:
+            stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
+
+            parsed_url = urlparse(url)
+            if not all([parsed_url.scheme, parsed_url.netloc]):
+                msg = "Url is not valid"
+                raise ValueError(msg)
+
+            request = GetChunksByUrlRequest(url=url)
+            response = await stub.get_chunks_by_url(request)
+            return response.chunks

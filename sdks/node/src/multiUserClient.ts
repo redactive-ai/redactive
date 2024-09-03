@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { AuthClient } from "./authClient";
-import { RelevantChunk } from "./grpc/chunks";
+import { Chunk, RelevantChunk } from "./grpc/chunks";
 import { SearchClient } from "./searchClient";
 
 export interface UserData {
@@ -115,5 +115,17 @@ export class MultiUserClient {
     }
 
     return await this.searchClient.queryChunks(userData.idToken!, semanticQuery, count);
+  }
+
+  async getChunksByUrl(userId: string, url: string): Promise<Chunk[]> {
+    let userData = await this.readUserData(userId);
+    if (!userData || !userData.refreshToken) {
+      throw new Error(`No valid Redactive session for user '${userId}'`);
+    }
+    if (!!userData.idTokenExpiry && new Date(userData.idTokenExpiry) < new Date()) {
+      userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
+    }
+
+    return await this.searchClient.getChunksByUrl(userData.idToken!, url);
   }
 }

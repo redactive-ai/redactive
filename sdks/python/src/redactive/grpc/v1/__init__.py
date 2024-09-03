@@ -106,6 +106,23 @@ class RelevantChunkRelevance(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
+class Chunk(betterproto.Message):
+    """A chunk is a part of a document"""
+
+    source: "SourceReference" = betterproto.message_field(1)
+    """Source reference of the document"""
+
+    chunk: "ChunkReference" = betterproto.message_field(2)
+    """Chunk reference of the chunk"""
+
+    chunk_body: str = betterproto.string_field(3)
+    """Chunk body"""
+
+    document_metadata: "ChunkMetadata" = betterproto.message_field(4)
+    """Document metadata"""
+
+
+@dataclass(eq=False, repr=False)
 class Query(betterproto.Message):
     semantic_query: str = betterproto.string_field(1)
     """Semantic query to execute"""
@@ -166,6 +183,26 @@ class QueryResponse(betterproto.Message):
     """List of relevant chunks"""
 
 
+@dataclass(eq=False, repr=False)
+class GetChunksByUrlRequest(betterproto.Message):
+    url: str = betterproto.string_field(1)
+    """URL to document"""
+
+
+@dataclass(eq=False, repr=False)
+class GetChunksByUrlResponse(betterproto.Message):
+    success: bool = betterproto.bool_field(1)
+    """Fetch was successful"""
+
+    error: Optional["betterproto_lib_google_protobuf.Struct"] = betterproto.message_field(
+        2, optional=True, group="_error"
+    )
+    """Error message if fetch failed"""
+
+    chunks: List["Chunk"] = betterproto.message_field(3)
+    """List of chunks"""
+
+
 class SearchStub(betterproto.ServiceStub):
     async def query_chunks(
         self,
@@ -184,14 +221,42 @@ class SearchStub(betterproto.ServiceStub):
             metadata=metadata,
         )
 
+    async def get_chunks_by_url(
+        self,
+        get_chunks_by_url_request: "GetChunksByUrlRequest",
+        *,
+        timeout: Optional[float] = None,
+        deadline: Optional["Deadline"] = None,
+        metadata: Optional["MetadataLike"] = None,
+    ) -> "GetChunksByUrlResponse":
+        return await self._unary_unary(
+            "/redactive.grpc.v1.Search/GetChunksByUrl",
+            get_chunks_by_url_request,
+            GetChunksByUrlResponse,
+            timeout=timeout,
+            deadline=deadline,
+            metadata=metadata,
+        )
+
 
 class SearchBase(ServiceBase):
     async def query_chunks(self, query_request: "QueryRequest") -> "QueryResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
+    async def get_chunks_by_url(self, get_chunks_by_url_request: "GetChunksByUrlRequest") -> "GetChunksByUrlResponse":
+        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
+
     async def __rpc_query_chunks(self, stream: "grpclib.server.Stream[QueryRequest, QueryResponse]") -> None:
         request = await stream.recv_message()
         response = await self.query_chunks(request)
+        await stream.send_message(response)
+
+    async def __rpc_get_chunks_by_url(
+        self,
+        stream: "grpclib.server.Stream[GetChunksByUrlRequest, GetChunksByUrlResponse]",
+    ) -> None:
+        request = await stream.recv_message()
+        response = await self.get_chunks_by_url(request)
         await stream.send_message(response)
 
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
@@ -201,5 +266,11 @@ class SearchBase(ServiceBase):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 QueryRequest,
                 QueryResponse,
+            ),
+            "/redactive.grpc.v1.Search/GetChunksByUrl": grpclib.const.Handler(
+                self.__rpc_get_chunks_by_url,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                GetChunksByUrlRequest,
+                GetChunksByUrlResponse,
             ),
         }

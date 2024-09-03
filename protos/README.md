@@ -9,7 +9,7 @@
 
 ### Python
 
-- Install required packages `pip install grpcio-tools betterproto[compiler]==2.0.0b6`
+- Install required packages `pip install grpcio-tools "betterproto[compiler]==2.0.0b6"`
 - Here is an example to generate search service
 
 ```bash
