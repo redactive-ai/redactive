@@ -2,8 +2,8 @@ name: Node SDK
 
 on:
   push:
-    paths:
-      - "sdks/node/**"
+    # paths:
+    #   - "sdks/node/**"
 
 jobs:
   build:
