@@ -50,14 +50,12 @@ jobs:
       run:
         working-directory: ./sdks/node
     steps:
-      # This needs to go first because checkout will overwrite the dist folder
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Download all the dists
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           name: redactive-node-sdk
           path: ./sdks/node/dist/
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       - name: Set up Node
         uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
