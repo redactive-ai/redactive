@@ -40,7 +40,7 @@ jobs:
 
   publish:
     name: 🚚 Publish Node SDK to NPM
-    if: startsWith(github.ref, 'refs/tags/') # only publish to NPM on tag pushes
+    # if: startsWith(github.ref, 'refs/tags/') # only publish to NPM on tag pushes
     needs: build
     runs-on: ubuntu-latest
     environment: release
@@ -57,22 +57,25 @@ jobs:
         with:
           name: redactive-node-sdk
           path: ./sdks/node/dist/
-      - name: Set up Node
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
-        with:
-          node-version: 22
-          registry-url: "https://registry.npmjs.org"
-      - name: Install pnpm
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
-        with:
-          version: 9
-          run_install: false
-      - name: Detect package version tag # Set to beta if any tag is in version string
-        id: version_tag
-        run: |
-          echo "tag=$(if [[ ${GITHUB_REF#refs/*/} =~ ^v[0-9.]+$ ]]; then echo 'latest' ; else echo 'beta'; fi)" >> $GITHUB_OUTPUT
-      - name: Publish Node SDK to NPM
-        shell: bash
-        run: pnpm version ${GITHUB_REF#refs/*/} && pnpm publish --access public --no-git-checks --tag ${{steps.version_tag.outputs.tag}}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: list-files
+        run: ls -all
+      # - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      # - name: Set up Node
+      #   uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+      #   with:
+      #     node-version: 22
+      #     registry-url: "https://registry.npmjs.org"
+      # - name: Install pnpm
+      #   uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+      #   with:
+      #     version: 9
+      #     run_install: false
+      # - name: Detect package version tag # Set to beta if any tag is in version string
+      #   id: version_tag
+      #   run: |
+      #     echo "tag=$(if [[ ${GITHUB_REF#refs/*/} =~ ^v[0-9.]+$ ]]; then echo 'latest' ; else echo 'beta'; fi)" >> $GITHUB_OUTPUT
+      # - name: Publish Node SDK to NPM
+      #   shell: bash
+      #   run: pnpm version ${GITHUB_REF#refs/*/} && pnpm publish --access public --no-git-checks --tag ${{steps.version_tag.outputs.tag}}
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
