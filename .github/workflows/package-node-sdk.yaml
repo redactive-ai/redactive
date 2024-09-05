@@ -36,7 +36,7 @@ jobs:
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: redactive-node-sdk
-          path: ./dist/
+          path: ./sdks/node/dist/
 
   publish:
     name: 🚚 Publish Node SDK to NPM
