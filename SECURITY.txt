@@ -10,7 +10,7 @@ Report security bugs in third-party modules to the person or team maintaining th
 
 ## The Redactive Security Notification Process
 
-For context on Redactive's security notification process, please see the [Notifications](https://github.com/redactive/governance/blob/main/wg-security/membership-and-notifications.md#notifications) section of the Security WG's [Membership and Notifications](https://github.com/redactive/governance/blob/main/wg-security/membership-and-notifications.md) Governance document.
+For context on Redactive's security notification process, please see the whitepaper.
 
 ## Learning More About Security
 
