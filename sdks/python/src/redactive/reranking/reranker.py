@@ -33,15 +33,15 @@ class RerankingSearchClient(search_client.SearchClient):
         access_token: str,
         semantic_query: str,
         count: int = 3,
-        query_filter: dict | None = None,
+        filters: dict | None = None,
     ) -> list[RelevantChunk]:
-        # Get many more results than the uesr is asking for, then
+        # Get many more results than the user is asking for, then
         # rerank them
         big_fetch_count = count * self.conf.fetch_multiplier
         if big_fetch_count > self.conf.max_fetch_results:
             big_fetch_count = self.conf.max_fetch_results
 
-        fetched_chunks = await super().query_chunks(access_token, semantic_query, big_fetch_count, query_filter)
+        fetched_chunks = await super().query_chunks(access_token, semantic_query, big_fetch_count, filters)
         ranker = Reranker(self.conf.reranking_algorithm)
         return self.rerank(semantic_query, fetched_chunks, ranker, count)
 
