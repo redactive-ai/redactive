@@ -2,6 +2,7 @@ import { Client, credentials, Metadata } from "@grpc/grpc-js";
 
 import { Chunk, RelevantChunk } from "./grpc/chunks";
 import {
+  Filters,
   GetChunksByUrlRequest,
   GetChunksByUrlResponse,
   Query,
@@ -33,16 +34,23 @@ export class SearchClient {
     }
   }
 
-  async queryChunks(accessToken: string, semanticQuery: string, count: number = 10): Promise<RelevantChunk[]> {
+  async queryChunks(
+    accessToken: string,
+    semanticQuery: string,
+    count: number = 10,
+    filters?: Partial<Filters>
+  ): Promise<RelevantChunk[]> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);
     requestMetadata.set("User-Agent", "redactive-sdk-node");
 
     const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
     const query: Query = { semanticQuery };
+    const _filters: Filters = { scope: [], userEmails: [], ...filters };
     const queryRequest: QueryRequest = {
       query,
-      count
+      count,
+      filters: filters ? _filters : undefined
     };
 
     const response = await new Promise<QueryResponse>((resolve, reject) => {
