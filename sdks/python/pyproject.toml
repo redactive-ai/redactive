@@ -25,6 +25,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+tests = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-httpx",
+]
 reranking = [
     "rerankers",
     "rerankers[transformers]"

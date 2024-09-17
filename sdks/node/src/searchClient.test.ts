@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Chunk, ChunkReference, RelevantChunk, RelevantChunk_Relevance, SourceReference } from "./grpc/chunks";
 import {
+  Filters,
   GetChunksByUrlRequest,
   GetChunksByUrlResponse,
   QueryRequest,
@@ -22,7 +23,13 @@ describe("Service client", () => {
     const accessToken = "test-accessToken";
     const query = "test-query";
     const count = 1;
-    const expectedResponse: RelevantChunk[] = Array.from({ length: 10 }, (_, i) => ({
+    const filters: Partial<Filters> = {
+      scope: ["dataprovider"],
+      created: { before: new Date() },
+      modified: { after: new Date() },
+      includeContentInTrash: true
+    };
+    const expectedResponse: RelevantChunk[] = Array.from({ length: count }, (_, i) => ({
       source: {
         system: `system-${i}`,
         systemVersion: `systemVersion-${i}`,
@@ -60,7 +67,7 @@ describe("Service client", () => {
     const client = new SearchClient();
 
     // Call the queryChunks method and capture the response
-    const response = await client.queryChunks(accessToken, query, count);
+    const response = await client.queryChunks(accessToken, query, count, filters);
 
     // Assert that the response matches the expected response
     expect(response).toStrictEqual(expectedResponse);
