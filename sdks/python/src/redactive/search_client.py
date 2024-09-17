@@ -1,3 +1,4 @@
+import warnings
 from urllib.parse import urlparse
 
 from grpclib.client import Channel
@@ -33,6 +34,7 @@ class SearchClient:
         access_token: str,
         semantic_query: str,
         count: int = 1,
+        query_filter: dict | None = None,
         filters: dict | None = None,
     ) -> list[RelevantChunk]:
         """
@@ -44,17 +46,24 @@ class SearchClient:
         :type semantic_query: str
         :param count: The number of relevant chunks to retrieve, defaults to 1
         :type count: int, optional
+        :param query_filter: deprecated, use `filters`.
+        :type query_filter: dict | None, optional
         :param filters: The filters for relevant chunks, defaults to None
         :type filters: dict | None, optional
         :return: A list of relevant chunks that match the query
         :rtype: list[RelevantChunk]
         """
+        if query_filter is not None:
+            warnings.warn("`query_filter` has been renamed `filters``", DeprecationWarning, stacklevel=2)
+
         async with Channel(self.host, self.port, ssl=True) as channel:
             stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
 
             _filters: Filters | None = None
             if filters is not None:
                 _filters = Filters(**filters)
+            elif query_filter is not None:
+                _filters = Filters(**query_filter)
 
             request = QueryRequest(count=count, query=Query(semantic_query=semantic_query), filters=_filters)
             response = await stub.query_chunks(request)
