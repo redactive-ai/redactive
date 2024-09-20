@@ -42,7 +42,13 @@ describe("MultiUserClient", () => {
     const result = await multiUserClient.getBeginConnectionUrl(userId, provider);
 
     expect(result).toBe(url);
-    expect(mockAuthClient.beginConnection).toHaveBeenCalledWith(provider, "http://callback.uri", undefined, state);
+    expect(mockAuthClient.beginConnection).toHaveBeenCalledWith(
+      provider,
+      "http://callback.uri",
+      undefined,
+      undefined,
+      state
+    );
     expect(writeUserData).toHaveBeenCalledWith(userId, { signInState: state });
   });
 
