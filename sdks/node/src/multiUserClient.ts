@@ -43,7 +43,7 @@ export class MultiUserClient {
 
   async getBeginConnectionUrl(userId: string, provider: string): Promise<string> {
     const state = randomUUID();
-    const url = await this.authClient.beginConnection(provider, this.callbackUri, undefined, undefined, state);
+    const url = await this.authClient.beginConnection(provider, this.callbackUri, { state });
 
     const userData = await this.readUserData(userId);
     await this.writeUserData(userId, {

@@ -27,19 +27,21 @@ export class AuthClient {
   async beginConnection(
     provider: string,
     redirectUri: string,
-    endpoint?: string,
-    codeParamAlias?: string,
-    state?: string
+    options: {
+      endpoint?: string;
+      codeParamAlias?: string;
+      state?: string;
+    } = {}
   ): Promise<string> {
     const params = [`redirect_uri=${encodeURIComponent(redirectUri)}`];
-    if (endpoint) {
-      params.push(`endpoint=${encodeURIComponent(endpoint)}`);
+    if (options.endpoint) {
+      params.push(`endpoint=${encodeURIComponent(options.endpoint)}`);
     }
-    if (state) {
-      params.push(`state=${encodeURIComponent(state)}`);
+    if (options.state) {
+      params.push(`state=${encodeURIComponent(options.state)}`);
     }
-    if (codeParamAlias) {
-      params.push(`code_param_alias=${encodeURIComponent(codeParamAlias)}`);
+    if (options.codeParamAlias) {
+      params.push(`code_param_alias=${encodeURIComponent(options.codeParamAlias)}`);
     }
 
     const response = await fetch(`${this.baseUrl}/api/auth/connect/${provider}/url?${params.join("&")}`, {
