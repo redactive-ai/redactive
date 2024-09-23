@@ -9,6 +9,14 @@ export interface UserConnections {
   connections: string[];
 }
 
+export interface BeginConnectionParams {
+  provider: string;
+  redirectUri: string;
+  endpoint?: string;
+  codeParamAlias?: string;
+  state?: string;
+}
+
 export class AuthClient {
   _requestHeaders: Headers;
   apiKey: string;
@@ -24,13 +32,13 @@ export class AuthClient {
     });
   }
 
-  async beginConnection(
-    provider: string,
-    redirectUri: string,
-    endpoint?: string,
-    codeParamAlias?: string,
-    state?: string
-  ): Promise<string> {
+  async beginConnection({
+    provider,
+    redirectUri,
+    endpoint,
+    codeParamAlias,
+    state
+  }: BeginConnectionParams): Promise<string> {
     const params = [`redirect_uri=${encodeURIComponent(redirectUri)}`];
     if (endpoint) {
       params.push(`endpoint=${encodeURIComponent(endpoint)}`);

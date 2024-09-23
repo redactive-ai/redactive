@@ -67,7 +67,7 @@ describe("Service client", () => {
     const client = new SearchClient();
 
     // Call the queryChunks method and capture the response
-    const response = await client.queryChunks(accessToken, query, count, filters);
+    const response = await client.queryChunks({ accessToken, semanticQuery: query, count, filters });
 
     // Assert that the response matches the expected response
     expect(response).toStrictEqual(expectedResponse);
@@ -111,7 +111,7 @@ describe("Service client", () => {
     const client = new SearchClient();
 
     // Call the getChunksByUrl method and capture the response
-    const response = await client.getChunksByUrl(accessToken, url);
+    const response = await client.getChunksByUrl({ accessToken, url });
 
     // Assert that the response matches the expected response
     expect(response).toStrictEqual(expectedResponse);
