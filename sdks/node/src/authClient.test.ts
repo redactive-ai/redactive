@@ -28,7 +28,7 @@ describe("API client", () => {
     });
 
     const client = new AuthClient(apiKey);
-    const response = await client.beginConnection(provider, redirectUri);
+    const response = await client.beginConnection({ provider, redirectUri });
 
     // Assertions
     expect(fetch).toHaveBeenCalledWith(

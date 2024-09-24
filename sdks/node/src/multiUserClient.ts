@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { AuthClient } from "./authClient";
 import { Chunk, RelevantChunk } from "./grpc/chunks";
-import { SearchClient } from "./searchClient";
+import { GetChunksByUrlSearchParams, QueryChunksSearchParams, SearchClient } from "./searchClient";
 
 export interface UserData {
   signInState?: string;
@@ -10,6 +10,13 @@ export interface UserData {
   idToken?: string;
   idTokenExpiry?: Date;
   connections?: string[];
+}
+
+export interface QueryChunksParams extends Omit<QueryChunksSearchParams, "accessToken"> {
+  userId: string;
+}
+export interface GetChunksByUrlParams extends Omit<GetChunksByUrlSearchParams, "accessToken"> {
+  userId: string;
 }
 
 export class MultiUserClient {
@@ -43,7 +50,7 @@ export class MultiUserClient {
 
   async getBeginConnectionUrl(userId: string, provider: string): Promise<string> {
     const state = randomUUID();
-    const url = await this.authClient.beginConnection(provider, this.callbackUri, undefined, undefined, state);
+    const url = await this.authClient.beginConnection({ provider, redirectUri: this.callbackUri, state });
 
     const userData = await this.readUserData(userId);
     await this.writeUserData(userId, {
@@ -105,7 +112,7 @@ export class MultiUserClient {
     await this.writeUserData(userId, undefined);
   }
 
-  async queryChunks(userId: string, semanticQuery: string, count: number = 10): Promise<RelevantChunk[]> {
+  async queryChunks({ userId, semanticQuery, count = 10, filters }: QueryChunksParams): Promise<RelevantChunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
       throw new Error(`No valid Redactive session for user '${userId}'`);
@@ -114,10 +121,10 @@ export class MultiUserClient {
       userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
     }
 
-    return await this.searchClient.queryChunks(userData.idToken!, semanticQuery, count);
+    return await this.searchClient.queryChunks({ accessToken: userData.idToken!, semanticQuery, count, filters });
   }
 
-  async getChunksByUrl(userId: string, url: string): Promise<Chunk[]> {
+  async getChunksByUrl({ userId, url }: GetChunksByUrlParams): Promise<Chunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
       throw new Error(`No valid Redactive session for user '${userId}'`);
@@ -126,6 +133,6 @@ export class MultiUserClient {
       userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
     }
 
-    return await this.searchClient.getChunksByUrl(userData.idToken!, url);
+    return await this.searchClient.getChunksByUrl({ accessToken: userData.idToken!, url });
   }
 }

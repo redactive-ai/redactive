@@ -11,6 +11,18 @@ import {
   SearchClient as SearchServiceClient
 } from "./grpc/search";
 
+export interface QueryChunksSearchParams {
+  accessToken: string;
+  semanticQuery: string;
+  count?: number;
+  filters?: Partial<Filters>;
+}
+
+export interface GetChunksByUrlSearchParams {
+  accessToken: string;
+  url: string;
+}
+
 export class SearchClient {
   host: string = "grpc.redactive.ai";
   port: number = 443;
@@ -34,12 +46,12 @@ export class SearchClient {
     }
   }
 
-  async queryChunks(
-    accessToken: string,
-    semanticQuery: string,
-    count: number = 10,
-    filters?: Partial<Filters>
-  ): Promise<RelevantChunk[]> {
+  async queryChunks({
+    accessToken,
+    semanticQuery,
+    count = 10,
+    filters
+  }: QueryChunksSearchParams): Promise<RelevantChunk[]> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);
     requestMetadata.set("User-Agent", "redactive-sdk-node");
@@ -66,7 +78,7 @@ export class SearchClient {
     return response.relevantChunks;
   }
 
-  async getChunksByUrl(accessToken: string, url: string): Promise<Chunk[]> {
+  async getChunksByUrl({ accessToken, url }: GetChunksByUrlSearchParams): Promise<Chunk[]> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);
     requestMetadata.set("User-Agent", "redactive-sdk-node");

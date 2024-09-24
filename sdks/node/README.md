@@ -41,7 +41,7 @@ import { AuthClient } from "@redactive/redactive";
 // Possible data sources: confluence, google-drive, jira, zendesk, slack, sharepoint
 const redirectUri = "https://url-debugger.vercel.app";
 const provider = "confluence";
-const signInUrl = await client.beginConnection(provider, redirectUri);
+const signInUrl = await client.beginConnection({ provider, redirectUri });
 
 // Navigate User to signInUrl
 // User will receive an oauth2 auth code after consenting the app's data source access permissions.
@@ -57,7 +57,9 @@ With the Redactive access_token, User can search documents with Redactive Search
 import { SearchClient } from "@redactive/redactive";
 
 const client = new SearchClient();
-await client.queryChunks("REDACTIVE-ACCESS-TOKEN", "Tell me about AI");
+const accessToken = "REDACTIVE-ACCESS-TOKEN";
+const semanticQuery = "Tell me about AI";
+await client.queryChunks({ accessToken, semanticQuery });
 ```
 
 ## Development

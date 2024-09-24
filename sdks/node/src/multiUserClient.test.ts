@@ -42,13 +42,11 @@ describe("MultiUserClient", () => {
     const result = await multiUserClient.getBeginConnectionUrl(userId, provider);
 
     expect(result).toBe(url);
-    expect(mockAuthClient.beginConnection).toHaveBeenCalledWith(
+    expect(mockAuthClient.beginConnection).toHaveBeenCalledWith({
       provider,
-      "http://callback.uri",
-      undefined,
-      undefined,
+      redirectUri: "http://callback.uri",
       state
-    );
+    });
     expect(writeUserData).toHaveBeenCalledWith(userId, { signInState: state });
   });
 
@@ -143,7 +141,7 @@ describe("MultiUserClient", () => {
 
     readUserData.mockResolvedValue(undefined);
 
-    await expect(multiUserClient.queryChunks(userId, semanticQuery)).rejects.toThrow(
+    await expect(multiUserClient.queryChunks({ userId, semanticQuery })).rejects.toThrow(
       `No valid Redactive session for user '${userId}'`
     );
   });
@@ -171,10 +169,10 @@ describe("MultiUserClient", () => {
     mockSearchClient.queryChunks.mockResolvedValue(chunks as unknown as RelevantChunk[]);
 
     multiUserClient.searchClient = mockSearchClient;
-    const result = await multiUserClient.queryChunks(userId, semanticQuery);
+    const result = await multiUserClient.queryChunks({ userId, semanticQuery });
 
     expect(result).toEqual(chunks);
-    expect(mockSearchClient.queryChunks).toHaveBeenCalledWith(idToken, semanticQuery, 10);
+    expect(mockSearchClient.queryChunks).toHaveBeenCalledWith({ accessToken: idToken, semanticQuery, count: 10 });
   });
 
   it("should get chunks by url after refreshing idToken", async () => {
@@ -200,9 +198,9 @@ describe("MultiUserClient", () => {
     mockSearchClient.getChunksByUrl.mockResolvedValue(chunks as unknown as Chunk[]);
 
     multiUserClient.searchClient = mockSearchClient;
-    const result = await multiUserClient.getChunksByUrl(userId, url);
+    const result = await multiUserClient.getChunksByUrl({ userId, url });
 
     expect(result).toEqual(chunks);
-    expect(mockSearchClient.getChunksByUrl).toHaveBeenCalledWith(idToken, url);
+    expect(mockSearchClient.getChunksByUrl).toHaveBeenCalledWith({ accessToken: idToken, url });
   });
 });
