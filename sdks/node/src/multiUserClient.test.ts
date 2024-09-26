@@ -175,6 +175,35 @@ describe("MultiUserClient", () => {
     expect(mockSearchClient.queryChunks).toHaveBeenCalledWith({ accessToken: idToken, semanticQuery, count: 10 });
   });
 
+  it("should query chunks by document name after refreshing idToken", async () => {
+    const userId = "user123";
+    const documentName = "test-document";
+    const idToken = "idToken123";
+    const refreshToken = "refreshToken123";
+    const chunks = [{ chunk: "chunk1" }, { chunk: "chunk2" }];
+
+    const expiredUserData: UserData = {
+      idToken,
+      idTokenExpiry: new Date(Date.now() - 1000),
+      refreshToken
+    };
+    const refreshedUserData: UserData = {
+      idToken,
+      idTokenExpiry: new Date(Date.now() + 3600 * 1000),
+      refreshToken
+    };
+
+    readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
+    multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
+    mockSearchClient.queryChunksByDocumentName.mockResolvedValue(chunks as unknown as Chunk[]);
+
+    multiUserClient.searchClient = mockSearchClient;
+    const result = await multiUserClient.queryChunksByDocumentName({ userId, documentName });
+
+    expect(result).toEqual(chunks);
+    expect(mockSearchClient.queryChunksByDocumentName).toHaveBeenCalledWith({ accessToken: idToken, documentName });
+  });
+
   it("should get chunks by url after refreshing idToken", async () => {
     const userId = "user123";
     const url = "https://example.com";

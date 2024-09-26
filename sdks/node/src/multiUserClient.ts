@@ -2,7 +2,12 @@ import { randomUUID } from "node:crypto";
 
 import { AuthClient } from "./authClient";
 import { Chunk, RelevantChunk } from "./grpc/chunks";
-import { GetChunksByUrlSearchParams, QueryChunksSearchParams, SearchClient } from "./searchClient";
+import {
+  GetChunksByUrlSearchParams,
+  QueryChunksByDocumentNameSearchParams,
+  QueryChunksSearchParams,
+  SearchClient
+} from "./searchClient";
 
 export interface UserData {
   signInState?: string;
@@ -15,6 +20,10 @@ export interface UserData {
 export interface QueryChunksParams extends Omit<QueryChunksSearchParams, "accessToken"> {
   userId: string;
 }
+export interface QueryChunksByDocumentNameParams extends Omit<QueryChunksByDocumentNameSearchParams, "accessToken"> {
+  userId: string;
+}
+
 export interface GetChunksByUrlParams extends Omit<GetChunksByUrlSearchParams, "accessToken"> {
   userId: string;
 }
@@ -122,6 +131,22 @@ export class MultiUserClient {
     }
 
     return await this.searchClient.queryChunks({ accessToken: userData.idToken!, semanticQuery, count, filters });
+  }
+
+  async queryChunksByDocumentName({
+    userId,
+    documentName,
+    filters
+  }: QueryChunksByDocumentNameParams): Promise<Chunk[]> {
+    let userData = await this.readUserData(userId);
+    if (!userData || !userData.refreshToken) {
+      throw new Error(`No valid Redactive session for user '${userId}'`);
+    }
+    if (!!userData.idTokenExpiry && new Date(userData.idTokenExpiry) < new Date()) {
+      userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
+    }
+
+    return await this.searchClient.queryChunksByDocumentName({ accessToken: userData.idToken!, documentName, filters });
   }
 
   async getChunksByUrl({ userId, url }: GetChunksByUrlParams): Promise<Chunk[]> {
