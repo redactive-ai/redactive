@@ -55,16 +55,33 @@ response = await client.exchange_tokens(code="OAUTH2-TOKEN")
 
 ### SearchClient
 
-With the Redactive access_token, User can search documents with Redactive Search service.
+With the Redactive access_token, you can perform three types of searches using the Redactive Search service:
+
+1. **Semantic Query Search**: Retrieve relevant chunks of information that are semantically related to a user query.
+2. **URL-based Search**: Obtain all the chunks from a document by specifying its URL.
+3. **Document Name Search**: Query for all the chunks from a document based on the name of the document.
 
 ```python
 from redactive.search_client import SearchClient
 
 client = SearchClient()
 
+# Semantic Search: retrieve text extracts (chunks) from various documents pertaining to the user query
 client.query_chunks(
-    access_token="REDACITVE-USER-ACCESS-TOKEN",
+    access_token="REDACTIVE-USER-ACCESS-TOKEN",
     semantic_query="Tell me about AI"
+)
+
+# URL-based Search: retrieve all chunks of the document at that URL
+client.get_chunks_by_url(
+    access_token="REDACTIVE-USER-ACCESS-TOKEN",
+    url="https://example.com/document"
+)
+
+# Document Name Search : retrieve all chunks of a document identified by its name
+client.query_chunks_by_document_name(
+    access_token="REDACTIVE-USER-ACCESS-TOKEN",
+    document_name="Project Plan"
 )
 ```
 
