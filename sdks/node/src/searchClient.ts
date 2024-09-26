@@ -2,10 +2,13 @@ import { Client, credentials, Metadata } from "@grpc/grpc-js";
 
 import { Chunk, RelevantChunk } from "./grpc/chunks";
 import {
+  DocumentNameQuery,
   Filters,
   GetChunksByUrlRequest,
   GetChunksByUrlResponse,
   Query,
+  QueryByDocumentNameRequest,
+  QueryByDocumentNameResponse,
   QueryRequest,
   QueryResponse,
   SearchClient as SearchServiceClient
@@ -15,6 +18,12 @@ export interface QueryChunksSearchParams {
   accessToken: string;
   semanticQuery: string;
   count?: number;
+  filters?: Partial<Filters>;
+}
+
+export interface QueryChunksByDocumentNameSearchParams {
+  accessToken: string;
+  documentName: string;
   filters?: Partial<Filters>;
 }
 
@@ -76,6 +85,36 @@ export class SearchClient {
       });
     });
     return response.relevantChunks;
+  }
+
+  async queryChunksByDocumentName({
+    accessToken,
+    documentName,
+    filters
+  }: QueryChunksByDocumentNameSearchParams): Promise<Chunk[]> {
+    const requestMetadata = new Metadata();
+    requestMetadata.set("Authorization", `Bearer ${accessToken}`);
+    requestMetadata.set("User-Agent", "redactive-sdk-node");
+
+    const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
+    const query: DocumentNameQuery = { documentName };
+    const _filters: Filters = { scope: [], userEmails: [], ...filters };
+    const queryRequest: QueryByDocumentNameRequest = {
+      query,
+      filters: filters ? _filters : undefined
+    };
+
+    const response = await new Promise<QueryByDocumentNameResponse>((resolve, reject) => {
+      client.queryChunksByDocumentName(queryRequest, requestMetadata, (err, response) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        return resolve(response);
+      });
+    });
+    return response.chunks;
   }
 
   async getChunksByUrl({ accessToken, url }: GetChunksByUrlSearchParams): Promise<Chunk[]> {

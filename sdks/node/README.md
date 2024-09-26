@@ -51,15 +51,29 @@ const response = await client.exchangeTokens("OAUTH2-AUTH-CODE");
 
 ### SearchClient
 
-With the Redactive access_token, User can search documents with Redactive Search service.
+With the Redactive access_token, you can perform three types of searches using the Redactive Search service:
+
+1. **Semantic Query Search**: Retrieve relevant chunks of information that are semantically related to a user query.
+2. **URL-based Search**: Obtain all the chunks from a document by specifying its URL.
+3. **Document Name Search**: Query for all the chunks from a document based on the name of the document.
 
 ```javascript
 import { SearchClient } from "@redactive/redactive";
 
 const client = new SearchClient();
 const accessToken = "REDACTIVE-ACCESS-TOKEN";
+
+// Semantic Search: retrieve text extracts (chunks) from various documents pertaining to the user query
 const semanticQuery = "Tell me about AI";
 await client.queryChunks({ accessToken, semanticQuery });
+
+// URL-based Search: retrieve all chunks of the document at that URL
+const url = "https://example.com/document";
+await client.getChunksByUrl({ accessToken, url });
+
+// Document Name Search : retrieve all chunks of a document identified by its name
+const documentName = "AI Research Paper";
+await client.queryChunksByDocumentName({ accessToken, documentName });
 ```
 
 ## Development

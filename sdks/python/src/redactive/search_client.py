@@ -4,7 +4,17 @@ from urllib.parse import urlparse
 from grpclib.client import Channel
 
 from redactive._connection_mode import get_default_grpc_host_and_port as _get_default_grpc_host_and_port
-from redactive.grpc.v1 import Chunk, Filters, GetChunksByUrlRequest, Query, QueryRequest, RelevantChunk, SearchStub
+from redactive.grpc.v1 import (
+    Chunk,
+    DocumentNameQuery,
+    Filters,
+    GetChunksByUrlRequest,
+    Query,
+    QueryByDocumentNameRequest,
+    QueryRequest,
+    RelevantChunk,
+    SearchStub,
+)
 
 
 class SearchClient:
@@ -94,4 +104,33 @@ class SearchClient:
 
             request = GetChunksByUrlRequest(url=url)
             response = await stub.get_chunks_by_url(request)
+            return response.chunks
+
+    async def query_chunks_by_document_name(
+        self,
+        access_token: str,
+        document_name: str,
+        filters: dict | None = None,
+    ) -> list[Chunk]:
+        """
+        Query for relevant chunks based on a semantic query.
+
+        :param access_token: The user access token for querying
+        :type access_token: str
+        :param document_name: The document name to look for
+        :type document_name:: str
+        :param filters: The filters for relevant chunks, defaults to None
+        :type filters: dict | None, optional
+        :return: The complete list of chunks for the matching document
+        :rtype: list[Chunk]
+        """
+        async with Channel(self.host, self.port, ssl=True) as channel:
+            stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
+
+            _filters: Filters | None = None
+            if filters is not None:
+                _filters = Filters(**filters)
+
+            request = QueryByDocumentNameRequest(query=DocumentNameQuery(document_name=document_name), filters=_filters)
+            response = await stub.query_chunks_by_document_name(request)
             return response.chunks

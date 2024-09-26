@@ -25,6 +25,8 @@ message SourceReference {
     string document_version = 5;
     // Document path in the source system e.g. "My Drive/document.txt", "slack-channel-name"
     optional string document_path = 6;
+    // Document name in the source system e.g. "document.txt"
+    optional string document_name = 7;
 }
 
 message ChunkReference {

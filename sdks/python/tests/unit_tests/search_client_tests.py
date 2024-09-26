@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from redactive.grpc.v1 import Filters
+from redactive.grpc.v1 import DocumentNameQuery, Filters, QueryByDocumentNameRequest
 from redactive.search_client import SearchClient
 
 
@@ -50,6 +50,24 @@ async def test_query_chunks_with_filter(mock_channel_context):
         await client.query_chunks(access_token, semantic_query, count, filters)
         mock_query_chunks.assert_called_once_with(
             QueryRequest(count=count, query=Query(semantic_query), filters=Filters(**filters))
+        )
+
+
+@mock.patch("grpclib.client.Channel")
+@pytest.mark.asyncio
+async def test_query_chunks_by_document_name_with_filter(mock_channel_context):
+    access_token = "test-access_token"
+    document_name = "document_name"
+    filters = {"scope": "mock.scope"}
+    mock_channel_context.return_value.__aenter__.side_effect = mock.AsyncMock()
+
+    with mock.patch(
+        "redactive.grpc.v1.SearchStub.query_chunks_by_document_name", side_effect=mock.AsyncMock()
+    ) as mock_query_chunks_by_document_name:
+        client = SearchClient()
+        await client.query_chunks_by_document_name(access_token, document_name, filters)
+        mock_query_chunks_by_document_name.assert_called_once_with(
+            QueryByDocumentNameRequest(query=DocumentNameQuery(document_name), filters=Filters(**filters))
         )
 
 

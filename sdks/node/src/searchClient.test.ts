@@ -6,6 +6,8 @@ import {
   Filters,
   GetChunksByUrlRequest,
   GetChunksByUrlResponse,
+  QueryByDocumentNameRequest,
+  QueryByDocumentNameResponse,
   QueryRequest,
   QueryResponse,
   SearchClient as SearchServiceClient
@@ -17,6 +19,54 @@ describe("Service client", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("should query chunks by document name", async () => {
+    const accessToken = "test-accessToken";
+    const documentName = "test-documentName";
+    const filters: Partial<Filters> = {
+      scope: ["dataprovider"],
+      created: { before: new Date() },
+      modified: { after: new Date() },
+      includeContentInTrash: true
+    };
+    const expectedResponse: Chunk[] = Array.from({ length: 5 }, (_, i) => ({
+      source: {
+        system: `system-${i}`,
+        systemVersion: `systemVersion-${i}`,
+        documentId: `documentId-${i}`,
+        documentVersion: `documentVersion-${i}`,
+        connectionId: `connectionId-${i}`,
+        documentName: `documentName-${i}`,
+        documentPath: `documentPath-${i}`
+      } as SourceReference,
+      chunk: {
+        chunkHash: `chunkHash-${i}`,
+        chunkId: `chunkId-${i}`,
+        chunkingVersion: `chunkingVersion-${i}`
+      } as ChunkReference,
+      chunkBody: `chunkBody-${i}`,
+      documentMetadata: {
+        createdAt: undefined,
+        link: undefined,
+        modifiedAt: undefined
+      }
+    }));
+
+    // Mock the _getClient method of SearchClient to return a mock gRPC client
+    vi.spyOn(SearchClient.prototype, "_getClient").mockReturnValue({
+      queryChunksByDocumentName: (
+        _request: QueryByDocumentNameRequest,
+        _metadata: Metadata,
+        callback: (error: ServiceError | null, response: QueryByDocumentNameResponse) => void
+      ) => callback(null, { success: true, chunks: expectedResponse } as QueryByDocumentNameResponse)
+    } as unknown as SearchServiceClient);
+
+    const client = new SearchClient();
+
+    const response = await client.queryChunksByDocumentName({ accessToken, documentName, filters });
+
+    expect(response).toStrictEqual(expectedResponse);
   });
 
   it("should query chunks", async () => {
@@ -36,7 +86,8 @@ describe("Service client", () => {
         documentId: `documentId-${i}`,
         documentVersion: `documentVersion-${i}`,
         connectionId: `connectionId-${i}`,
-        documentPath: undefined
+        documentName: `documentName-${i}`,
+        documentPath: `documentPath-${i}`
       } as SourceReference,
       chunk: {
         chunkHash: `chunkHash-${i}`,
@@ -83,7 +134,8 @@ describe("Service client", () => {
         documentId: `documentId-${i}`,
         documentVersion: `documentVersion-${i}`,
         connectionId: `connectionId-${i}`,
-        documentPath: undefined
+        documentName: `documentName-${i}`,
+        documentPath: `documentPath-${i}`
       } as SourceReference,
       chunk: {
         chunkHash: `chunkHash-${i}`,
