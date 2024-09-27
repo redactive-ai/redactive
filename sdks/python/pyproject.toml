@@ -22,18 +22,12 @@ dependencies = [
     "betterproto[compiler]==2.0.0b6",
     "grpclib[protobuf]",
     "httpx",
+    "pyjwt",
 ]
 
 [project.optional-dependencies]
-tests = [
-    "pytest",
-    "pytest-asyncio",
-    "pytest-httpx",
-]
-reranking = [
-    "rerankers",
-    "rerankers[transformers]"
-]
+tests = ["pytest", "pytest-asyncio", "pytest-httpx"]
+reranking = ["rerankers", "rerankers[transformers]"]
 
 [project.urls]
 Homepage = "https://github.com/redactive-ai/redactive"
@@ -54,7 +48,12 @@ python_classes = "*Tests"
 python_functions = "test_*"
 
 [tool.hatch.envs.types]
-extra-dependencies = ["redactive>=1.0.0", "pyright", "rerankers", "rerankers[transformers]"]
+extra-dependencies = [
+    "redactive>=1.0.0",
+    "pyright",
+    "rerankers",
+    "rerankers[transformers]",
+]
 
 [tool.hatch.envs.types.scripts]
 check = "pyright"

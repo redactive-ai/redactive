@@ -6,6 +6,11 @@ from pydantic import BaseModel
 from redactive._connection_mode import get_default_http_endpoint as _get_default_http_endpoint
 
 
+class ListConnectionsResponse(BaseModel):
+    user_id: str
+    connections: list[str]
+
+
 class ExchangeTokenResponse(BaseModel):
     idToken: str  # noqa: N815
     refreshToken: str  # noqa: N815
@@ -84,6 +89,24 @@ class AuthClient:
             raise httpx.RequestError(response.text)
 
         return ExchangeTokenResponse(**response.json())
+
+    async def list_connections(self, access_token: str) -> ListConnectionsResponse:
+        """
+        Retrieve the list of user connections.
+
+        :param access_token: The access token for authentication.
+        :type access_token: str
+        :raises httpx.RequestError: If an error occurs while making the HTTP request.
+        :return: An object containing the user ID and current connections.
+        :rtype: UserConnections
+        """
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = await self._client.get("/api/auth/connections", headers=headers)
+
+        if response.status_code != http.HTTPStatus.OK:
+            raise httpx.RequestError(response.text)
+
+        return ListConnectionsResponse(**response.json())
 
 
 class BearerAuth(httpx.Auth):
