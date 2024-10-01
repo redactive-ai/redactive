@@ -20,16 +20,6 @@ class UserData:
     sign_in_state: str | None = None
 
 
-@dataclass
-class MultiUserClientOptions:
-    auth_base_url: str | None
-    """The base auth URL to use for Redactive."""
-    grpc_host: str | None
-    """The host to use for the gRPC server for Search services."""
-    grpc_port: int | None
-    """The port to use for the gRPC server for Search services."""
-
-
 class InvalidRedactiveSessionError(Exception):
     def __init__(self, user_id: str) -> None:
         super().__init__(f"No valid Redactive session for user '{user_id}'")
@@ -42,7 +32,10 @@ class MultiUserClient:
         callback_uri: str,
         read_user_data: Callable[[Annotated[str, "user_id"]], Awaitable[UserData]],
         write_user_data: Callable[[Annotated[str, "user_id"], UserData | None], Awaitable[None]],
-        options: MultiUserClientOptions | None = None,
+        *,
+        auth_base_url: str | None = None,
+        grpc_host: str | None = None,
+        grpc_port: int | None = None,
     ) -> None:
         """Redactive client handling multiple users authentication and access to the Redactive Search service.
 
@@ -54,12 +47,16 @@ class MultiUserClient:
         :type read_user_data: Callable[[Annotated[str, user_id]], Awaitable[UserData]]
         :param write_user_data: Function to write user data to storage.
         :type write_user_data: Callable[[[Annotated[str, user_id], UserData | None], Awaitable[None]]
-        :param options: optional configuration of the auth client and the search client
-        :type options: MultiUserClientOptions, optional
+        :param auth_base_url: Base URL for the authentication service. Optional.
+        :type auth_base_url: str | None
+        :param grpc_host: Host for the gRPC service. Optional.
+        :type grpc_host: str | None
+        :param grpc_port: Port for the gRPC service. Optional.
+        :type grpc_port: int | None
         """
 
-        self.auth_client = AuthClient(api_key, base_url=options and options.auth_base_url)
-        self.search_client = SearchClient(options and options.grpc_host, options and options.grpc_port)
+        self.auth_client = AuthClient(api_key, base_url=auth_base_url)
+        self.search_client = SearchClient(host=grpc_host, port=grpc_port)
         self.callback_uri = callback_uri
         self.read_user_data = read_user_data
         self.write_user_data = write_user_data

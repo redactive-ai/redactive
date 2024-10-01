@@ -6,7 +6,7 @@ import pytest
 
 from redactive.auth_client import AuthClient
 from redactive.grpc.v1 import Chunk, RelevantChunk
-from redactive.multi_user_client import MultiUserClient, MultiUserClientOptions, UserData
+from redactive.multi_user_client import MultiUserClient, UserData
 from redactive.search_client import SearchClient
 
 
@@ -33,7 +33,9 @@ def multi_user_client() -> MultiUserClient:
         callback_uri="http://callback.uri",
         read_user_data=mock.AsyncMock(),
         write_user_data=mock.AsyncMock(),
-        options=MultiUserClientOptions(auth_base_url="http://auth.base.url", grpc_host="grpc.host", grpc_port=443),
+        auth_base_url="http://auth.base.url",
+        grpc_host="grpc.host",
+        grpc_port=443,
     )
 
 
@@ -42,16 +44,18 @@ def test_multi_user_client_initialization() -> None:
     callback_uri = "http://callback.uri"
     read_user_data = mock.Mock()
     write_user_data = mock.Mock()
-    options: MultiUserClientOptions = MultiUserClientOptions(
-        auth_base_url="http://auth.base.url", grpc_host="grpc.host", grpc_port=443
-    )
+    auth_base_url = ("http://auth.base.url",)
+    grpc_host = ("grpc.host",)
+    grpc_port = 443
 
     multi_user_client = MultiUserClient(
         api_key=api_key,
         callback_uri=callback_uri,
         read_user_data=read_user_data,
         write_user_data=write_user_data,
-        options=options,
+        auth_base_url=auth_base_url,
+        grpc_host=grpc_host,
+        grpc_port=grpc_port,
     )
 
     assert isinstance(multi_user_client.auth_client, AuthClient)
@@ -59,8 +63,8 @@ def test_multi_user_client_initialization() -> None:
     assert multi_user_client.callback_uri == callback_uri
     assert multi_user_client.read_user_data == read_user_data
     assert multi_user_client.write_user_data == write_user_data
-    assert multi_user_client.search_client.host == options.grpc_host
-    assert multi_user_client.search_client.port == options.grpc_port
+    assert multi_user_client.search_client.host == grpc_host
+    assert multi_user_client.search_client.port == grpc_port
 
 
 def test_multi_user_client_initialization_with_no_options() -> None:
