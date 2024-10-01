@@ -2,10 +2,11 @@ import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
 import jwt
 
-from redactive.auth_client import AuthClient, ListConnectionsResponse
+from redactive.auth_client import AuthClient
 from redactive.grpc.v1 import Chunk, RelevantChunk
 from redactive.search_client import SearchClient
 
@@ -20,12 +21,12 @@ class UserData:
 
 
 @dataclass
-class MultiUserClientConfig:
-    auth_base_url: str
+class MultiUserClientOptions:
+    auth_base_url: str | None
     """The base auth URL to use for Redactive."""
-    grpc_host: str
+    grpc_host: str | None
     """The host to use for the gRPC server for Search services."""
-    grpc_port: int
+    grpc_port: int | None
     """The port to use for the gRPC server for Search services."""
 
 
@@ -39,34 +40,34 @@ class MultiUserClient:
         self,
         api_key: str,
         callback_uri: str,
-        read_user_data: Callable[[str], Awaitable[UserData]],
-        write_user_data: Callable[[str, UserData | None], Awaitable[None]],
-        config: MultiUserClientConfig,
+        read_user_data: Callable[[Annotated[str, "user_id"]], Awaitable[UserData]],
+        write_user_data: Callable[[Annotated[str, "user_id"], UserData | None], Awaitable[None]],
+        options: MultiUserClientOptions | None = None,
     ) -> None:
         """Redactive client handling multiple users authentication and access to the Redactive Search service.
 
         :param api_key: Redactive API key.
         :type api_key: str
-        :param callback_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
+        :param callback_uri: The URI to redirect to after initiating the connection.
         :type callback_uri: str
         :param read_user_data: Function to read user data from storage.
-        :type read_user_data: Callable[[str], Awaitable[UserData]]
+        :type read_user_data: Callable[[Annotated[str, user_id]], Awaitable[UserData]]
         :param write_user_data: Function to write user data to storage.
-        :type write_user_data: Callable[[str, UserData | None], Awaitable[None]]
-        :param config: configuration of the auth client and the search client
-        :type config: MultiUserClientConfig
+        :type write_user_data: Callable[[[Annotated[str, user_id], UserData | None], Awaitable[None]]
+        :param options: optional configuration of the auth client and the search client
+        :type options: MultiUserClientOptions, optional
         """
 
-        self.auth_client = AuthClient(api_key, base_url=config.auth_base_url)
-        self.search_client = SearchClient(config.grpc_host, config.grpc_port)
+        self.auth_client = AuthClient(api_key, base_url=options and options.auth_base_url)
+        self.search_client = SearchClient(options and options.grpc_host, options and options.grpc_port)
         self.callback_uri = callback_uri
         self.read_user_data = read_user_data
         self.write_user_data = write_user_data
 
     async def get_begin_connection_url(self, user_id: str, provider: str) -> str:
         state = str(uuid.uuid4())
-        response = await self.auth_client.begin_connection(provider, self.callback_uri, code_param_alias=state)
-        user_data: UserData = await self.read_user_data(user_id)
+        response = await self.auth_client.begin_connection(provider, self.callback_uri, state=state)
+        user_data = await self.read_user_data(user_id)
         user_data.sign_in_state = state
         await self.write_user_data(user_id, user_data)
         return response.url
@@ -75,12 +76,12 @@ class MultiUserClient:
         self, user_id: str, refresh_token: str | None = None, sign_in_code: str | None = None
     ) -> UserData:
         tokens = await self.auth_client.exchange_tokens(sign_in_code, refresh_token)
-        connections: ListConnectionsResponse = await self.auth_client.list_connections(tokens.idToken)
-        user_data: UserData = UserData(
-            tokens.refreshToken,
-            tokens.idToken,
-            datetime.now(UTC) + timedelta(seconds=tokens.expiresIn - 10),
-            connections.connections,
+        connections = await self.auth_client.list_connections(tokens.idToken)
+        user_data = UserData(
+            refresh_token=tokens.refreshToken,
+            id_token=tokens.idToken,
+            id_token_expiry=datetime.now(UTC) + timedelta(seconds=tokens.expiresIn - 10),
+            connections=connections.connections,
         )
         await self.write_user_data(user_id, user_data)
         return user_data
@@ -102,10 +103,10 @@ class MultiUserClient:
     async def get_user_connections(self, user_id: str) -> list[str]:
         user_data = await self.read_user_data(user_id)
         if user_data and user_data.id_token_expiry and user_data.id_token_expiry > datetime.now(UTC):
-            return user_data.connections or []
+            return user_data.connections
         if user_data and user_data.refresh_token:
             user_data = await self._refresh_user_data(user_id, refresh_token=user_data.refresh_token)
-            return user_data.connections or []
+            return user_data.connections
         return []
 
     async def clear_user_data(self, user_id: str) -> None:

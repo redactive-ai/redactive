@@ -6,7 +6,7 @@ import pytest
 
 from redactive.auth_client import AuthClient
 from redactive.grpc.v1 import Chunk, RelevantChunk
-from redactive.multi_user_client import MultiUserClient, MultiUserClientConfig, UserData
+from redactive.multi_user_client import MultiUserClient, MultiUserClientOptions, UserData
 from redactive.search_client import SearchClient
 
 
@@ -33,7 +33,7 @@ def multi_user_client() -> MultiUserClient:
         callback_uri="http://callback.uri",
         read_user_data=mock.AsyncMock(),
         write_user_data=mock.AsyncMock(),
-        config=MultiUserClientConfig("http://auth.base.url", "grpc.host", 443),
+        options=MultiUserClientOptions(auth_base_url="http://auth.base.url", grpc_host="grpc.host", grpc_port=443),
     )
 
 
@@ -42,14 +42,16 @@ def test_multi_user_client_initialization() -> None:
     callback_uri = "http://callback.uri"
     read_user_data = mock.Mock()
     write_user_data = mock.Mock()
-    config: MultiUserClientConfig = MultiUserClientConfig("http://auth.base.url", "grpc.host", 443)
+    options: MultiUserClientOptions = MultiUserClientOptions(
+        auth_base_url="http://auth.base.url", grpc_host="grpc.host", grpc_port=443
+    )
 
     multi_user_client = MultiUserClient(
         api_key=api_key,
         callback_uri=callback_uri,
         read_user_data=read_user_data,
         write_user_data=write_user_data,
-        config=config,
+        options=options,
     )
 
     assert isinstance(multi_user_client.auth_client, AuthClient)
@@ -57,8 +59,25 @@ def test_multi_user_client_initialization() -> None:
     assert multi_user_client.callback_uri == callback_uri
     assert multi_user_client.read_user_data == read_user_data
     assert multi_user_client.write_user_data == write_user_data
-    assert multi_user_client.search_client.host == config.grpc_host
-    assert multi_user_client.search_client.port == config.grpc_port
+    assert multi_user_client.search_client.host == options.grpc_host
+    assert multi_user_client.search_client.port == options.grpc_port
+
+
+def test_multi_user_client_initialization_with_no_options() -> None:
+    api_key = "test_api_key"
+    callback_uri = "http://callback.uri"
+    read_user_data = mock.Mock()
+    write_user_data = mock.Mock()
+
+    multi_user_client = MultiUserClient(
+        api_key=api_key, callback_uri=callback_uri, read_user_data=read_user_data, write_user_data=write_user_data
+    )
+
+    assert isinstance(multi_user_client.auth_client, AuthClient)
+    assert isinstance(multi_user_client.search_client, SearchClient)
+    assert multi_user_client.callback_uri == callback_uri
+    assert multi_user_client.read_user_data == read_user_data
+    assert multi_user_client.write_user_data == write_user_data
 
 
 @pytest.mark.asyncio
@@ -131,9 +150,7 @@ async def test_get_begin_connection_url(multi_user_client: MultiUserClient, mock
         result = await multi_user_client.get_begin_connection_url(user_id, provider)
 
         assert result == url
-        mock_auth_client.begin_connection.assert_called_with(
-            provider, multi_user_client.callback_uri, code_param_alias=state
-        )
+        mock_auth_client.begin_connection.assert_called_with(provider, multi_user_client.callback_uri, state=state)
         multi_user_client.write_user_data.assert_called_with(user_id, expected_user_data)
 
 
