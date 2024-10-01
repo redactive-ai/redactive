@@ -10,7 +10,7 @@ from redactive.multi_user_client import MultiUserClient, UserData
 from redactive.search_client import SearchClient
 
 
-def mock_read_user_data(user_id) -> UserData:
+def mock_read_user_data(user_id) -> UserData | None:
     if user_id == "user123":
         return UserData(refresh_token="refreshToken123", id_token="idToken123")
     return None
