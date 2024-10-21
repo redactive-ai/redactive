@@ -6,6 +6,11 @@ from pydantic import BaseModel
 from redactive._connection_mode import get_default_http_endpoint as _get_default_http_endpoint
 
 
+class ListConnectionsResponse(BaseModel):
+    user_id: str
+    connections: list[str]
+
+
 class ExchangeTokenResponse(BaseModel):
     idToken: str  # noqa: N815
     refreshToken: str  # noqa: N815
@@ -32,7 +37,12 @@ class AuthClient:
         self._client = httpx.AsyncClient(base_url=f"{base_url}", auth=BearerAuth(api_key))
 
     async def begin_connection(
-        self, provider: str, redirect_uri: str, endpoint: str | None = None, code_param_alias: str | None = None
+        self,
+        provider: str,
+        redirect_uri: str,
+        endpoint: str | None = None,
+        code_param_alias: str | None = None,
+        state: str | None = None,
     ) -> BeginConnectionResponse:
         """
         Initiates a connection process with a specified provider.
@@ -45,6 +55,8 @@ class AuthClient:
         :type endpoint: str, optional
         :param code_param_alias: The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
         :type code_param_alias: str, optional
+        :param state: An optional parameter that is stored as app_callback_state for building callback url. Defaults to None.
+        :type state: str, optional
         :raises httpx.RequestError: If an error occurs while making the HTTP request.
         :return: The URL to redirect the user to for beginning the connection.
         :rtype: BeginConnectionResponse
@@ -54,6 +66,8 @@ class AuthClient:
             params["endpoint"] = endpoint
         if code_param_alias:
             params["code_param_alias"] = code_param_alias
+        if state:
+            params["state"] = state
         response = await self._client.post(url=f"/api/auth/connect/{provider}/url", params=params)
         if response.status_code != http.HTTPStatus.OK:
             raise httpx.RequestError(response.text)
@@ -84,6 +98,24 @@ class AuthClient:
             raise httpx.RequestError(response.text)
 
         return ExchangeTokenResponse(**response.json())
+
+    async def list_connections(self, access_token: str) -> ListConnectionsResponse:
+        """
+        Retrieve the list of user connections.
+
+        :param access_token: The access token for authentication.
+        :type access_token: str
+        :raises httpx.RequestError: If an error occurs while making the HTTP request.
+        :return: An object containing the user ID and current connections.
+        :rtype: UserConnections
+        """
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = await self._client.get("/api/auth/connections", headers=headers)
+
+        if response.status_code != http.HTTPStatus.OK:
+            raise httpx.RequestError(response.text)
+
+        return ListConnectionsResponse(**response.json())
 
 
 class BearerAuth(httpx.Auth):
