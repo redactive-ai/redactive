@@ -24,10 +24,11 @@ python -m pip install .
 
 ## Usage
 
-The library has following components.
+The library has the following components:
 
 - **AuthClient** - provides functionality to interact with data sources
-- **SearchClient** - provides functionality to search chunks with Redactive search service in gRPC
+- **SearchClient** - provides functionality to search chunks with Redactive search service
+- **MultiUserClient** - provides functionality manage multi-user search with Redactive search service
 - **RerankingSearchClient** [Experimental] - retrieves extra results, then re-ranks them using a more precise ranking function, returning the top_k results
 
 ### AuthClient
@@ -78,11 +79,42 @@ client.get_chunks_by_url(
     url="https://example.com/document"
 )
 
-# Document Name Search : retrieve all chunks of a document identified by its name
+# Document Name Search: retrieve all chunks of a document identified by its name
 client.query_chunks_by_document_name(
     access_token="REDACTIVE-USER-ACCESS-TOKEN",
     document_name="Project Plan"
 )
+```
+
+## Multi-User Client
+
+The `MultiUserClient` class helps manage multiple users' authentication and access to the Redactive search service.
+
+```python
+from redactive.multi_user_client import MultiUserClient
+
+multi_user_client = MultiUserClient(
+    api_key="REDACTIVE-API-KEY",
+    callback_uri="https://example.com/callback/",
+    read_user_data=...,
+    write_user_data=...,
+)
+
+# Present `connection_url` in browser for user to interact with:
+user_id = ...
+connection_url = await multi_user_client.get_begin_connection_url(user_id=user_id, provider="confluence")
+
+# On user return from OAuth connection flow:
+sign_in_code, state = ..., ...  # from URL query parameters
+is_connection_successful = await multi_user_client.handle_connection_callback(
+    user_id=user_id,
+    sign_in_code=sign_in_code,
+    state=state
+)
+
+# User can now use Redactive search service via `MultiUserClient`'s other methods:
+semantic_query = "Tell me about the missing research vessel, the Borealis"
+chunks = await multi_user_client.query_chunks(user_id=user_id, semantic_query=semantic_query)
 ```
 
 ## Development

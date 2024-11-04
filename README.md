@@ -1,6 +1,6 @@
 # Redactive
 
-The Redactive Application, Docs &amp; Samples
+The Redactive Application, Docs & Samples
 
 ## Directory Structure
 
