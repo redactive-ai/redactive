@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from typing import Any
 
 from rerankers import Reranker
 
 from redactive import search_client
-from redactive.grpc.v1 import RelevantChunk
+from redactive.grpc.v1 import Filters, RelevantChunk
 
 
 @dataclass
@@ -33,8 +34,8 @@ class RerankingSearchClient(search_client.SearchClient):
         access_token: str,
         semantic_query: str,
         count: int = 3,
-        query_filter: dict | None = None,
-        filters: dict | None = None,
+        query_filter: dict[str, Any] | None = None,
+        filters: Filters | dict[str, Any] | None = None,
     ) -> list[RelevantChunk]:
         # Get many more results than the user is asking for, then
         # rerank them

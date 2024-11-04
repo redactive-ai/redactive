@@ -96,10 +96,12 @@ async def test_query_chunks(multi_user_client: MultiUserClient, mock_search_clie
     multi_user_client.search_client.query_chunks.return_value = relevant_chunks
     multi_user_client.read_user_data.side_effect = mock_read_user_data
 
-    result = await multi_user_client.query_chunks(user_id, semantic_query, count, filters)
+    result = await multi_user_client.query_chunks(user_id, semantic_query, count, filters=filters)
 
     assert result == relevant_chunks
-    multi_user_client.search_client.query_chunks.assert_called_with("idToken123", semantic_query, count, filters)
+    multi_user_client.search_client.query_chunks.assert_called_with(
+        "idToken123", semantic_query, count, filters=filters
+    )
 
 
 @pytest.mark.asyncio

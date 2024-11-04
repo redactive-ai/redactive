@@ -24,11 +24,11 @@ class BeginConnectionResponse(BaseModel):
 class AuthClient:
     def __init__(self, api_key: str, base_url: str | None = None):
         """
-        Initialize the connection settings for the service.
+        Initialize the connection settings for the Redactive API.
 
         :param api_key: The API key used for authentication.
         :type api_key: str
-        :param base_url: The base URL to use for Redactive.
+        :param base_url: The base URL to the Redactive API.
         :type base_url: str, optional
         """
         if base_url is None:
@@ -45,17 +45,17 @@ class AuthClient:
         state: str | None = None,
     ) -> BeginConnectionResponse:
         """
-        Initiates a connection process with a specified provider.
+        Return a URL for authorizing Redactive to connect with provider on a user's behalf.
 
         :param provider: The name of the provider to connect with.
         :type provider: str
-        :param redirect_uri: The URI to redirect to after initiating the connection. Defaults to an empty string.
+        :param redirect_uri: The URI to redirect to after initiating the connection.
         :type redirect_uri: str
-        :param endpoint: The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk. Defaults to None.
+        :param endpoint: The endpoint to use to access specific provider APIs. Only required if connecting to Zendesk.
         :type endpoint: str, optional
         :param code_param_alias: The alias for the code parameter. This is the name of the query parameter that will need to be passed to the `/auth/token` endpoint as `code`. Defaults to None and will be `code` on the return.
         :type code_param_alias: str, optional
-        :param state: An optional parameter that is stored as app_callback_state for building callback url. Defaults to None.
+        :param state: An optional parameter that is stored as app_callback_state for building callback url.
         :type state: str, optional
         :raises httpx.RequestError: If an error occurs while making the HTTP request.
         :return: The URL to redirect the user to for beginning the connection.
@@ -78,15 +78,14 @@ class AuthClient:
         """
         Exchange an authorization code and refresh token for access tokens.
 
-        :param code: The authorization code received from the OAuth flow, defaults to None
-        :type code: str | None, optional
-        :param refresh_token: The refresh token used for token refreshing, defaults to None
-        :type refresh_token: str | None, optional
+        :param code: The authorization code received from the OAuth flow.
+        :type code: str, optional
+        :param refresh_token: The refresh token used for token refreshing.
+        :type refresh_token: str, optional
         :raises httpx.RequestError: If an error occurs while making the HTTP request.
         :return: An object containing access token and other token information.
         :rtype: ExchangeTokenResponse
         """
-
         body = {}
         if code:
             body["code"] = code
@@ -101,9 +100,9 @@ class AuthClient:
 
     async def list_connections(self, access_token: str) -> ListConnectionsResponse:
         """
-        Retrieve the list of user connections.
+        Retrieve the list of user's provider connections.
 
-        :param access_token: The access token for authentication.
+        :param access_token: The user's access token for authentication..
         :type access_token: str
         :raises httpx.RequestError: If an error occurs while making the HTTP request.
         :return: An object containing the user ID and current connections.

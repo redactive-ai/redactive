@@ -1,4 +1,5 @@
 import warnings
+from typing import Any
 from urllib.parse import urlparse
 
 from grpclib.client import Channel
@@ -20,11 +21,11 @@ from redactive.grpc.v1 import (
 class SearchClient:
     def __init__(self, host: str | None = None, port: int | None = None) -> None:
         """
-        Initialize the connection settings for the service.
+        Redactive API search client.
 
-        :param host: The hostname or IP address of the service
+        :param host: The hostname or IP address of the Redactive API service.
         :type host: str, optional
-        :param port: The port number to connect to
+        :param port: The port number of the Redactive API service.
         :type port: int, optional
         """
         if host is not None and port is None:
@@ -43,23 +44,23 @@ class SearchClient:
         self,
         access_token: str,
         semantic_query: str,
-        count: int = 1,
-        query_filter: dict | None = None,
-        filters: dict | None = None,
+        count: int = 10,
+        query_filter: dict[str, Any] | None = None,
+        filters: Filters | dict[str, Any] | None = None,
     ) -> list[RelevantChunk]:
         """
         Query for relevant chunks based on a semantic query.
 
-        :param access_token: The user access token for querying
+        :param access_token: The user's Redactive access token.
         :type access_token: str
-        :param semantic_query: The query string used to find relevant chunks
+        :param semantic_query: The query string used to find relevant chunks.
         :type semantic_query: str
-        :param count: The number of relevant chunks to retrieve, defaults to 1
+        :param count: The number of relevant chunks to retrieve. Defaults to 10.
         :type count: int, optional
         :param query_filter: deprecated, use `filters`.
-        :type query_filter: dict | None, optional
-        :param filters: The filters for relevant chunks, defaults to None
-        :type filters: dict | None, optional
+        :type query_filter: dict[str, Any], optional
+        :param filters: The filters for relevant chunks. See `Filters` type.
+        :type filters: Filters | dict[str, Any], optional
         :return: A list of relevant chunks that match the query
         :rtype: list[RelevantChunk]
         """
@@ -70,7 +71,9 @@ class SearchClient:
             stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
 
             _filters: Filters | None = None
-            if filters is not None:
+            if isinstance(filters, Filters):
+                _filters = filters
+            elif isinstance(filters, dict):
                 _filters = Filters(**filters)
             elif query_filter is not None:
                 _filters = Filters(**query_filter)
@@ -78,6 +81,37 @@ class SearchClient:
             request = QueryRequest(count=count, query=Query(semantic_query=semantic_query), filters=_filters)
             response = await stub.query_chunks(request)
             return response.relevant_chunks
+
+    async def query_chunks_by_document_name(
+        self,
+        access_token: str,
+        document_name: str,
+        filters: Filters | dict[str, Any] | None = None,
+    ) -> list[Chunk]:
+        """
+        Query for chunks by document name.
+
+        :param access_token: The user's Redactive access token.
+        :type access_token: str
+        :param document_name: The name of the document to retrieve chunks.
+        :type document_name: str
+        :param filters: The filters for querying documents. See `Filters` type.
+        :type filters: Filters | dict[str, Any], optional
+        :return: The complete list of chunks for the matching document.
+        :rtype: list[Chunk]
+        """
+        async with Channel(self.host, self.port, ssl=True) as channel:
+            stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
+
+            _filters: Filters | None = None
+            if isinstance(filters, Filters):
+                _filters = filters
+            elif isinstance(filters, dict):
+                _filters = Filters(**filters)
+
+            request = QueryByDocumentNameRequest(query=DocumentNameQuery(document_name=document_name), filters=_filters)
+            response = await stub.query_chunks_by_document_name(request)
+            return response.chunks
 
     async def get_chunks_by_url(
         self,
@@ -89,9 +123,9 @@ class SearchClient:
 
         :param access_token: The user access token
         :type access_token: str
-        :param url: URL to source document to retrieve chunks
+        :param url: The URL to the document for retrieving chunks.
         :type url: str
-        :return: A list of chunks from URL source document
+        :return: The complete list of chunks for the document.
         :rtype: list[Chunk]
         """
         async with Channel(self.host, self.port, ssl=True) as channel:
@@ -104,33 +138,4 @@ class SearchClient:
 
             request = GetChunksByUrlRequest(url=url)
             response = await stub.get_chunks_by_url(request)
-            return response.chunks
-
-    async def query_chunks_by_document_name(
-        self,
-        access_token: str,
-        document_name: str,
-        filters: dict | None = None,
-    ) -> list[Chunk]:
-        """
-        Query for relevant chunks based on a semantic query.
-
-        :param access_token: The user access token for querying
-        :type access_token: str
-        :param document_name: The document name to look for
-        :type document_name:: str
-        :param filters: The filters for relevant chunks, defaults to None
-        :type filters: dict | None, optional
-        :return: The complete list of chunks for the matching document
-        :rtype: list[Chunk]
-        """
-        async with Channel(self.host, self.port, ssl=True) as channel:
-            stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
-
-            _filters: Filters | None = None
-            if filters is not None:
-                _filters = Filters(**filters)
-
-            request = QueryByDocumentNameRequest(query=DocumentNameQuery(document_name=document_name), filters=_filters)
-            response = await stub.query_chunks_by_document_name(request)
             return response.chunks

@@ -37,6 +37,17 @@ export class MultiUserClient {
   readUserData: (userId: string) => Promise<UserData | undefined>;
   writeUserData: (userId: string, data: UserData | undefined) => Promise<void>;
 
+  /**
+   * Redactive client handling multiple user authentication and access to the Redactive Search service.
+   * @param apiKey - Redactive API key.
+   * @param callbackUri - The URI to redirect to after initiating the connection.
+   * @param readUserData - Function to read user data from storage.
+   * @param writeUserData - Function to write user data to storage.
+   * @param options - An object of client options. Optional.
+   * @param options.authBaseUrl - Base URL for the authentication service. Optional.
+   * @param options.grpcHost - Host for the Redactive API service. Optional.
+   * @param options.grpcPort - Port for the Redactive API service. Optional.
+   */
   constructor(
     apiKey: string,
     callbackUri: string,
@@ -57,6 +68,12 @@ export class MultiUserClient {
     this.writeUserData = writeUserData;
   }
 
+  /**
+   * Return a URL for authorizing Redactive to connect with provider on a user's behalf.
+   * @param userId - A user ID to associate the connection URL with.
+   * @param provider - The name of the provider to connect with.
+   * @returns The URL to redirect the user to for beginning the connection.
+   */
   async getBeginConnectionUrl(userId: string, provider: string): Promise<string> {
     const state = randomUUID();
     const url = await this.authClient.beginConnection({ provider, redirectUri: this.callbackUri, state });
@@ -96,6 +113,14 @@ export class MultiUserClient {
     return tokenBody.email;
   }
 
+  /**
+   * The callback method for users completing the connection flow; to be called when user returns to app with
+   * connection-related URL query parameters.
+   * @param userId - The ID of the user completing their connection flow.
+   * @param signInCode - The connection sign-in code returned in the URL query parameters by completing the connection flow.
+   * @param state - The state value returned in the URL query parameters by completing the connection flow.
+   * @returns A boolean representing successful connection completion.
+   */
   async handleConnectionCallback(userId: string, signInCode: string, state: string): Promise<boolean> {
     const userData = await this.readUserData(userId);
     if (!userData || !state || userData.signInState !== state) {
@@ -105,6 +130,11 @@ export class MultiUserClient {
     return true;
   }
 
+  /**
+   * Retrieve the list of the user's provider connections.
+   * @param userId - The ID of the user.
+   * @returns A list of the user's connected providers.
+   */
   async getUserConnections(userId: string): Promise<string[]> {
     let userData = await this.readUserData(userId);
     if (!!userData && !!userData.idTokenExpiry && new Date(userData.idTokenExpiry) > new Date()) {
@@ -121,6 +151,14 @@ export class MultiUserClient {
     await this.writeUserData(userId, undefined);
   }
 
+  /**
+   * Query for relevant chunks based on a semantic query.
+   * @param userId - The ID of the user.
+   * @param semanticQuery - The query string used to find relevant chunks.
+   * @param count - The number of relevant chunks to retrieve. Defaults to 10.
+   * @param filters - An object of filters for querying. Optional.
+   * @returns list of relevant chunks.
+   */
   async queryChunks({ userId, semanticQuery, count = 10, filters }: QueryChunksParams): Promise<RelevantChunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
@@ -133,6 +171,13 @@ export class MultiUserClient {
     return await this.searchClient.queryChunks({ accessToken: userData.idToken!, semanticQuery, count, filters });
   }
 
+  /**
+   * Query for chunks by document name.
+   * @param userId - The ID of the user.
+   * @param documentName - The name of the document to retrieve chunks.
+   * @param filters - The filters for querying documents. Optional.
+   * @returns The complete list of chunks for the matching document.
+   */
   async queryChunksByDocumentName({
     userId,
     documentName,
@@ -149,6 +194,12 @@ export class MultiUserClient {
     return await this.searchClient.queryChunksByDocumentName({ accessToken: userData.idToken!, documentName, filters });
   }
 
+  /**
+   * Get chunks from a document by its URL.
+   * @param accessToken - The user's Redactive access token.
+   * @param url - The URL to the document for retrieving chunks.
+   * @returns The complete list of chunks for the matching document.
+   */
   async getChunksByUrl({ userId, url }: GetChunksByUrlParams): Promise<Chunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
