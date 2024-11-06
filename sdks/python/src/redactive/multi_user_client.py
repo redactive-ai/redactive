@@ -2,12 +2,12 @@ import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from typing import Annotated
+from typing import Annotated, Any
 
 import jwt
 
 from redactive.auth_client import AuthClient
-from redactive.grpc.v1 import Chunk, RelevantChunk
+from redactive.grpc.v1 import Chunk, Filters, RelevantChunk
 from redactive.search_client import SearchClient
 
 
@@ -37,7 +37,8 @@ class MultiUserClient:
         grpc_host: str | None = None,
         grpc_port: int | None = None,
     ) -> None:
-        """Redactive client handling multiple users authentication and access to the Redactive Search service.
+        """
+        Redactive client handling multiple users authentication and access to the Redactive Search service.
 
         :param api_key: Redactive API key.
         :type api_key: str
@@ -49,9 +50,9 @@ class MultiUserClient:
         :type write_user_data: Callable[[[Annotated[str, user_id], UserData | None], Awaitable[None]]
         :param auth_base_url: Base URL for the authentication service. Optional.
         :type auth_base_url: str | None
-        :param grpc_host: Host for the gRPC service. Optional.
+        :param grpc_host: Host for the Redactive API service. Optional.
         :type grpc_host: str | None
-        :param grpc_port: Port for the gRPC service. Optional.
+        :param grpc_port: Port for the Redactive API service. Optional.
         :type grpc_port: int | None
         """
 
@@ -62,6 +63,16 @@ class MultiUserClient:
         self.write_user_data = write_user_data
 
     async def get_begin_connection_url(self, user_id: str, provider: str) -> str:
+        """
+        Return a URL for authorizing Redactive to connect with provider on a user's behalf.
+
+        :param user_id: A user ID to associate connection URL with.
+        :type user_id: str
+        :param provider: The name of the provider to connect with.
+        :type provider: str
+        :return: The URL to redirect the user to for beginning the connection.
+        :rtype: str
+        """
         state = str(uuid.uuid4())
         response = await self.auth_client.begin_connection(provider, self.callback_uri, state=state)
         user_data = await self.read_user_data(user_id)
@@ -91,6 +102,19 @@ class MultiUserClient:
         return token_body.get("email")
 
     async def handle_connection_callback(self, user_id: str, sign_in_code: str, state: str) -> bool:
+        """
+        The callback method for users completing the connection flow; to be called when user returns to app with
+        connection-related URL query parameters.
+
+        :param user_id: The ID of the user completing their connection flow.
+        :type user_id: str
+        :param sign_in_code: The connection sign-in code returned in the URL query params by completing the connection flow.
+        :type sign_in_code: str
+        :param state: The state value returned in the URL query params by completing the connection flow.`
+        :type state: str
+        :return: A boolean represent successful connection completion.
+        :rtype: bool
+        """
         user_data = await self.read_user_data(user_id)
         if not user_data or user_data.sign_in_state != state:
             return False
@@ -98,6 +122,12 @@ class MultiUserClient:
         return True
 
     async def get_user_connections(self, user_id: str) -> list[str]:
+        """
+        Retrieve the list of user's provider connections.
+        :param user_id: The ID of the user.
+        :type user_id: str
+        :return: A list of user's connected providers.
+        """
         user_data = await self.read_user_data(user_id)
         if user_data and user_data.id_token_expiry and user_data.id_token_expiry > datetime.now(UTC):
             return user_data.connections
@@ -120,17 +150,53 @@ class MultiUserClient:
         return user_data.id_token
 
     async def query_chunks(
-        self, user_id: str, semantic_query: str, count: int = 10, filters: dict | None = None
+        self, user_id: str, semantic_query: str, count: int = 10, filters: Filters | dict[str, Any] | None = None
     ) -> list[RelevantChunk]:
+        """
+        Query for relevant chunks based on a semantic query.
+
+        :param user_id: The ID of the user.
+        :type user_id: str
+        :param semantic_query: The query string used to find relevant chunks.
+        :type semantic_query: str
+        :param count: The number of relevant chunks to retrieve. Defaults to 10.
+        :type count: int, optional
+        :param filters: The filters for relevant chunks. See `Filters` type.
+        :type filters: Filters | dict[str, Any], optional
+        :return: A list of relevant chunks that match the query
+        :rtype: list[RelevantChunk]
+        """
         id_token = await self._get_id_token(user_id)
-        return await self.search_client.query_chunks(id_token, semantic_query, count, filters)
+        return await self.search_client.query_chunks(id_token, semantic_query, count, filters=filters)
 
     async def query_chunks_by_document_name(
-        self, user_id: str, document_name: str, filters: dict | None = None
+        self, user_id: str, document_name: str, filters: Filters | dict[str, Any] | None = None
     ) -> list[Chunk]:
+        """
+        Query for chunks by document name.
+
+        :param user_id: The ID of the user.
+        :type user_id: str
+        :param document_name: The name of the document to retrieve chunks.
+        :type document_name: str
+        :param filters: The filters for querying documents. See `Filters` type.
+        :type filters: Filters | dict[str, Any], optional
+        :return: The complete list of chunks for the matching document.
+        :rtype: list[Chunk]
+        """
         id_token = await self._get_id_token(user_id)
         return await self.search_client.query_chunks_by_document_name(id_token, document_name, filters)
 
     async def get_chunks_by_url(self, user_id: str, url: str) -> list[Chunk]:
+        """
+        Get chunks from a document by its URL.
+
+        :param user_id: The ID of the user.
+        :type user_id: str
+        :param url: The URL to the document for retrieving chunks.
+        :type url: str
+        :return: The complete list of chunks for the document.
+        :rtype: list[Chunk]
+        """
         id_token = await self._get_id_token(user_id)
         return await self.search_client.get_chunks_by_url(id_token, url)

@@ -37,6 +37,11 @@ export class SearchClient {
   port: number = 443;
   _cachedServiceClients: Map<string, Client>;
 
+  /**
+   * Redactive API search client.
+   * @param host - The hostname or IP address of the Redactive API service.
+   * @param port - The port number of the Redactive API service.
+   */
   constructor(host?: string, port?: number) {
     this.host = host || this.host;
     this.port = port || this.port;
@@ -55,6 +60,14 @@ export class SearchClient {
     }
   }
 
+  /**
+   * Query for relevant chunks based on a semantic query.
+   * @param accessToken - The user's Redactive access token.
+   * @param semanticQuery - The query string used to find relevant chunks.
+   * @param count - The number of relevant chunks to retrieve. Defaults to 10.
+   * @param filters - An object of filters for querying. Optional.
+   * @returns list of relevant chunks.
+   */
   async queryChunks({
     accessToken,
     semanticQuery,
@@ -87,6 +100,13 @@ export class SearchClient {
     return response.relevantChunks;
   }
 
+  /**
+   * Query for chunks by document name.
+   * @param accessToken - The user's Redactive access token.
+   * @param documentName - The name of the document to retrieve chunks.
+   * @param filters - The filters for querying documents. Optional.
+   * @returns The complete list of chunks for the matching document.
+   */
   async queryChunksByDocumentName({
     accessToken,
     documentName,
@@ -117,6 +137,12 @@ export class SearchClient {
     return response.chunks;
   }
 
+  /**
+   * Get chunks from a document by its URL.
+   * @param accessToken - The user's Redactive access token.
+   * @param url - The URL to the document for retrieving chunks.
+   * @returns The complete list of chunks for the matching document.
+   */
   async getChunksByUrl({ accessToken, url }: GetChunksByUrlSearchParams): Promise<Chunk[]> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);

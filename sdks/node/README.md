@@ -28,6 +28,7 @@ The library has following components.
 
 - **AuthClient** - provides functionality to interact with data sources
 - **SearchClient** - provides functionality to search chunks with Redactive search service in gRPC
+- **MultiUserClient** - provides functionality manage multi-user search with Redactive search service
 
 ### AuthClient
 
@@ -74,6 +75,57 @@ await client.getChunksByUrl({ accessToken, url });
 // Document Name Search : retrieve all chunks of a document identified by its name
 const documentName = "AI Research Paper";
 await client.queryChunksByDocumentName({ accessToken, documentName });
+```
+
+### Filters
+
+Query methods, i.e. `queryChunks`, `queryChunksByDocumentName`, support a set of optional filters. The filters are applied in a logical 'AND' operation. If a data source provider does not support a filter-type, then no results from that provider are returned.
+
+```typescript
+import { Filters } from "@redactive/redactive/grpc/search";
+
+// Query chunks from Confluence only, that are from documents created before last week, modified since last week,
+// and that are from documents associated with a user's email. Include chunks from trashed documents.
+const lastWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+const filters: Filters = {
+  scope: ["confluence"],
+  created: {
+    before: lastWeek
+  },
+  modified: {
+    after: lastWeek
+  },
+  userEmails: ["myEmail@example.com"],
+  includeContentInTrash: true
+};
+await client.queryChunks({ accessToken, semanticQuery, filters });
+```
+
+### Multi-User Client
+
+The `MultiUserClient` class helps manage multiple users' authentication and access to the Redactive search service.
+
+```typescript
+import { MultiUserClient } from "@redactive/redactive";
+
+const multiUserClient = MultiUserClient(
+  "REDACTIVE-API-KEY",
+  "https://example.com/callback/",
+  readUserData,
+  multiUserClient
+);
+
+// Present `connection_url` in browser for user to interact with:
+const userId = "myUserId";
+const connectionUrl = await multiUserClient.getBeginConnectionUrl(userId, "confluence");
+
+// On user return from OAuth connection flow:
+let [signInCode, state] = ["", ""]; // from URL query parameters
+const isConnectionSuccessful = await multiUserClient.handleConnectionCallback(userId, signInCode, state);
+
+// User can now use Redactive search service via `MultiUserClient`'s other methods:
+const semanticQuery = "Tell me about the missing research vessel, the Borealis";
+const chunks = await multiUserClient.queryChunks({ userId, semanticQuery });
 ```
 
 ## Development
