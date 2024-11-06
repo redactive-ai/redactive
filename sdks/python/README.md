@@ -86,7 +86,39 @@ client.query_chunks_by_document_name(
 )
 ```
 
-## Multi-User Client
+### Filters
+
+Query methods, i.e. `query_chunks`, `query_chunks_by_document_name`, support a set of optional filters. The filters are applied in a logical 'AND' operation. If a data source provider does not support a filter-type, then no results from that provider are returned.
+
+```python
+from datetime import datetime, timedelta
+from redactive.search_client import SearchClient
+from redactive.grpc.v1 import Filters
+
+client = SearchClient()
+
+# Query chunks from Confluence only, that are from documents created before last week, modified since last week,
+# and that are from documents associated with a user's email. Include chunks from trashed documents.
+last_week = datetime.now() - timedelta(weeks=1)
+filters = Filters().from_dict({
+  "scope": ["confluence"],
+  "created": {
+    "before": last_week,
+  },
+  "modified": {
+    "after": last_week,
+  },
+  "userEmails": ["myEmail@example.com"],
+  "includeContentInTrash": True,
+})
+client.query_chunks(
+    access_token="REDACTIVE-USER-ACCESS-TOKEN",
+    semantic_query="Tell me about AI",
+    filters=filters
+)
+```
+
+### Multi-User Client
 
 The `MultiUserClient` class helps manage multiple users' authentication and access to the Redactive search service.
 
