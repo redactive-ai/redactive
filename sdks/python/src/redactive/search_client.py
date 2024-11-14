@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from grpclib.client import Channel
 
 from redactive._connection_mode import get_default_grpc_host_and_port as _get_default_grpc_host_and_port
-from redactive.grpc.v1 import (
+from redactive.grpc.v2 import (
     Chunk,
     DocumentNameQuery,
     Filters,

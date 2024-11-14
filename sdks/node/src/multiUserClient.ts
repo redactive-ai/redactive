@@ -3,9 +3,8 @@ import { randomUUID } from "node:crypto";
 import { AuthClient } from "./authClient";
 import { Chunk, RelevantChunk } from "./grpc/chunks";
 import {
-  GetChunksByUrlSearchParams,
-  QueryChunksByDocumentNameSearchParams,
-  QueryChunksSearchParams,
+  SearchChunksParams,
+  GetDocumentParams,
   SearchClient
 } from "./searchClient";
 
@@ -17,14 +16,11 @@ export interface UserData {
   connections?: string[];
 }
 
-export interface QueryChunksParams extends Omit<QueryChunksSearchParams, "accessToken"> {
-  userId: string;
-}
-export interface QueryChunksByDocumentNameParams extends Omit<QueryChunksByDocumentNameSearchParams, "accessToken"> {
+export interface MultiUserSearchChunksParams extends Omit<SearchChunksParams, "accessToken"> {
   userId: string;
 }
 
-export interface GetChunksByUrlParams extends Omit<GetChunksByUrlSearchParams, "accessToken"> {
+export interface MultiUserGetDocumentParams extends Omit<GetDocumentParams, "accessToken"> {
   userId: string;
 }
 
@@ -154,12 +150,12 @@ export class MultiUserClient {
   /**
    * Query for relevant chunks based on a semantic query.
    * @param userId - The ID of the user.
-   * @param semanticQuery - The query string used to find relevant chunks.
+   * @param query - The query string used to find relevant chunks.
    * @param count - The number of relevant chunks to retrieve. Defaults to 10.
    * @param filters - An object of filters for querying. Optional.
    * @returns list of relevant chunks.
    */
-  async queryChunks({ userId, semanticQuery, count = 10, filters }: QueryChunksParams): Promise<RelevantChunk[]> {
+  async searchChunksBySemantics({ userId, query, count = 10, filters }: MultiUserSearchChunksParams): Promise<RelevantChunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
       throw new Error(`No valid Redactive session for user '${userId}'`);
@@ -168,21 +164,18 @@ export class MultiUserClient {
       userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
     }
 
-    return await this.searchClient.queryChunks({ accessToken: userData.idToken!, semanticQuery, count, filters });
+    return await this.searchClient.searchChunksBySemantics({ accessToken: userData.idToken!, query, count, filters });
   }
 
   /**
-   * Query for chunks by document name.
+   * Query for relevant chunks containing the provided keywords
    * @param userId - The ID of the user.
-   * @param documentName - The name of the document to retrieve chunks.
-   * @param filters - The filters for querying documents. Optional.
-   * @returns The complete list of chunks for the matching document.
+   * @param query - The query string used to find relevant chunks.
+   * @param count - The number of relevant chunks to retrieve. Defaults to 10.
+   * @param filters - An object of filters for querying. Optional.
+   * @returns list of relevant chunks.
    */
-  async queryChunksByDocumentName({
-    userId,
-    documentName,
-    filters
-  }: QueryChunksByDocumentNameParams): Promise<Chunk[]> {
+  async searchChunksByKeyword({ userId, query, count = 10, filters }: MultiUserSearchChunksParams): Promise<RelevantChunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
       throw new Error(`No valid Redactive session for user '${userId}'`);
@@ -191,16 +184,17 @@ export class MultiUserClient {
       userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
     }
 
-    return await this.searchClient.queryChunksByDocumentName({ accessToken: userData.idToken!, documentName, filters });
+    return await this.searchClient.searchChunksByKeyword({ accessToken: userData.idToken!, query, count, filters });
   }
 
   /**
    * Get chunks from a document by its URL.
    * @param accessToken - The user's Redactive access token.
-   * @param url - The URL to the document for retrieving chunks.
+   * @param ref - A reference to the document we are retrieving. Can be either a url or document name.
+   * @param filters - The filters for querying documents. Optional. Only applicable for getting by document name.
    * @returns The complete list of chunks for the matching document.
    */
-  async getChunksByUrl({ userId, url }: GetChunksByUrlParams): Promise<Chunk[]> {
+  async getDocument({ userId, ref, filters }: MultiUserGetDocumentParams): Promise<Chunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
       throw new Error(`No valid Redactive session for user '${userId}'`);
@@ -209,6 +203,6 @@ export class MultiUserClient {
       userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
     }
 
-    return await this.searchClient.getChunksByUrl({ accessToken: userData.idToken!, url });
+    return await this.searchClient.getDocument({ accessToken: userData.idToken!, ref, filters});
   }
 }
