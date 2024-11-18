@@ -60,7 +60,7 @@ export class SearchClient {
    * @param filters - An object of filters for querying. Optional.
    * @returns list of relevant chunks.
    */
-  async searchChunksBySemantics({
+  async searchChunks({
     accessToken,
     query,
     count = 10,
@@ -72,46 +72,6 @@ export class SearchClient {
 
     const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
     const query_obj: Query = { semanticQuery: query };
-    const _filters: Filters = { scope: [], userEmails: [], ...filters };
-    const searchRequest: SearchChunksRequest = {
-      query: query_obj,
-      count,
-      filters: filters ? _filters : undefined
-    };
-
-    const response = await new Promise<SearchChunksResponse>((resolve, reject) => {
-      client.searchChunks(searchRequest, requestMetadata, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        return resolve(response);
-      });
-    });
-    return response.relevantChunks;
-  }
-
-  /**
-   * Query for relevant chunks based on keywords.
-   * @param accessToken - The user's Redactive access token.
-   * @param query - The query string used to find relevant chunks.
-   * @param count - The number of relevant chunks to retrieve. Defaults to 10.
-   * @param filters - An object of filters for querying. Optional.
-   * @returns list of relevant chunks.
-   */
-  async searchChunksByKeyword({
-    accessToken,
-    query,
-    count = 10,
-    filters
-  }: SearchChunksParams): Promise<RelevantChunk[]> {
-    const requestMetadata = new Metadata();
-    requestMetadata.set("Authorization", `Bearer ${accessToken}`);
-    requestMetadata.set("User-Agent", "redactive-sdk-node");
-
-    const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
-    const query_obj: Query = { keywordQuery: query };
     const _filters: Filters = { scope: [], userEmails: [], ...filters };
     const searchRequest: SearchChunksRequest = {
       query: query_obj,

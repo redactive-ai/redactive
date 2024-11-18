@@ -155,7 +155,7 @@ export class MultiUserClient {
    * @param filters - An object of filters for querying. Optional.
    * @returns list of relevant chunks.
    */
-  async searchChunksBySemantics({ userId, query, count = 10, filters }: MultiUserSearchChunksParams): Promise<RelevantChunk[]> {
+  async searchChunks({ userId, query, count = 10, filters }: MultiUserSearchChunksParams): Promise<RelevantChunk[]> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
       throw new Error(`No valid Redactive session for user '${userId}'`);
@@ -164,27 +164,7 @@ export class MultiUserClient {
       userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
     }
 
-    return await this.searchClient.searchChunksBySemantics({ accessToken: userData.idToken!, query, count, filters });
-  }
-
-  /**
-   * Query for relevant chunks containing the provided keywords
-   * @param userId - The ID of the user.
-   * @param query - The query string used to find relevant chunks.
-   * @param count - The number of relevant chunks to retrieve. Defaults to 10.
-   * @param filters - An object of filters for querying. Optional.
-   * @returns list of relevant chunks.
-   */
-  async searchChunksByKeyword({ userId, query, count = 10, filters }: MultiUserSearchChunksParams): Promise<RelevantChunk[]> {
-    let userData = await this.readUserData(userId);
-    if (!userData || !userData.refreshToken) {
-      throw new Error(`No valid Redactive session for user '${userId}'`);
-    }
-    if (!!userData.idTokenExpiry && new Date(userData.idTokenExpiry) < new Date()) {
-      userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
-    }
-
-    return await this.searchClient.searchChunksByKeyword({ accessToken: userData.idToken!, query, count, filters });
+    return await this.searchClient.searchChunks({ accessToken: userData.idToken!, query, count, filters });
   }
 
   /**
