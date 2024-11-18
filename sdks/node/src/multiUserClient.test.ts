@@ -141,12 +141,12 @@ describe("MultiUserClient", () => {
 
     readUserData.mockResolvedValue(undefined);
 
-    await expect(multiUserClient.searchChunksBySemantics({ userId, query })).rejects.toThrow(
+    await expect(multiUserClient.searchChunks({ userId, query })).rejects.toThrow(
       `No valid Redactive session for user '${userId}'`
     );
   });
 
-  it("should query chunks semantically after refreshing idToken", async () => {
+  it("should query chunks after refreshing idToken", async () => {
     const userId = "user123";
     const query = "query";
     const idToken = "idToken123";
@@ -166,42 +166,13 @@ describe("MultiUserClient", () => {
 
     readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
     multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
-    mockSearchClient.searchChunksBySemantics.mockResolvedValue(chunks as unknown as RelevantChunk[]);
+    mockSearchClient.searchChunks.mockResolvedValue(chunks as unknown as RelevantChunk[]);
 
     multiUserClient.searchClient = mockSearchClient;
-    const result = await multiUserClient.searchChunksBySemantics({ userId, query });
+    const result = await multiUserClient.searchChunks({ userId, query });
 
     expect(result).toEqual(chunks);
-    expect(mockSearchClient.searchChunksBySemantics).toHaveBeenCalledWith({ accessToken: idToken, query, count: 10 });
-  });
-
-  it("should query chunks by keyword after refreshing idToken", async () => {
-    const userId = "user123";
-    const query = "query";
-    const idToken = "idToken123";
-    const refreshToken = "refreshToken123";
-    const chunks = [{ chunk: "chunk1" }, { chunk: "chunk2" }];
-
-    const expiredUserData: UserData = {
-      idToken,
-      idTokenExpiry: new Date(Date.now() - 1000),
-      refreshToken
-    };
-    const refreshedUserData: UserData = {
-      idToken,
-      idTokenExpiry: new Date(Date.now() + 3600 * 1000),
-      refreshToken
-    };
-
-    readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
-    multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
-    mockSearchClient.searchChunksByKeyword.mockResolvedValue(chunks as unknown as RelevantChunk[]);
-
-    multiUserClient.searchClient = mockSearchClient;
-    const result = await multiUserClient.searchChunksByKeyword({ userId, query });
-
-    expect(result).toEqual(chunks);
-    expect(mockSearchClient.searchChunksByKeyword).toHaveBeenCalledWith({ accessToken: idToken, query, count: 10 });
+    expect(mockSearchClient.searchChunks).toHaveBeenCalledWith({ accessToken: idToken, query, count: 10 });
   });
 
   it("should query chunks by document ref after refreshing idToken", async () => {
