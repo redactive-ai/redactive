@@ -60,8 +60,7 @@ With a Redactive access_token, you can perform two types of search
 
 #### Query-based Search
 
-1. **Query-based Search**: Retrieve relevant chunks of information that are related to a user query.
-2. **Document Fetch**: Obtain all the chunks from a specific document by specifying  a unique reference (i.e. a URL).
+Retrieve relevant chunks of information that are related to a user query.
 
 ```python
 from redactive.search_client import SearchClient
@@ -75,17 +74,27 @@ client.search_chunks(
 )
 ```
 
-```python
-# URL-based Search: retrieve all chunks of the document at that URL
-client.get_document(
-    access_token="REDACTIVE-USER-ACCESS-TOKEN",
-    ref="https://example.com/document"
-)
+**Filters** may be applied to query-based search operations. At present, the following fields may be provided as filter predicates:
+
+```protobuf
+message Filters {
+    // Scope of the query. This may either be the name of a provider, or a subspace of documents.
+    // Subspaces take the form of <provider>://<tenancy>/<path>
+    // e.g. for Confluence: 'confluence://redactiveai.atlassian.net/Engineering/Engineering Onboarding Guide'
+    // for Sharepoint: 'sharepoint://redactiveai.sharepoint.com/Shared Documents/Engineering/Onboarding Guide.pdf'
+    repeated string scope = 1;
+    // Timespan of response chunk's creation
+    optional TimeSpan created = 2;
+    // Timespan of response chunk's last modification
+    optional TimeSpan modified = 3;
+    // List of user emails associated with response chunk
+    repeated string user_emails = 4;
+    // Include content from documents in trash
+    optional bool include_content_in_trash = 5;
+}
 ```
 
-### Filters
-
-Query methods, i.e. `query_chunks`, `query_chunks_by_document_name`, support a set of optional filters. The filters are applied in a logical 'AND' operation. If a data source provider does not support a filter-type, then no results from that provider are returned.
+Filters may be populated and provided to a query in the following way for the Python SDK:
 
 ```python
 from datetime import datetime, timedelta
@@ -112,6 +121,19 @@ client.query_chunks(
     access_token="REDACTIVE-USER-ACCESS-TOKEN",
     semantic_query="Tell me about AI",
     filters=filters
+)
+```
+
+
+#### Document Fetch
+
+Obtain all the chunks from a specific document by specifying  a unique reference (i.e. a URL).
+
+```python
+# URL-based Search: retrieve all chunks of the document at that URL
+client.get_document(
+    access_token="REDACTIVE-USER-ACCESS-TOKEN",
+    ref="https://example.com/document"
 )
 ```
 
@@ -142,8 +164,8 @@ is_connection_successful = await multi_user_client.handle_connection_callback(
 )
 
 # User can now use Redactive search service via `MultiUserClient`'s other methods:
-semantic_query = "Tell me about the missing research vessel, the Borealis"
-chunks = await multi_user_client.query_chunks(user_id=user_id, semantic_query=semantic_query)
+query = "Tell me about the missing research vessel, the Borealis"
+chunks = await multi_user_client.search_chunks(user_id=user_id, query=query)
 ```
 
 ## Development
