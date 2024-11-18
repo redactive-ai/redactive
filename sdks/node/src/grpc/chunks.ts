@@ -21,15 +21,15 @@ export interface ChunkMetadata {
 }
 
 export interface SourceReference {
-  /** Source system of the document e.g. confluence, slack, local_file_system */
+  /** Source system of the document e.g. confluence, sharepoint */
   system: string;
   /** Version of the source system e.g. 1.0.0 */
   systemVersion: string;
-  /** Connection id to the source system e.g. confluence space id, slack channel id, local file hostname */
+  /** Connection id to the source system e.g. confluence space id, sharepoint drive id */
   connectionId: string;
-  /** Document id in the source system e.g. confluence page id, slack message id, local file path */
+  /** Document id in the source system e.g. confluence page id, sharepoint file id */
   documentId: string;
-  /** Document version in the source system e.g. confluence page version, slack message version, local file version hash */
+  /** Document version in the source system e.g. confluence page version, sharepoint file hash */
   documentVersion: string;
   /**
    * Document path in the source system e.g. "redactiveai.atlassian.net/Engineering/Onboarding Guide"
@@ -45,7 +45,7 @@ export interface SourceReference {
 export interface ChunkReference {
   /** Chunking version e.g. 1.0.0 */
   chunkingVersion: string;
-  /** chunk id is unique within the document, but not globally unique, it's actually the index of the chunk in the document */
+  /** chunk id is unique within the document, but not globally unique. */
   chunkId: string;
   /** SHA256 hash of the chunk body */
   chunkHash: string;
