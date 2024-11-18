@@ -172,7 +172,7 @@ class Filters(betterproto.Message):
     of documents. Subspaces take the form of <provider>://<tenancy>/<path> e.g.
     for Confluence:
     'confluence://redactiveai.atlassian.net/Engineering/Engineering Onboarding
-    Guide' for Sharepoint: 'sharepoint://redactiveai.sharepoint.com/Shared
+    Guide'. For Sharepoint: 'sharepoint://redactiveai.sharepoint.com/Shared
     Documents/Engineering/Onboarding Guide.pdf'
     """
 

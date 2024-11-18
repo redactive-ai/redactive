@@ -7,7 +7,7 @@ from typing import Annotated, Any
 import jwt
 
 from redactive.auth_client import AuthClient
-from redactive.grpc.v1 import Chunk, Filters, RelevantChunk
+from redactive.grpc.v2 import Chunk, Filters, RelevantChunk
 from redactive.search_client import SearchClient
 
 
@@ -149,16 +149,16 @@ class MultiUserClient:
             raise InvalidRedactiveSessionError(user_id)
         return user_data.id_token
 
-    async def query_chunks(
-        self, user_id: str, semantic_query: str, count: int = 10, filters: Filters | dict[str, Any] | None = None
+    async def search_chunks(
+        self, user_id: str, query: str, count: int = 10, filters: Filters | dict[str, Any] | None = None
     ) -> list[RelevantChunk]:
         """
         Query for relevant chunks based on a semantic query.
 
         :param user_id: The ID of the user.
         :type user_id: str
-        :param semantic_query: The query string used to find relevant chunks.
-        :type semantic_query: str
+        :param query: The query string used to find relevant chunks.
+        :type query: str
         :param count: The number of relevant chunks to retrieve. Defaults to 10.
         :type count: int, optional
         :param filters: The filters for relevant chunks. See `Filters` type.
@@ -167,27 +167,9 @@ class MultiUserClient:
         :rtype: list[RelevantChunk]
         """
         id_token = await self._get_id_token(user_id)
-        return await self.search_client.query_chunks(id_token, semantic_query, count, filters=filters)
+        return await self.search_client.search_chunks(id_token, query, count, filters=filters)
 
-    async def query_chunks_by_document_name(
-        self, user_id: str, document_name: str, filters: Filters | dict[str, Any] | None = None
-    ) -> list[Chunk]:
-        """
-        Query for chunks by document name.
-
-        :param user_id: The ID of the user.
-        :type user_id: str
-        :param document_name: The name of the document to retrieve chunks.
-        :type document_name: str
-        :param filters: The filters for querying documents. See `Filters` type.
-        :type filters: Filters | dict[str, Any], optional
-        :return: The complete list of chunks for the matching document.
-        :rtype: list[Chunk]
-        """
-        id_token = await self._get_id_token(user_id)
-        return await self.search_client.query_chunks_by_document_name(id_token, document_name, filters)
-
-    async def get_chunks_by_url(self, user_id: str, url: str) -> list[Chunk]:
+    async def get_document(self, user_id: str, ref: str) -> list[Chunk]:
         """
         Get chunks from a document by its URL.
 
@@ -199,4 +181,4 @@ class MultiUserClient:
         :rtype: list[Chunk]
         """
         id_token = await self._get_id_token(user_id)
-        return await self.search_client.get_chunks_by_url(id_token, url)
+        return await self.search_client.get_document(id_token, ref)
