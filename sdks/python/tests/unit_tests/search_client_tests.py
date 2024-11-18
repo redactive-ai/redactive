@@ -36,7 +36,7 @@ async def test_query_chunks(mock_channel_context):
 @mock.patch("grpclib.client.Channel")
 @pytest.mark.asyncio
 async def test_query_chunks_with_filter(mock_channel_context):
-    from redactive.grpc.v2 import Query, SearchChunksRequest, Filters
+    from redactive.grpc.v2 import Filters, Query, SearchChunksRequest
 
     access_token = "test-access_token"
     query = "Tell me about somethings"

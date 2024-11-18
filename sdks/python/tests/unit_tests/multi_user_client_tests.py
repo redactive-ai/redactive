@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from redactive.auth_client import AuthClient
-from redactive.grpc.v2 import Chunk, RelevantChunk
+from redactive.grpc.v2 import RelevantChunk
 from redactive.multi_user_client import MultiUserClient, UserData
 from redactive.search_client import SearchClient
 
@@ -99,9 +99,7 @@ async def test_search_chunks(multi_user_client: MultiUserClient, mock_search_cli
     result = await multi_user_client.search_chunks(user_id, query, count, filters=filters)
 
     assert result == relevant_chunks
-    multi_user_client.search_client.search_chunks.assert_called_with(
-        "idToken123", query, count, filters=filters
-    )
+    multi_user_client.search_client.search_chunks.assert_called_with("idToken123", query, count, filters=filters)
 
 
 @pytest.mark.asyncio

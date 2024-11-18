@@ -2,11 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { AuthClient } from "./authClient";
 import { Chunk, RelevantChunk } from "./grpc/chunks";
-import {
-  SearchChunksParams,
-  GetDocumentParams,
-  SearchClient
-} from "./searchClient";
+import { GetDocumentParams, SearchChunksParams, SearchClient } from "./searchClient";
 
 export interface UserData {
   signInState?: string;
@@ -183,6 +179,6 @@ export class MultiUserClient {
       userData = await this._refreshUserData(userId, userData.refreshToken, undefined);
     }
 
-    return await this.searchClient.getDocument({ accessToken: userData.idToken!, ref, filters});
+    return await this.searchClient.getDocument({ accessToken: userData.idToken!, ref, filters });
   }
 }

@@ -89,8 +89,8 @@ message Filters {
 }
 ```
 
-The query will only return results which match _ALL_ filter predicates i.e. if multiple fields are populated in the filter object, 
-the resulting filter is the logical 'AND' of all the fields. If a data source provider does not support a filter-type, then no 
+The query will only return results which match _ALL_ filter predicates i.e. if multiple fields are populated in the filter object,
+the resulting filter is the logical 'AND' of all the fields. If a data source provider does not support a filter-type, then no
 results from that provider are returned.
 
 Filters may be populated and provided to a query in the following way for the NodeJS SDK:
@@ -119,7 +119,6 @@ await client.searchChunks({ accessToken, semanticQuery, filters });
 #### Document Fetch
 
 Obtain all the chunks from a specific document by specifying a unique reference (i.e. a URL).
-
 
 ```javascript
 import { SearchClient } from "@redactive/redactive";

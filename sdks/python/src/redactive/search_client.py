@@ -6,10 +6,10 @@ from redactive._connection_mode import get_default_grpc_host_and_port as _get_de
 from redactive.grpc.v2 import (
     Chunk,
     Filters,
-    Query,
     GetDocumentRequest,
-    SearchChunksRequest,
+    Query,
     RelevantChunk,
+    SearchChunksRequest,
     SearchStub,
 )
 
@@ -91,4 +91,3 @@ class SearchClient:
             request = GetDocumentRequest(ref=ref)
             response = await stub.get_document(request)
             return response.chunks
-

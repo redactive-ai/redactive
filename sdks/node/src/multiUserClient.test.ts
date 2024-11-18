@@ -203,5 +203,4 @@ describe("MultiUserClient", () => {
     expect(result).toEqual(chunks);
     expect(mockSearchClient.getDocument).toHaveBeenCalledWith({ accessToken: idToken, ref: documentName });
   });
-
 });

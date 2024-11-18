@@ -42,9 +42,7 @@ class RerankingSearchClient(search_client.SearchClient):
         if big_fetch_count > self.conf.max_fetch_results:
             big_fetch_count = self.conf.max_fetch_results
 
-        fetched_chunks = await super().search_chunks(
-            access_token, query, big_fetch_count, filters
-        )
+        fetched_chunks = await super().search_chunks(access_token, query, big_fetch_count, filters)
         ranker = Reranker(self.conf.reranking_algorithm)
         return self.rerank(query, fetched_chunks, ranker, count)
 
