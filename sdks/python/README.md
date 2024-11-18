@@ -56,7 +56,7 @@ response = await client.exchange_tokens(code="OAUTH2-TOKEN")
 
 ### SearchClient
 
-With a Redactive access_token, you can perform two types of search
+With a Redactive `access_token`, you can perform two types of search
 
 #### Query-based Search
 
@@ -94,12 +94,16 @@ message Filters {
 }
 ```
 
+The query will only return results which match _ALL_ filter predicates i.e. if multiple fields are populated in the filter object, 
+the resulting filter is the logical 'AND' of all the fields. If a data source provider does not support a filter-type, then no 
+results from that provider are returned.
+
 Filters may be populated and provided to a query in the following way for the Python SDK:
 
 ```python
 from datetime import datetime, timedelta
 from redactive.search_client import SearchClient
-from redactive.grpc.v1 import Filters
+from redactive.grpc.v2 import Filters
 
 client = SearchClient()
 
@@ -117,7 +121,7 @@ filters = Filters().from_dict({
   "userEmails": ["myEmail@example.com"],
   "includeContentInTrash": True,
 })
-client.query_chunks(
+client.search_chunks(
     access_token="REDACTIVE-USER-ACCESS-TOKEN",
     semantic_query="Tell me about AI",
     filters=filters
@@ -127,7 +131,7 @@ client.query_chunks(
 
 #### Document Fetch
 
-Obtain all the chunks from a specific document by specifying  a unique reference (i.e. a URL).
+Obtain all the chunks from a specific document by specifying a unique reference (i.e. a URL).
 
 ```python
 # URL-based Search: retrieve all chunks of the document at that URL
