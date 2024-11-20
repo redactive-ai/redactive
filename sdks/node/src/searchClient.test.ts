@@ -4,12 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Chunk, ChunkReference, RelevantChunk, RelevantChunk_Relevance, SourceReference } from "./grpc/chunks";
 import {
   Filters,
-  GetChunksByUrlRequest,
-  GetChunksByUrlResponse,
-  QueryByDocumentNameRequest,
-  QueryByDocumentNameResponse,
-  QueryRequest,
-  QueryResponse,
+  GetDocumentRequest,
+  GetDocumentResponse,
+  SearchChunksRequest,
+  SearchChunksResponse,
   SearchClient as SearchServiceClient
 } from "./grpc/search";
 import { SearchClient } from "./searchClient";
@@ -21,9 +19,9 @@ describe("Service client", () => {
     vi.clearAllMocks();
   });
 
-  it("should query chunks by document name", async () => {
+  it("should get chunks by document reference", async () => {
     const accessToken = "test-accessToken";
-    const documentName = "test-documentName";
+    const ref = "test-documentName";
     const filters: Partial<Filters> = {
       scope: ["dataprovider"],
       created: { before: new Date() },
@@ -55,21 +53,21 @@ describe("Service client", () => {
 
     // Mock the _getClient method of SearchClient to return a mock gRPC client
     vi.spyOn(SearchClient.prototype, "_getClient").mockReturnValue({
-      queryChunksByDocumentName: (
-        _request: QueryByDocumentNameRequest,
+      getDocument: (
+        _request: GetDocumentRequest,
         _metadata: Metadata,
-        callback: (error: ServiceError | null, response: QueryByDocumentNameResponse) => void
-      ) => callback(null, { success: true, chunks: expectedResponse } as QueryByDocumentNameResponse)
+        callback: (error: ServiceError | null, response: GetDocumentResponse) => void
+      ) => callback(null, { success: true, chunks: expectedResponse } as GetDocumentResponse)
     } as unknown as SearchServiceClient);
 
     const client = new SearchClient();
 
-    const response = await client.queryChunksByDocumentName({ accessToken, documentName, filters });
+    const response = await client.getDocument({ accessToken, ref, filters });
 
     expect(response).toStrictEqual(expectedResponse);
   });
 
-  it("should query chunks", async () => {
+  it("should search chunks", async () => {
     const accessToken = "test-accessToken";
     const query = "test-query";
     const count = 1;
@@ -107,63 +105,18 @@ describe("Service client", () => {
 
     // Mock the _getClient method of SearchClient to return a mock gRPC client
     vi.spyOn(SearchClient.prototype, "_getClient").mockReturnValue({
-      queryChunks: (
-        _request: QueryRequest,
+      searchChunks: (
+        _request: SearchChunksRequest,
         _metadata: Metadata,
-        callback: (error: ServiceError | null, response: QueryResponse) => void
-      ) => callback(null, QueryResponse.fromJSON({ relevantChunks: expectedResponse }))
+        callback: (error: ServiceError | null, response: SearchChunksResponse) => void
+      ) => callback(null, SearchChunksResponse.fromJSON({ relevantChunks: expectedResponse }))
     } as unknown as SearchServiceClient);
 
     // Create an instance of SearchClient
     const client = new SearchClient();
 
     // Call the queryChunks method and capture the response
-    const response = await client.queryChunks({ accessToken, semanticQuery: query, count, filters });
-
-    // Assert that the response matches the expected response
-    expect(response).toStrictEqual(expectedResponse);
-  });
-
-  it("should get chunks by url", async () => {
-    const accessToken = "test-accessToken";
-    const url = "https://example.com";
-    const expectedResponse: Chunk[] = Array.from({ length: 10 }, (_, i) => ({
-      source: {
-        system: `system-${i}`,
-        systemVersion: `systemVersion-${i}`,
-        documentId: `documentId-${i}`,
-        documentVersion: `documentVersion-${i}`,
-        connectionId: `connectionId-${i}`,
-        documentName: `documentName-${i}`,
-        documentPath: `documentPath-${i}`
-      } as SourceReference,
-      chunk: {
-        chunkHash: `chunkHash-${i}`,
-        chunkId: `chunkId-${i}`,
-        chunkingVersion: `chunkingVersion-${i}`
-      } as ChunkReference,
-      chunkBody: `chunkBody-${i}`,
-      documentMetadata: {
-        createdAt: undefined,
-        link: undefined,
-        modifiedAt: undefined
-      }
-    }));
-
-    // Mock the _getClient method of SearchClient to return a mock gRPC client
-    vi.spyOn(SearchClient.prototype, "_getClient").mockReturnValue({
-      getChunksByUrl: (
-        _request: GetChunksByUrlRequest,
-        _metadata: Metadata,
-        callback: (error: ServiceError | null, response: GetChunksByUrlResponse) => void
-      ) => callback(null, GetChunksByUrlResponse.fromJSON({ chunks: expectedResponse }))
-    } as unknown as SearchServiceClient);
-
-    // Create an instance of SearchClient
-    const client = new SearchClient();
-
-    // Call the getChunksByUrl method and capture the response
-    const response = await client.getChunksByUrl({ accessToken, url });
+    const response = await client.searchChunks({ accessToken, query, count, filters });
 
     // Assert that the response matches the expected response
     expect(response).toStrictEqual(expectedResponse);

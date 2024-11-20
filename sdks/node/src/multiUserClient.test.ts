@@ -137,18 +137,18 @@ describe("MultiUserClient", () => {
 
   it("should throw an error if no valid session when querying chunks", async () => {
     const userId = "user123";
-    const semanticQuery = "query";
+    const query = "query";
 
     readUserData.mockResolvedValue(undefined);
 
-    await expect(multiUserClient.queryChunks({ userId, semanticQuery })).rejects.toThrow(
+    await expect(multiUserClient.searchChunks({ userId, query })).rejects.toThrow(
       `No valid Redactive session for user '${userId}'`
     );
   });
 
   it("should query chunks after refreshing idToken", async () => {
     const userId = "user123";
-    const semanticQuery = "query";
+    const query = "query";
     const idToken = "idToken123";
     const refreshToken = "refreshToken123";
     const chunks = [{ chunk: "chunk1" }, { chunk: "chunk2" }];
@@ -166,16 +166,16 @@ describe("MultiUserClient", () => {
 
     readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
     multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
-    mockSearchClient.queryChunks.mockResolvedValue(chunks as unknown as RelevantChunk[]);
+    mockSearchClient.searchChunks.mockResolvedValue(chunks as unknown as RelevantChunk[]);
 
     multiUserClient.searchClient = mockSearchClient;
-    const result = await multiUserClient.queryChunks({ userId, semanticQuery });
+    const result = await multiUserClient.searchChunks({ userId, query });
 
     expect(result).toEqual(chunks);
-    expect(mockSearchClient.queryChunks).toHaveBeenCalledWith({ accessToken: idToken, semanticQuery, count: 10 });
+    expect(mockSearchClient.searchChunks).toHaveBeenCalledWith({ accessToken: idToken, query, count: 10 });
   });
 
-  it("should query chunks by document name after refreshing idToken", async () => {
+  it("should query chunks by document ref after refreshing idToken", async () => {
     const userId = "user123";
     const documentName = "test-document";
     const idToken = "idToken123";
@@ -195,41 +195,12 @@ describe("MultiUserClient", () => {
 
     readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
     multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
-    mockSearchClient.queryChunksByDocumentName.mockResolvedValue(chunks as unknown as Chunk[]);
+    mockSearchClient.getDocument.mockResolvedValue(chunks as unknown as Chunk[]);
 
     multiUserClient.searchClient = mockSearchClient;
-    const result = await multiUserClient.queryChunksByDocumentName({ userId, documentName });
+    const result = await multiUserClient.getDocument({ userId, ref: documentName });
 
     expect(result).toEqual(chunks);
-    expect(mockSearchClient.queryChunksByDocumentName).toHaveBeenCalledWith({ accessToken: idToken, documentName });
-  });
-
-  it("should get chunks by url after refreshing idToken", async () => {
-    const userId = "user123";
-    const url = "https://example.com";
-    const idToken = "idToken123";
-    const refreshToken = "refreshToken123";
-    const chunks = [{ chunk: "chunk1" }, { chunk: "chunk2" }];
-
-    const expiredUserData: UserData = {
-      idToken,
-      idTokenExpiry: new Date(Date.now() - 1000),
-      refreshToken
-    };
-    const refreshedUserData: UserData = {
-      idToken,
-      idTokenExpiry: new Date(Date.now() + 3600 * 1000),
-      refreshToken
-    };
-
-    readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
-    multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
-    mockSearchClient.getChunksByUrl.mockResolvedValue(chunks as unknown as Chunk[]);
-
-    multiUserClient.searchClient = mockSearchClient;
-    const result = await multiUserClient.getChunksByUrl({ userId, url });
-
-    expect(result).toEqual(chunks);
-    expect(mockSearchClient.getChunksByUrl).toHaveBeenCalledWith({ accessToken: idToken, url });
+    expect(mockSearchClient.getDocument).toHaveBeenCalledWith({ accessToken: idToken, ref: documentName });
   });
 });

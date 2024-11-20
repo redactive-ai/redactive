@@ -4,7 +4,7 @@ from typing import Any
 from rerankers import Reranker
 
 from redactive import search_client
-from redactive.grpc.v1 import Filters, RelevantChunk
+from redactive.grpc.v2 import Filters, RelevantChunk
 
 
 @dataclass
@@ -32,9 +32,8 @@ class RerankingSearchClient(search_client.SearchClient):
     async def query_chunks(
         self,
         access_token: str,
-        semantic_query: str,
+        query: str,
         count: int = 3,
-        query_filter: dict[str, Any] | None = None,
         filters: Filters | dict[str, Any] | None = None,
     ) -> list[RelevantChunk]:
         # Get many more results than the user is asking for, then
@@ -43,11 +42,9 @@ class RerankingSearchClient(search_client.SearchClient):
         if big_fetch_count > self.conf.max_fetch_results:
             big_fetch_count = self.conf.max_fetch_results
 
-        fetched_chunks = await super().query_chunks(
-            access_token, semantic_query, big_fetch_count, query_filter, filters
-        )
+        fetched_chunks = await super().search_chunks(access_token, query, big_fetch_count, filters)
         ranker = Reranker(self.conf.reranking_algorithm)
-        return self.rerank(semantic_query, fetched_chunks, ranker, count)
+        return self.rerank(query, fetched_chunks, ranker, count)
 
     def rerank(self, query_string: str, fetched_chunks: list[RelevantChunk], ranker, top_k):
         """

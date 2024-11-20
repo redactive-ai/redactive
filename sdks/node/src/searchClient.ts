@@ -2,34 +2,26 @@ import { Client, credentials, Metadata } from "@grpc/grpc-js";
 
 import { Chunk, RelevantChunk } from "./grpc/chunks";
 import {
-  DocumentNameQuery,
   Filters,
-  GetChunksByUrlRequest,
-  GetChunksByUrlResponse,
+  GetDocumentRequest,
+  GetDocumentResponse,
   Query,
-  QueryByDocumentNameRequest,
-  QueryByDocumentNameResponse,
-  QueryRequest,
-  QueryResponse,
+  SearchChunksRequest,
+  SearchChunksResponse,
   SearchClient as SearchServiceClient
 } from "./grpc/search";
 
-export interface QueryChunksSearchParams {
+export interface SearchChunksParams {
   accessToken: string;
-  semanticQuery: string;
+  query: string;
   count?: number;
   filters?: Partial<Filters>;
 }
 
-export interface QueryChunksByDocumentNameSearchParams {
+export interface GetDocumentParams {
   accessToken: string;
-  documentName: string;
+  ref: string;
   filters?: Partial<Filters>;
-}
-
-export interface GetChunksByUrlSearchParams {
-  accessToken: string;
-  url: string;
 }
 
 export class SearchClient {
@@ -63,32 +55,27 @@ export class SearchClient {
   /**
    * Query for relevant chunks based on a semantic query.
    * @param accessToken - The user's Redactive access token.
-   * @param semanticQuery - The query string used to find relevant chunks.
+   * @param query - The query string used to find relevant chunks.
    * @param count - The number of relevant chunks to retrieve. Defaults to 10.
    * @param filters - An object of filters for querying. Optional.
    * @returns list of relevant chunks.
    */
-  async queryChunks({
-    accessToken,
-    semanticQuery,
-    count = 10,
-    filters
-  }: QueryChunksSearchParams): Promise<RelevantChunk[]> {
+  async searchChunks({ accessToken, query, count = 10, filters }: SearchChunksParams): Promise<RelevantChunk[]> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);
     requestMetadata.set("User-Agent", "redactive-sdk-node");
 
     const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
-    const query: Query = { semanticQuery };
+    const query_obj: Query = { semanticQuery: query };
     const _filters: Filters = { scope: [], userEmails: [], ...filters };
-    const queryRequest: QueryRequest = {
-      query,
+    const searchRequest: SearchChunksRequest = {
+      query: query_obj,
       count,
       filters: filters ? _filters : undefined
     };
 
-    const response = await new Promise<QueryResponse>((resolve, reject) => {
-      client.queryChunks(queryRequest, requestMetadata, (err, response) => {
+    const response = await new Promise<SearchChunksResponse>((resolve, reject) => {
+      client.searchChunks(searchRequest, requestMetadata, (err, response) => {
         if (err) {
           reject(err);
           return;
@@ -101,60 +88,26 @@ export class SearchClient {
   }
 
   /**
-   * Query for chunks by document name.
+   * Get chunks for a document via a specific reference
    * @param accessToken - The user's Redactive access token.
-   * @param documentName - The name of the document to retrieve chunks.
-   * @param filters - The filters for querying documents. Optional.
+   * @param ref - A reference to the document to retrieve. Can be either a url or document name.
+   * @param filters - The filters for querying documents. Optional. Only applicable for getting by document name.
    * @returns The complete list of chunks for the matching document.
    */
-  async queryChunksByDocumentName({
-    accessToken,
-    documentName,
-    filters
-  }: QueryChunksByDocumentNameSearchParams): Promise<Chunk[]> {
+  async getDocument({ accessToken, ref, filters }: GetDocumentParams): Promise<Chunk[]> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);
     requestMetadata.set("User-Agent", "redactive-sdk-node");
 
     const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
-    const query: DocumentNameQuery = { documentName };
     const _filters: Filters = { scope: [], userEmails: [], ...filters };
-    const queryRequest: QueryByDocumentNameRequest = {
-      query,
+    const queryRequest: GetDocumentRequest = {
+      ref,
       filters: filters ? _filters : undefined
     };
 
-    const response = await new Promise<QueryByDocumentNameResponse>((resolve, reject) => {
-      client.queryChunksByDocumentName(queryRequest, requestMetadata, (err, response) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        return resolve(response);
-      });
-    });
-    return response.chunks;
-  }
-
-  /**
-   * Get chunks from a document by its URL.
-   * @param accessToken - The user's Redactive access token.
-   * @param url - The URL to the document for retrieving chunks.
-   * @returns The complete list of chunks for the matching document.
-   */
-  async getChunksByUrl({ accessToken, url }: GetChunksByUrlSearchParams): Promise<Chunk[]> {
-    const requestMetadata = new Metadata();
-    requestMetadata.set("Authorization", `Bearer ${accessToken}`);
-    requestMetadata.set("User-Agent", "redactive-sdk-node");
-
-    const client = this._getClient(SearchServiceClient.serviceName) as SearchServiceClient;
-    const queryRequest: GetChunksByUrlRequest = {
-      url
-    };
-
-    const response = await new Promise<GetChunksByUrlResponse>((resolve, reject) => {
-      client.getChunksByUrl(queryRequest, requestMetadata, (err, response) => {
+    const response = await new Promise<GetDocumentResponse>((resolve, reject) => {
+      client.getDocument(queryRequest, requestMetadata, (err, response) => {
         if (err) {
           reject(err);
           return;

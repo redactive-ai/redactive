@@ -7,7 +7,7 @@ The Redactive Node SDK provides a robust and intuitive interface for interacting
 In order to use the package to integrate with Redactive.ai, run:
 
 ```sh
-npm install redactive
+npm install @redactive/redactive
 ```
 
 There is no need to clone this repository.
@@ -35,28 +35,51 @@ The library has following components.
 AuthClient needs to be configured with your account's API key which is
 available in the Apps page at [Redactive Dashboard](https://dashboard.redactive.ai/).
 
+The AuthClient can be used to present users with the data providers' OAuth consent
+pages:
+
 ```javascript
 import { AuthClient } from "@redactive/redactive";
 
+// Construct AuthClient using your Redactive API key
+const client = new AuthClient("YOUR-API-KEY-HERE");
+
 // Establish an connection to data source
-// Possible data sources: confluence, google-drive, jira, zendesk, slack, sharepoint
-const redirectUri = "https://url-debugger.vercel.app";
+// Possible data sources: confluence, sharepoint
+const redirectUri = "YOUR-REDIRECT-URI";
 const provider = "confluence";
 const signInUrl = await client.beginConnection({ provider, redirectUri });
 
-// Navigate User to signInUrl
-// User will receive an oauth2 auth code after consenting the app's data source access permissions.
-// Use this code to exchange Redactive access_token with Redactive API
-const response = await client.exchangeTokens("OAUTH2-AUTH-CODE");
+// Now redirect your user to signInUrl
 ```
+
+The user will be redirected back to your app's configured redirect uri after they have completed the steps on
+the data provider's OAuth consent page. There will be a signin code present in the `code` parameter of the query string e.g.
+`https://your-redirect-page.com?code=abcde12345`.
+
+This code may be exchanged for a user access token (which the user may use to issue queries against their data):
+
+```javascript
+// Exchange signin code for a Redactive ID token
+const response = await client.exchangeTokens({ code: "SIGNIN-CODE" });
+const accessToken = response.idToken;
+```
+
+Once a user has completed the OAuth flow, the data source should show up in their connected data sources:
+
+```javascript
+(await client.listConnections({ accessToken }).connections) === ["confluence"]; // ✅
+```
+
+Use the `list_connections` method to keep your user's connection status up to date, and provide mechanisms to re-connect data sources.
 
 ### SearchClient
 
-With the Redactive access_token, you can perform three types of searches using the Redactive Search service:
+With the Redactive `access_token`, you can perform two types of search
 
-1. **Semantic Query Search**: Retrieve relevant chunks of information that are semantically related to a user query.
-2. **URL-based Search**: Obtain all the chunks from a document by specifying its URL.
-3. **Document Name Search**: Query for all the chunks from a document based on the name of the document.
+#### Query-based Search
+
+Retrieve relevant chunks of information that are related to a user query.
 
 ```javascript
 import { SearchClient } from "@redactive/redactive";
@@ -64,25 +87,39 @@ import { SearchClient } from "@redactive/redactive";
 const client = new SearchClient();
 const accessToken = "REDACTIVE-ACCESS-TOKEN";
 
-// Semantic Search: retrieve text extracts (chunks) from various documents pertaining to the user query
-const semanticQuery = "Tell me about AI";
-await client.queryChunks({ accessToken, semanticQuery });
-
-// URL-based Search: retrieve all chunks of the document at that URL
-const url = "https://example.com/document";
-await client.getChunksByUrl({ accessToken, url });
-
-// Document Name Search : retrieve all chunks of a document identified by its name
-const documentName = "AI Research Paper";
-await client.queryChunksByDocumentName({ accessToken, documentName });
+// Query-based Search: retrieve text extracts (chunks) from various documents pertaining to the user query
+const query = "Tell me about AI";
+await client.searchChunks({ accessToken, query });
 ```
 
-### Filters
+**Filters** may be applied to query-based search operations. At present, the following fields may be provided as filter predicates:
 
-Query methods, i.e. `queryChunks`, `queryChunksByDocumentName`, support a set of optional filters. The filters are applied in a logical 'AND' operation. If a data source provider does not support a filter-type, then no results from that provider are returned.
+```protobuf
+message Filters {
+    // Scope of the query. This may either be the name of a provider, or a subspace of documents.
+    // Subspaces take the form of <provider>://<tenancy>/<path>
+    // e.g. for Confluence: 'confluence://redactiveai.atlassian.net/Engineering/Engineering Onboarding Guide'
+    // for Sharepoint: 'sharepoint://redactiveai.sharepoint.com/Shared Documents/Engineering/Onboarding Guide.pdf'
+    repeated string scope = 1;
+    // Timespan of response chunk's creation
+    optional TimeSpan created = 2;
+    // Timespan of response chunk's last modification
+    optional TimeSpan modified = 3;
+    // List of user emails associated with response chunk
+    repeated string user_emails = 4;
+    // Include content from documents in trash
+    optional bool include_content_in_trash = 5;
+}
+```
 
-```typescript
-import { Filters } from "@redactive/redactive/grpc/search";
+The query will only return results which match _ALL_ filter predicates i.e. if multiple fields are populated in the filter object,
+the resulting filter is the logical 'AND' of all the fields. If a data source provider does not support a filter-type, then no
+results from that provider are returned.
+
+Filters may be populated and provided to a query in the following way for the NodeJS SDK:
+
+```javascript
+import { Filters } from "@redactive/redactive";
 
 // Query chunks from Confluence only, that are from documents created before last week, modified since last week,
 // and that are from documents associated with a user's email. Include chunks from trashed documents.
@@ -98,7 +135,23 @@ const filters: Filters = {
   userEmails: ["myEmail@example.com"],
   includeContentInTrash: true
 };
-await client.queryChunks({ accessToken, semanticQuery, filters });
+await client.searchChunks({ accessToken, semanticQuery, filters });
+
+```
+
+#### Document Fetch
+
+Obtain all the chunks from a specific document by specifying a unique reference (i.e. a URL).
+
+```javascript
+import { SearchClient } from "@redactive/redactive";
+
+const client = new SearchClient();
+const accessToken = "REDACTIVE-ACCESS-TOKEN";
+
+// URL-based Search: retrieve all chunks of the document at that URL
+const url = "https://example.com/document";
+await client.getDocument({ accessToken, url });
 ```
 
 ### Multi-User Client
@@ -124,8 +177,8 @@ let [signInCode, state] = ["", ""]; // from URL query parameters
 const isConnectionSuccessful = await multiUserClient.handleConnectionCallback(userId, signInCode, state);
 
 // User can now use Redactive search service via `MultiUserClient`'s other methods:
-const semanticQuery = "Tell me about the missing research vessel, the Borealis";
-const chunks = await multiUserClient.queryChunks({ userId, semanticQuery });
+const query = "Tell me about the missing research vessel, the Borealis";
+const chunks = await multiUserClient.searchChunks({ userId, query });
 ```
 
 ## Development

@@ -36,31 +36,60 @@ The library has the following components:
 AuthClient needs to be configured with your account's API key which is
 available in the Apps page at [Redactive Dashboard](https://dashboard.redactive.ai/).
 
+The AuthClient can be used to present users with the data providers' OAuth consent
+pages:
+
 ```python
 from redactive.auth_client import AuthClient
 
-client = AuthClient(api_key="API-KEY")
+client = AuthClient(api_key="YOUR-APP'S-API-KEY")
 
-# Establish an connection to data source
-# Possible data sources: confluence, google-drive, jira, zendesk, slack, sharepoint
-redirect_uri = "https://url-debugger.vercel.app"
+# This value must _exactly_ match the redirect URI you provided when creating your
+# Redactive app.
+redirect_uri = "YOUR-APP'S-REDIRECT-URI"
+
+# Possible data sources: confluence, sharepoint
+provider = "confluence"
+
 sign_in_url = await client.begin_connection(
-    provider="confluence", redirect_uri=redirect_uri
+    provider=provider, redirect_uri=redirect_uri
 )
 
-# Navigate User to sign_in_url
-# User will receive an oauth2 auth code after consenting the app's data source access permissions.
-# Use this code to exchange Redactive access_token with Redactive API
-response = await client.exchange_tokens(code="OAUTH2-TOKEN")
+# Now redirect your user to sign_in_url 
 ```
+
+The user will be redirected back to your app's configured redirect uri after they have completed the steps on
+the data provider's OAuth consent page. There will be a signin code present in the `code` parameter of the query string e.g.
+`https://your-redirect-page.com?code=abcde12345`. 
+
+This code may be exchanged for a user access token (which the user may use to issue queries against their data):
+
+```python
+# Exchange signin code for a Redactive ID token
+response = await client.exchange_tokens(code="SIGNIN-CODE")
+access_token = response.idToken
+```
+
+Once a user has completed the OAuth flow, the data source should show up in their connected data sources:
+
+```python
+response = await client.list_connections(
+    access_token=access_token
+)
+
+assert "confluence" in response.connections # ✅
+```
+
+Use the `list_connections` method to keep your user's connection status up to date, and provide mechanisms to re-connect data sources.
+
 
 ### SearchClient
 
-With the Redactive access_token, you can perform three types of searches using the Redactive Search service:
+With a Redactive `access_token`, you can perform two types of search
 
-1. **Semantic Query Search**: Retrieve relevant chunks of information that are semantically related to a user query.
-2. **URL-based Search**: Obtain all the chunks from a document by specifying its URL.
-3. **Document Name Search**: Query for all the chunks from a document based on the name of the document.
+#### Query-based Search
+
+Retrieve relevant chunks of information that are related to a user query.
 
 ```python
 from redactive.search_client import SearchClient
@@ -68,32 +97,42 @@ from redactive.search_client import SearchClient
 client = SearchClient()
 
 # Semantic Search: retrieve text extracts (chunks) from various documents pertaining to the user query
-client.query_chunks(
-    access_token="REDACTIVE-USER-ACCESS-TOKEN",
-    semantic_query="Tell me about AI"
-)
-
-# URL-based Search: retrieve all chunks of the document at that URL
-client.get_chunks_by_url(
-    access_token="REDACTIVE-USER-ACCESS-TOKEN",
-    url="https://example.com/document"
-)
-
-# Document Name Search: retrieve all chunks of a document identified by its name
-client.query_chunks_by_document_name(
-    access_token="REDACTIVE-USER-ACCESS-TOKEN",
-    document_name="Project Plan"
+client.search_chunks(
+    access_token=access_token,
+    query="Tell me about AI"
 )
 ```
 
-### Filters
+**Filters** may be applied to query-based search operations. At present, the following fields may be provided as filter predicates:
 
-Query methods, i.e. `query_chunks`, `query_chunks_by_document_name`, support a set of optional filters. The filters are applied in a logical 'AND' operation. If a data source provider does not support a filter-type, then no results from that provider are returned.
+```protobuf
+message Filters {
+    // Scope of the query. This may either be the name of a provider, or a subspace of documents.
+    // Subspaces take the form of <provider>://<tenancy>/<path>
+    // e.g. for Confluence: 'confluence://redactiveai.atlassian.net/Engineering/Engineering Onboarding Guide'
+    // for Sharepoint: 'sharepoint://redactiveai.sharepoint.com/Shared Documents/Engineering/Onboarding Guide.pdf'
+    repeated string scope = 1;
+    // Timespan of response chunk's creation
+    optional TimeSpan created = 2;
+    // Timespan of response chunk's last modification
+    optional TimeSpan modified = 3;
+    // List of user emails associated with response chunk
+    repeated string user_emails = 4;
+    // Include content from documents in trash
+    optional bool include_content_in_trash = 5;
+}
+```
+
+The query will only return results which match _ALL_ filter predicates i.e. if multiple fields are populated in the filter object, 
+the resulting filter is the logical 'AND' of all the fields. If a data source provider does not support a filter-type, then no 
+results from that provider are returned.
+
+Filters may be populated and provided to a query in the following way for the Python SDK:
 
 ```python
 from datetime import datetime, timedelta
 from redactive.search_client import SearchClient
-from redactive.grpc.v1 import Filters
+from redactive.grpc.v2 import Filters
 
 client = SearchClient()
 
@@ -111,10 +150,23 @@ filters = Filters().from_dict({
   "userEmails": ["myEmail@example.com"],
   "includeContentInTrash": True,
 })
-client.query_chunks(
+client.search_chunks(
     access_token="REDACTIVE-USER-ACCESS-TOKEN",
     semantic_query="Tell me about AI",
     filters=filters
+)
+```
+
+
+#### Document Fetch
+
+Obtain all the chunks from a specific document by specifying a unique reference (i.e. a URL).
+
+```python
+# URL-based Search: retrieve all chunks of the document at that URL
+client.get_document(
+    access_token="REDACTIVE-USER-ACCESS-TOKEN",
+    ref="https://example.com/document"
 )
 ```
 
@@ -145,8 +197,8 @@ is_connection_successful = await multi_user_client.handle_connection_callback(
 )
 
 # User can now use Redactive search service via `MultiUserClient`'s other methods:
-semantic_query = "Tell me about the missing research vessel, the Borealis"
-chunks = await multi_user_client.query_chunks(user_id=user_id, semantic_query=semantic_query)
+query = "Tell me about the missing research vessel, the Borealis"
+chunks = await multi_user_client.search_chunks(user_id=user_id, query=query)
 ```
 
 ## Development

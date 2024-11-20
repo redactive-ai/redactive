@@ -1,29 +1,23 @@
 syntax = "proto3";
 
-package redactive.grpc.v1;
+package redactive.grpc.v2;
 
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
-
 import "chunks.proto";
 
 service Search {
     // Query the index for relevant chunks
-    rpc QueryChunks(QueryRequest) returns (QueryResponse);
+    rpc SearchChunks(SearchChunksRequest) returns (SearchChunksResponse);
     // Query the index for all chunks of a specific document
-    rpc QueryChunksByDocumentName(QueryByDocumentNameRequest) returns (QueryByDocumentNameResponse);
-    // Get chunks by URL
-    rpc GetChunksByUrl(GetChunksByUrlRequest) returns (GetChunksByUrlResponse);
+    rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse);
 }
 
 message Query {
-    // Semantic query to execute
-    string semantic_query = 1;
-}
-
-message DocumentNameQuery {
-    // Document name to search for
-    string document_name = 1;
+    // Search query for semantic content
+    optional string semantic_query = 1;
+    // Specific keywords to search for in source document
+    optional string keyword_query = 2;
 }
 
 message TimeSpan {
@@ -32,7 +26,10 @@ message TimeSpan {
 }
 
 message Filters {
-    // Scope e.g. "confluence", "slack://channel-name", "google-drive://CompanyDrive/document.docx"
+    // Scope of the query. This may either be the name of a fetcher, or a subspace of documents.
+    // Subspaces take the form of <provider>://<tenancy>/<path>
+    // e.g. for Confluence: 'confluence://redactiveai.atlassian.net/Engineering/Engineering Onboarding Guide'
+    // for Sharepoint: 'sharepoint://redactiveai.sharepoint.com/Shared Documents/Engineering/Onboarding Guide.pdf'
     repeated string scope = 1;
     // Timespan of response chunk's creation
     optional TimeSpan created = 2;
@@ -44,7 +41,7 @@ message Filters {
     optional bool include_content_in_trash = 5;
 }
 
-message QueryRequest {
+message SearchChunksRequest {
     // How many results to try to return (maximum number of results)
     optional uint32 count = 1;
     // The query to execute
@@ -53,7 +50,14 @@ message QueryRequest {
     optional Filters filters = 3;
 }
 
-message QueryResponse {
+message GetDocumentRequest {
+   // A reference to the document to retrieve
+   string ref = 1;
+   // Query filters (only really for GetDocByTitle)
+   optional Filters filters = 2;
+}
+
+message SearchChunksResponse {
     // Query was successful
     bool success = 1;
     // Error message if query failed
@@ -62,28 +66,7 @@ message QueryResponse {
     repeated RelevantChunk relevant_chunks = 3;
 }
 
-message GetChunksByUrlRequest {
-    // URL to document
-    string url = 1;
-}
-
-message GetChunksByUrlResponse {
-    // Fetch was successful
-    bool success = 1;
-    // Error message if fetch failed
-    optional google.protobuf.Struct error = 2;
-    // List of chunks
-    repeated Chunk chunks = 3;
-}
-
-message QueryByDocumentNameRequest {
-    // The query to execute
-    DocumentNameQuery query = 2;
-    // Filters to apply to query
-    optional Filters filters = 3;
-}
-
-message QueryByDocumentNameResponse {
+message GetDocumentResponse {
     // Query was successful
     bool success = 1;
     // Error message if query failed

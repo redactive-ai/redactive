@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from redactive.auth_client import AuthClient
-from redactive.grpc.v1 import Chunk, RelevantChunk
+from redactive.grpc.v2 import RelevantChunk
 from redactive.multi_user_client import MultiUserClient, UserData
 from redactive.search_client import SearchClient
 
@@ -44,8 +44,8 @@ def test_multi_user_client_initialization() -> None:
     callback_uri = "http://callback.uri"
     read_user_data = mock.Mock()
     write_user_data = mock.Mock()
-    auth_base_url = ("http://auth.base.url",)
-    grpc_host = ("grpc.host",)
+    auth_base_url = "http://auth.base.url"
+    grpc_host = "grpc.host"
     grpc_port = 443
 
     multi_user_client = MultiUserClient(
@@ -85,60 +85,37 @@ def test_multi_user_client_initialization_with_no_options() -> None:
 
 
 @pytest.mark.asyncio
-async def test_query_chunks(multi_user_client: MultiUserClient, mock_search_client: mock.AsyncMock) -> None:
+async def test_search_chunks(multi_user_client: MultiUserClient, mock_search_client: mock.AsyncMock) -> None:
     user_id = "user123"
-    semantic_query = "example query"
+    query = "example query"
     count = 5
     filters = {"key": "value"}
     relevant_chunks = [mock.Mock(spec=RelevantChunk) for _ in range(count)]
 
     multi_user_client.search_client = mock_search_client
-    multi_user_client.search_client.query_chunks.return_value = relevant_chunks
+    multi_user_client.search_client.search_chunks.return_value = relevant_chunks
     multi_user_client.read_user_data.side_effect = mock_read_user_data
 
-    result = await multi_user_client.query_chunks(user_id, semantic_query, count, filters=filters)
+    result = await multi_user_client.search_chunks(user_id, query, count, filters=filters)
 
     assert result == relevant_chunks
-    multi_user_client.search_client.query_chunks.assert_called_with(
-        "idToken123", semantic_query, count, filters=filters
-    )
+    multi_user_client.search_client.search_chunks.assert_called_with("idToken123", query, count, filters=filters)
 
 
 @pytest.mark.asyncio
-async def test_query_chunks_by_document_name(
-    multi_user_client: MultiUserClient, mock_search_client: mock.AsyncMock
-) -> None:
-    user_id = "user123"
-    document_name = "example_document"
-    filters = {"key": "value"}
-    chunks = [mock.Mock(spec=Chunk) for _ in range(3)]
-
-    multi_user_client.search_client = mock_search_client
-    multi_user_client.search_client.query_chunks_by_document_name.return_value = chunks
-    multi_user_client.read_user_data.side_effect = mock_read_user_data
-
-    result = await multi_user_client.query_chunks_by_document_name(user_id, document_name, filters)
-
-    assert result == chunks
-    multi_user_client.search_client.query_chunks_by_document_name.assert_called_with(
-        "idToken123", document_name, filters
-    )
-
-
-@pytest.mark.asyncio
-async def test_get_chunks_by_url(multi_user_client: MultiUserClient, mock_search_client: mock.AsyncMock) -> None:
+async def test_get_document_by_url(multi_user_client: MultiUserClient, mock_search_client: mock.AsyncMock) -> None:
     user_id = "user123"
     url = "http://example.com"
     chunks = [mock.Mock() for _ in range(3)]
 
     multi_user_client.search_client = mock_search_client
-    multi_user_client.search_client.get_chunks_by_url.return_value = chunks
+    multi_user_client.search_client.get_document.return_value = chunks
     multi_user_client.read_user_data.side_effect = mock_read_user_data
 
-    result = await multi_user_client.get_chunks_by_url(user_id, url)
+    result = await multi_user_client.get_document(user_id, url)
 
     assert result == chunks
-    multi_user_client.search_client.get_chunks_by_url.assert_called_with("idToken123", url)
+    multi_user_client.search_client.get_document.assert_called_with("idToken123", url)
 
 
 async def test_get_begin_connection_url(multi_user_client: MultiUserClient, mock_auth_client: mock.AsyncMock) -> None:

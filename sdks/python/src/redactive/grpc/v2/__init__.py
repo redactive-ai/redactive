@@ -37,33 +37,35 @@ class ChunkMetadata(betterproto.Message):
 @dataclass(eq=False, repr=False)
 class SourceReference(betterproto.Message):
     system: str = betterproto.string_field(1)
-    """Source system of the document e.g. confluence, slack, google-drive"""
+    """Source system of the document e.g. confluence, sharepoint"""
 
     system_version: str = betterproto.string_field(2)
     """Version of the source system e.g. 1.0.0"""
 
     connection_id: str = betterproto.string_field(3)
     """
-    Connection id to the source system e.g. confluence space id, slack channel
-    id, google-drive drive id
+    Connection id to the source system e.g. confluence space id, sharepoint
+    drive id
     """
 
     document_id: str = betterproto.string_field(4)
     """
-    Document id in the source system e.g. confluence page id, slack message id,
-    google-drive document id
+    Document id in the source system e.g. confluence page id, sharepoint file
+    id
     """
 
     document_version: str = betterproto.string_field(5)
     """
-    Document version in the source system e.g. confluence page version, slack
-    message version, google-drive document version
+    Document version in the source system e.g. confluence page version,
+    sharepoint file hash
     """
 
     document_path: Optional[str] = betterproto.string_field(6, optional=True, group="_document_path")
     """
-    Document path in the source system e.g. "My Drive/document.txt", "slack-
-    channel-name"
+    Document path in the source system e.g.
+    "redactiveai.atlassian.net/Engineering/Onboarding Guide" or
+    "redactiveai.sharepoint.com/Shared Documents/Engineering/Onboarding
+    Guide.pdf"
     """
 
     document_name: Optional[str] = betterproto.string_field(7, optional=True, group="_document_name")
@@ -127,14 +129,11 @@ class Chunk(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class Query(betterproto.Message):
-    semantic_query: str = betterproto.string_field(1)
-    """Semantic query to execute"""
+    semantic_query: Optional[str] = betterproto.string_field(1, optional=True, group="_semantic_query")
+    """Search query for semantic content"""
 
-
-@dataclass(eq=False, repr=False)
-class DocumentNameQuery(betterproto.Message):
-    document_name: str = betterproto.string_field(1)
-    """Document name to search for"""
+    keyword_query: Optional[str] = betterproto.string_field(2, optional=True, group="_keyword_query")
+    """Specific keywords to search for in source document"""
 
 
 @dataclass(eq=False, repr=False)
@@ -147,8 +146,12 @@ class TimeSpan(betterproto.Message):
 class Filters(betterproto.Message):
     scope: List[str] = betterproto.string_field(1)
     """
-    Scope e.g. "confluence", "slack://channel-name", "google-
-    drive://CompanyDrive/document.docx"
+    Scope of the query. This may either be the name of a fetcher, or a subspace
+    of documents. Subspaces take the form of <provider>://<tenancy>/<path> e.g.
+    for Confluence:
+    'confluence://redactiveai.atlassian.net/Engineering/Engineering Onboarding
+    Guide' for Sharepoint: 'sharepoint://redactiveai.sharepoint.com/Shared
+    Documents/Engineering/Onboarding Guide.pdf'
     """
 
     created: Optional["TimeSpan"] = betterproto.message_field(2, optional=True, group="_created")
@@ -167,7 +170,7 @@ class Filters(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class QueryRequest(betterproto.Message):
+class SearchChunksRequest(betterproto.Message):
     count: Optional[int] = betterproto.uint32_field(1, optional=True, group="_count")
     """How many results to try to return (maximum number of results)"""
 
@@ -179,7 +182,16 @@ class QueryRequest(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class QueryResponse(betterproto.Message):
+class GetDocumentRequest(betterproto.Message):
+    ref: str = betterproto.string_field(1)
+    """A reference to the document to retrieve"""
+
+    filters: Optional["Filters"] = betterproto.message_field(2, optional=True, group="_filters")
+    """Query filters (only really for GetDocByTitle)"""
+
+
+@dataclass(eq=False, repr=False)
+class SearchChunksResponse(betterproto.Message):
     success: bool = betterproto.bool_field(1)
     """Query was successful"""
 
@@ -193,36 +205,7 @@ class QueryResponse(betterproto.Message):
 
 
 @dataclass(eq=False, repr=False)
-class GetChunksByUrlRequest(betterproto.Message):
-    url: str = betterproto.string_field(1)
-    """URL to document"""
-
-
-@dataclass(eq=False, repr=False)
-class GetChunksByUrlResponse(betterproto.Message):
-    success: bool = betterproto.bool_field(1)
-    """Fetch was successful"""
-
-    error: Optional["betterproto_lib_google_protobuf.Struct"] = betterproto.message_field(
-        2, optional=True, group="_error"
-    )
-    """Error message if fetch failed"""
-
-    chunks: List["Chunk"] = betterproto.message_field(3)
-    """List of chunks"""
-
-
-@dataclass(eq=False, repr=False)
-class QueryByDocumentNameRequest(betterproto.Message):
-    query: "DocumentNameQuery" = betterproto.message_field(2)
-    """The query to execute"""
-
-    filters: Optional["Filters"] = betterproto.message_field(3, optional=True, group="_filters")
-    """Filters to apply to query"""
-
-
-@dataclass(eq=False, repr=False)
-class QueryByDocumentNameResponse(betterproto.Message):
+class GetDocumentResponse(betterproto.Message):
     success: bool = betterproto.bool_field(1)
     """Query was successful"""
 
@@ -236,52 +219,35 @@ class QueryByDocumentNameResponse(betterproto.Message):
 
 
 class SearchStub(betterproto.ServiceStub):
-    async def query_chunks(
+    async def search_chunks(
         self,
-        query_request: "QueryRequest",
+        search_chunks_request: "SearchChunksRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
         metadata: Optional["MetadataLike"] = None,
-    ) -> "QueryResponse":
+    ) -> "SearchChunksResponse":
         return await self._unary_unary(
-            "/redactive.grpc.v1.Search/QueryChunks",
-            query_request,
-            QueryResponse,
+            "/redactive.grpc.v2.Search/SearchChunks",
+            search_chunks_request,
+            SearchChunksResponse,
             timeout=timeout,
             deadline=deadline,
             metadata=metadata,
         )
 
-    async def query_chunks_by_document_name(
+    async def get_document(
         self,
-        query_by_document_name_request: "QueryByDocumentNameRequest",
+        get_document_request: "GetDocumentRequest",
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
         metadata: Optional["MetadataLike"] = None,
-    ) -> "QueryByDocumentNameResponse":
+    ) -> "GetDocumentResponse":
         return await self._unary_unary(
-            "/redactive.grpc.v1.Search/QueryChunksByDocumentName",
-            query_by_document_name_request,
-            QueryByDocumentNameResponse,
-            timeout=timeout,
-            deadline=deadline,
-            metadata=metadata,
-        )
-
-    async def get_chunks_by_url(
-        self,
-        get_chunks_by_url_request: "GetChunksByUrlRequest",
-        *,
-        timeout: Optional[float] = None,
-        deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None,
-    ) -> "GetChunksByUrlResponse":
-        return await self._unary_unary(
-            "/redactive.grpc.v1.Search/GetChunksByUrl",
-            get_chunks_by_url_request,
-            GetChunksByUrlResponse,
+            "/redactive.grpc.v2.Search/GetDocument",
+            get_document_request,
+            GetDocumentResponse,
             timeout=timeout,
             deadline=deadline,
             metadata=metadata,
@@ -289,56 +255,38 @@ class SearchStub(betterproto.ServiceStub):
 
 
 class SearchBase(ServiceBase):
-    async def query_chunks(self, query_request: "QueryRequest") -> "QueryResponse":
+    async def search_chunks(self, search_chunks_request: "SearchChunksRequest") -> "SearchChunksResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def query_chunks_by_document_name(
-        self, query_by_document_name_request: "QueryByDocumentNameRequest"
-    ) -> "QueryByDocumentNameResponse":
+    async def get_document(self, get_document_request: "GetDocumentRequest") -> "GetDocumentResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_chunks_by_url(self, get_chunks_by_url_request: "GetChunksByUrlRequest") -> "GetChunksByUrlResponse":
-        raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
-
-    async def __rpc_query_chunks(self, stream: "grpclib.server.Stream[QueryRequest, QueryResponse]") -> None:
-        request = await stream.recv_message()
-        response = await self.query_chunks(request)
-        await stream.send_message(response)
-
-    async def __rpc_query_chunks_by_document_name(
-        self,
-        stream: "grpclib.server.Stream[QueryByDocumentNameRequest, QueryByDocumentNameResponse]",
+    async def __rpc_search_chunks(
+        self, stream: "grpclib.server.Stream[SearchChunksRequest, SearchChunksResponse]"
     ) -> None:
         request = await stream.recv_message()
-        response = await self.query_chunks_by_document_name(request)
+        response = await self.search_chunks(request)
         await stream.send_message(response)
 
-    async def __rpc_get_chunks_by_url(
-        self,
-        stream: "grpclib.server.Stream[GetChunksByUrlRequest, GetChunksByUrlResponse]",
+    async def __rpc_get_document(
+        self, stream: "grpclib.server.Stream[GetDocumentRequest, GetDocumentResponse]"
     ) -> None:
         request = await stream.recv_message()
-        response = await self.get_chunks_by_url(request)
+        response = await self.get_document(request)
         await stream.send_message(response)
 
     def __mapping__(self) -> Dict[str, grpclib.const.Handler]:
         return {
-            "/redactive.grpc.v1.Search/QueryChunks": grpclib.const.Handler(
-                self.__rpc_query_chunks,
+            "/redactive.grpc.v2.Search/SearchChunks": grpclib.const.Handler(
+                self.__rpc_search_chunks,
                 grpclib.const.Cardinality.UNARY_UNARY,
-                QueryRequest,
-                QueryResponse,
+                SearchChunksRequest,
+                SearchChunksResponse,
             ),
-            "/redactive.grpc.v1.Search/QueryChunksByDocumentName": grpclib.const.Handler(
-                self.__rpc_query_chunks_by_document_name,
+            "/redactive.grpc.v2.Search/GetDocument": grpclib.const.Handler(
+                self.__rpc_get_document,
                 grpclib.const.Cardinality.UNARY_UNARY,
-                QueryByDocumentNameRequest,
-                QueryByDocumentNameResponse,
-            ),
-            "/redactive.grpc.v1.Search/GetChunksByUrl": grpclib.const.Handler(
-                self.__rpc_get_chunks_by_url,
-                grpclib.const.Cardinality.UNARY_UNARY,
-                GetChunksByUrlRequest,
-                GetChunksByUrlResponse,
+                GetDocumentRequest,
+                GetDocumentResponse,
             ),
         }

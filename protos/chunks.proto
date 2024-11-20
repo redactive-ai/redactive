@@ -1,8 +1,9 @@
 syntax = "proto3";
 
-package redactive.grpc.v1;
+package redactive.grpc.v2;
 
 import "google/protobuf/timestamp.proto";
+
 
 message ChunkMetadata {
     // Chunk content's creation timestamp
@@ -13,17 +14,18 @@ message ChunkMetadata {
 }
 
 message SourceReference {
-    // Source system of the document e.g. confluence, slack, google-drive
+    // Source system of the document e.g. confluence, sharepoint
     string system = 1;
     // Version of the source system e.g. 1.0.0
     string system_version = 2;
-    // Connection id to the source system e.g. confluence space id, slack channel id, google-drive drive id
+    // Connection id to the source system e.g. confluence space id, sharepoint drive id
     string connection_id = 3;
-    // Document id in the source system e.g. confluence page id, slack message id, google-drive document id
+    // Document id in the source system e.g. confluence page id, sharepoint file id
     string document_id = 4;
-    // Document version in the source system e.g. confluence page version, slack message version, google-drive document version
+    // Document version in the source system e.g. confluence page version, sharepoint file hash
     string document_version = 5;
-    // Document path in the source system e.g. "My Drive/document.txt", "slack-channel-name"
+    // Document path in the source system e.g. "redactiveai.atlassian.net/Engineering/Onboarding Guide"
+    // or "redactiveai.sharepoint.com/Shared Documents/Engineering/Onboarding Guide.pdf"
     optional string document_path = 6;
     // Document name in the source system e.g. "document.txt"
     optional string document_name = 7;
