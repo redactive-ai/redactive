@@ -36,23 +36,52 @@ The library has the following components:
 AuthClient needs to be configured with your account's API key which is
 available in the Apps page at [Redactive Dashboard](https://dashboard.redactive.ai/).
 
+The AuthClient can be used to present users with the data providers' OAuth consent
+pages:
+
 ```python
 from redactive.auth_client import AuthClient
 
-client = AuthClient(api_key="API-KEY")
+client = AuthClient(api_key="YOUR-APP'S-API-KEY")
 
-# Establish an connection to data source
-# Possible data sources: confluence, google-drive, jira, zendesk, slack, sharepoint
-redirect_uri = "https://url-debugger.vercel.app"
+# This value must _exactly_ match the redirect URI you provided when creating your
+# Redactive app.
+redirect_uri = "YOUR-APP'S-REDIRECT-URI"
+
+# Possible data sources: confluence, sharepoint
+provider = "confluence"
+
 sign_in_url = await client.begin_connection(
-    provider="confluence", redirect_uri=redirect_uri
+    provider=provider, redirect_uri=redirect_uri
 )
 
-# Navigate User to sign_in_url
-# User will receive an oauth2 auth code after consenting the app's data source access permissions.
-# Use this code to exchange Redactive access_token with Redactive API
-response = await client.exchange_tokens(code="OAUTH2-TOKEN")
+# Now redirect your user to sign_in_url 
 ```
+
+The user will be redirected back to your app's configured redirect uri after they have completed the steps on
+the data provider's OAuth consent page. There will be a signin code present in the `code` parameter of the query string e.g.
+`https://your-redirect-page.com?code=abcde12345`. 
+
+This code may be exchanged for a user access token (which the user may use to issue queries against their data):
+
+```python
+# Exchange signin code for a Redactive ID token
+response = await client.exchange_tokens(code="SIGNIN-CODE")
+access_token = response.idToken
+```
+
+Once a user has completed the OAuth flow, the data source should show up in their connected data sources:
+
+```python
+response = await client.list_connections(
+    access_token=access_token
+)
+
+assert "confluence" in response.connections # ✅
+```
+
+Use the `list_connections` method to keep your user's connection status up to date, and provide mechanisms to re-connect data sources.
+
 
 ### SearchClient
 
@@ -69,7 +98,7 @@ client = SearchClient()
 
 # Semantic Search: retrieve text extracts (chunks) from various documents pertaining to the user query
 client.search_chunks(
-    access_token="REDACTIVE-USER-ACCESS-TOKEN",
+    access_token=access_token,
     query="Tell me about AI"
 )
 ```

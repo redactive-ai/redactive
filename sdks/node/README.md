@@ -7,7 +7,7 @@ The Redactive Node SDK provides a robust and intuitive interface for interacting
 In order to use the package to integrate with Redactive.ai, run:
 
 ```sh
-npm install redactive
+npm install @redactive/redactive
 ```
 
 There is no need to clone this repository.
@@ -35,20 +35,46 @@ The library has following components.
 AuthClient needs to be configured with your account's API key which is
 available in the Apps page at [Redactive Dashboard](https://dashboard.redactive.ai/).
 
+The AuthClient can be used to present users with the data providers' OAuth consent
+pages:
+
 ```javascript
 import { AuthClient } from "@redactive/redactive";
 
+// Construct AuthClient using your Redactive API key
+const client = new AuthClient(
+    "YOUR-API-KEY-HERE"
+)
+
 // Establish an connection to data source
-// Possible data sources: confluence, google-drive, jira, zendesk, slack, sharepoint
-const redirectUri = "https://url-debugger.vercel.app";
+// Possible data sources: confluence, sharepoint
+const redirectUri = "YOUR-REDIRECT-URI";
 const provider = "confluence";
 const signInUrl = await client.beginConnection({ provider, redirectUri });
 
-// Navigate User to signInUrl
-// User will receive an oauth2 auth code after consenting the app's data source access permissions.
-// Use this code to exchange Redactive access_token with Redactive API
-const response = await client.exchangeTokens("OAUTH2-AUTH-CODE");
+
+// Now redirect your user to signInUrl 
 ```
+
+The user will be redirected back to your app's configured redirect uri after they have completed the steps on
+the data provider's OAuth consent page. There will be a signin code present in the `code` parameter of the query string e.g.
+`https://your-redirect-page.com?code=abcde12345`. 
+
+This code may be exchanged for a user access token (which the user may use to issue queries against their data):
+
+```javascript
+// Exchange signin code for a Redactive ID token
+const response = await client.exchangeTokens({code: "SIGNIN-CODE"});
+const accessToken = response.idToken
+```
+
+Once a user has completed the OAuth flow, the data source should show up in their connected data sources:
+
+```javascript
+await client.listConnections({accessToken}).connections === [ "confluence" ] // ✅
+```
+
+Use the `list_connections` method to keep your user's connection status up to date, and provide mechanisms to re-connect data sources.
 
 ### SearchClient
 
@@ -96,7 +122,7 @@ results from that provider are returned.
 Filters may be populated and provided to a query in the following way for the NodeJS SDK:
 
 ```javascript
-import { Filters } from "@redactive/redactive/grpc/search";
+import { Filters } from "@redactive/redactive";
 
 // Query chunks from Confluence only, that are from documents created before last week, modified since last week,
 // and that are from documents associated with a user's email. Include chunks from trashed documents.
