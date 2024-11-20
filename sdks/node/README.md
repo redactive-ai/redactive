@@ -42,9 +42,7 @@ pages:
 import { AuthClient } from "@redactive/redactive";
 
 // Construct AuthClient using your Redactive API key
-const client = new AuthClient(
-    "YOUR-API-KEY-HERE"
-)
+const client = new AuthClient("YOUR-API-KEY-HERE");
 
 // Establish an connection to data source
 // Possible data sources: confluence, sharepoint
@@ -52,26 +50,25 @@ const redirectUri = "YOUR-REDIRECT-URI";
 const provider = "confluence";
 const signInUrl = await client.beginConnection({ provider, redirectUri });
 
-
-// Now redirect your user to signInUrl 
+// Now redirect your user to signInUrl
 ```
 
 The user will be redirected back to your app's configured redirect uri after they have completed the steps on
 the data provider's OAuth consent page. There will be a signin code present in the `code` parameter of the query string e.g.
-`https://your-redirect-page.com?code=abcde12345`. 
+`https://your-redirect-page.com?code=abcde12345`.
 
 This code may be exchanged for a user access token (which the user may use to issue queries against their data):
 
 ```javascript
 // Exchange signin code for a Redactive ID token
-const response = await client.exchangeTokens({code: "SIGNIN-CODE"});
-const accessToken = response.idToken
+const response = await client.exchangeTokens({ code: "SIGNIN-CODE" });
+const accessToken = response.idToken;
 ```
 
 Once a user has completed the OAuth flow, the data source should show up in their connected data sources:
 
 ```javascript
-await client.listConnections({accessToken}).connections === [ "confluence" ] // ✅
+(await client.listConnections({ accessToken }).connections) === ["confluence"]; // ✅
 ```
 
 Use the `list_connections` method to keep your user's connection status up to date, and provide mechanisms to re-connect data sources.
