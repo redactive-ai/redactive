@@ -18,7 +18,7 @@ export const protobufPackage = "google.protobuf";
 export enum NullValue {
   /** NULL_VALUE - Null value. */
   NULL_VALUE = 0,
-  UNRECOGNIZED = -1
+  UNRECOGNIZED = -1,
 }
 
 export function nullValueFromJSON(object: any): NullValue {
@@ -73,15 +73,25 @@ export interface Struct_FieldsEntry {
  */
 export interface Value {
   /** Represents a null value. */
-  nullValue?: NullValue | undefined;
+  nullValue?:
+    | NullValue
+    | undefined;
   /** Represents a double value. */
-  numberValue?: number | undefined;
+  numberValue?:
+    | number
+    | undefined;
   /** Represents a string value. */
-  stringValue?: string | undefined;
+  stringValue?:
+    | string
+    | undefined;
   /** Represents a boolean value. */
-  boolValue?: boolean | undefined;
+  boolValue?:
+    | boolean
+    | undefined;
   /** Represents a structured value. */
-  structValue?: { [key: string]: any } | undefined;
+  structValue?:
+    | { [key: string]: any }
+    | undefined;
   /** Represents a repeated `Value`. */
   listValue?: Array<any> | undefined;
 }
@@ -141,10 +151,10 @@ export const Struct: MessageFns<Struct> & StructWrapperFns = {
     return {
       fields: isObject(object.fields)
         ? Object.entries(object.fields).reduce<{ [key: string]: any | undefined }>((acc, [key, value]) => {
-            acc[key] = value as any | undefined;
-            return acc;
-          }, {})
-        : {}
+          acc[key] = value as any | undefined;
+          return acc;
+        }, {})
+        : {},
     };
   },
 
@@ -174,7 +184,7 @@ export const Struct: MessageFns<Struct> & StructWrapperFns = {
         }
         return acc;
       },
-      {}
+      {},
     );
     return message;
   },
@@ -198,7 +208,7 @@ export const Struct: MessageFns<Struct> & StructWrapperFns = {
       }
     }
     return object;
-  }
+  },
 };
 
 function createBaseStruct_FieldsEntry(): Struct_FieldsEntry {
@@ -251,7 +261,7 @@ export const Struct_FieldsEntry: MessageFns<Struct_FieldsEntry> = {
   fromJSON(object: any): Struct_FieldsEntry {
     return {
       key: isSet(object.key) ? globalThis.String(object.key) : "",
-      value: isSet(object?.value) ? object.value : undefined
+      value: isSet(object?.value) ? object.value : undefined,
     };
   },
 
@@ -274,7 +284,7 @@ export const Struct_FieldsEntry: MessageFns<Struct_FieldsEntry> = {
     message.key = object.key ?? "";
     message.value = object.value ?? undefined;
     return message;
-  }
+  },
 };
 
 function createBaseValue(): Value {
@@ -284,7 +294,7 @@ function createBaseValue(): Value {
     stringValue: undefined,
     boolValue: undefined,
     structValue: undefined,
-    listValue: undefined
+    listValue: undefined,
   };
 }
 
@@ -382,7 +392,7 @@ export const Value: MessageFns<Value> & AnyValueWrapperFns = {
       stringValue: isSet(object.stringValue) ? globalThis.String(object.stringValue) : undefined,
       boolValue: isSet(object.boolValue) ? globalThis.Boolean(object.boolValue) : undefined,
       structValue: isObject(object.structValue) ? object.structValue : undefined,
-      listValue: globalThis.Array.isArray(object.listValue) ? [...object.listValue] : undefined
+      listValue: globalThis.Array.isArray(object.listValue) ? [...object.listValue] : undefined,
     };
   },
 
@@ -458,7 +468,7 @@ export const Value: MessageFns<Value> & AnyValueWrapperFns = {
       return null;
     }
     return undefined;
-  }
+  },
 };
 
 function createBaseListValue(): ListValue {
@@ -530,24 +540,19 @@ export const ListValue: MessageFns<ListValue> & ListValueWrapperFns = {
     } else {
       return message as any;
     }
-  }
+  },
 };
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends globalThis.Array<infer U>
-    ? globalThis.Array<DeepPartial<U>>
-    : T extends ReadonlyArray<infer U>
-      ? ReadonlyArray<DeepPartial<U>>
-      : T extends {}
-        ? { [K in keyof T]?: DeepPartial<T[K]> }
-        : Partial<T>;
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
+  : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin
-  ? P
+export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function isObject(value: any): boolean {

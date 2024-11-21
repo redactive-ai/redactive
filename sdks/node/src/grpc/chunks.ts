@@ -6,14 +6,15 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
-
 import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "redactive.grpc.v2";
 
 export interface ChunkMetadata {
   /** Chunk content's creation timestamp */
-  createdAt?: Date | undefined;
+  createdAt?:
+    | Date
+    | undefined;
   /** Chunk content's last modified timestamp */
   modifiedAt?: Date | undefined;
   link?: string | undefined;
@@ -34,7 +35,9 @@ export interface SourceReference {
    * Document path in the source system e.g. "redactiveai.atlassian.net/Engineering/Onboarding Guide"
    * or "redactiveai.sharepoint.com/Shared Documents/Engineering/Onboarding Guide.pdf"
    */
-  documentPath?: string | undefined;
+  documentPath?:
+    | string
+    | undefined;
   /** Document name in the source system e.g. "document.txt" */
   documentName?: string | undefined;
 }
@@ -51,11 +54,17 @@ export interface ChunkReference {
 /** A chunk is a part of a document */
 export interface RelevantChunk {
   /** Source reference of the document */
-  source: SourceReference | undefined;
+  source:
+    | SourceReference
+    | undefined;
   /** Chunk reference of the chunk */
-  chunk: ChunkReference | undefined;
+  chunk:
+    | ChunkReference
+    | undefined;
   /** Relevance of the chunk */
-  relevance: RelevantChunk_Relevance | undefined;
+  relevance:
+    | RelevantChunk_Relevance
+    | undefined;
   /** Chunk body */
   chunkBody: string;
   /** Document metadata */
@@ -70,9 +79,13 @@ export interface RelevantChunk_Relevance {
 /** A chunk is a part of a document */
 export interface Chunk {
   /** Source reference of the document */
-  source: SourceReference | undefined;
+  source:
+    | SourceReference
+    | undefined;
   /** Chunk reference of the chunk */
-  chunk: ChunkReference | undefined;
+  chunk:
+    | ChunkReference
+    | undefined;
   /** Chunk body */
   chunkBody: string;
   /** Document metadata */
@@ -141,7 +154,7 @@ export const ChunkMetadata: MessageFns<ChunkMetadata> = {
     return {
       createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
       modifiedAt: isSet(object.modifiedAt) ? fromJsonTimestamp(object.modifiedAt) : undefined,
-      link: isSet(object.link) ? globalThis.String(object.link) : undefined
+      link: isSet(object.link) ? globalThis.String(object.link) : undefined,
     };
   },
 
@@ -168,7 +181,7 @@ export const ChunkMetadata: MessageFns<ChunkMetadata> = {
     message.modifiedAt = object.modifiedAt ?? undefined;
     message.link = object.link ?? undefined;
     return message;
-  }
+  },
 };
 
 function createBaseSourceReference(): SourceReference {
@@ -179,7 +192,7 @@ function createBaseSourceReference(): SourceReference {
     documentId: "",
     documentVersion: "",
     documentPath: undefined,
-    documentName: undefined
+    documentName: undefined,
   };
 }
 
@@ -289,7 +302,7 @@ export const SourceReference: MessageFns<SourceReference> = {
       documentId: isSet(object.documentId) ? globalThis.String(object.documentId) : "",
       documentVersion: isSet(object.documentVersion) ? globalThis.String(object.documentVersion) : "",
       documentPath: isSet(object.documentPath) ? globalThis.String(object.documentPath) : undefined,
-      documentName: isSet(object.documentName) ? globalThis.String(object.documentName) : undefined
+      documentName: isSet(object.documentName) ? globalThis.String(object.documentName) : undefined,
     };
   },
 
@@ -332,7 +345,7 @@ export const SourceReference: MessageFns<SourceReference> = {
     message.documentPath = object.documentPath ?? undefined;
     message.documentName = object.documentName ?? undefined;
     return message;
-  }
+  },
 };
 
 function createBaseChunkReference(): ChunkReference {
@@ -397,7 +410,7 @@ export const ChunkReference: MessageFns<ChunkReference> = {
     return {
       chunkingVersion: isSet(object.chunkingVersion) ? globalThis.String(object.chunkingVersion) : "",
       chunkId: isSet(object.chunkId) ? globalThis.String(object.chunkId) : "",
-      chunkHash: isSet(object.chunkHash) ? globalThis.String(object.chunkHash) : ""
+      chunkHash: isSet(object.chunkHash) ? globalThis.String(object.chunkHash) : "",
     };
   },
 
@@ -424,7 +437,7 @@ export const ChunkReference: MessageFns<ChunkReference> = {
     message.chunkId = object.chunkId ?? "";
     message.chunkHash = object.chunkHash ?? "";
     return message;
-  }
+  },
 };
 
 function createBaseRelevantChunk(): RelevantChunk {
@@ -513,7 +526,7 @@ export const RelevantChunk: MessageFns<RelevantChunk> = {
       chunk: isSet(object.chunk) ? ChunkReference.fromJSON(object.chunk) : undefined,
       relevance: isSet(object.relevance) ? RelevantChunk_Relevance.fromJSON(object.relevance) : undefined,
       chunkBody: isSet(object.chunkBody) ? globalThis.String(object.chunkBody) : "",
-      documentMetadata: isSet(object.documentMetadata) ? ChunkMetadata.fromJSON(object.documentMetadata) : undefined
+      documentMetadata: isSet(object.documentMetadata) ? ChunkMetadata.fromJSON(object.documentMetadata) : undefined,
     };
   },
 
@@ -542,21 +555,21 @@ export const RelevantChunk: MessageFns<RelevantChunk> = {
   },
   fromPartial<I extends Exact<DeepPartial<RelevantChunk>, I>>(object: I): RelevantChunk {
     const message = createBaseRelevantChunk();
-    message.source =
-      object.source !== undefined && object.source !== null ? SourceReference.fromPartial(object.source) : undefined;
-    message.chunk =
-      object.chunk !== undefined && object.chunk !== null ? ChunkReference.fromPartial(object.chunk) : undefined;
-    message.relevance =
-      object.relevance !== undefined && object.relevance !== null
-        ? RelevantChunk_Relevance.fromPartial(object.relevance)
-        : undefined;
+    message.source = (object.source !== undefined && object.source !== null)
+      ? SourceReference.fromPartial(object.source)
+      : undefined;
+    message.chunk = (object.chunk !== undefined && object.chunk !== null)
+      ? ChunkReference.fromPartial(object.chunk)
+      : undefined;
+    message.relevance = (object.relevance !== undefined && object.relevance !== null)
+      ? RelevantChunk_Relevance.fromPartial(object.relevance)
+      : undefined;
     message.chunkBody = object.chunkBody ?? "";
-    message.documentMetadata =
-      object.documentMetadata !== undefined && object.documentMetadata !== null
-        ? ChunkMetadata.fromPartial(object.documentMetadata)
-        : undefined;
+    message.documentMetadata = (object.documentMetadata !== undefined && object.documentMetadata !== null)
+      ? ChunkMetadata.fromPartial(object.documentMetadata)
+      : undefined;
     return message;
-  }
+  },
 };
 
 function createBaseRelevantChunk_Relevance(): RelevantChunk_Relevance {
@@ -614,7 +627,7 @@ export const RelevantChunk_Relevance: MessageFns<RelevantChunk_Relevance> = {
     const message = createBaseRelevantChunk_Relevance();
     message.similarityScore = object.similarityScore ?? 0;
     return message;
-  }
+  },
 };
 
 function createBaseChunk(): Chunk {
@@ -691,7 +704,7 @@ export const Chunk: MessageFns<Chunk> = {
       source: isSet(object.source) ? SourceReference.fromJSON(object.source) : undefined,
       chunk: isSet(object.chunk) ? ChunkReference.fromJSON(object.chunk) : undefined,
       chunkBody: isSet(object.chunkBody) ? globalThis.String(object.chunkBody) : "",
-      documentMetadata: isSet(object.documentMetadata) ? ChunkMetadata.fromJSON(object.documentMetadata) : undefined
+      documentMetadata: isSet(object.documentMetadata) ? ChunkMetadata.fromJSON(object.documentMetadata) : undefined,
     };
   },
 
@@ -717,34 +730,30 @@ export const Chunk: MessageFns<Chunk> = {
   },
   fromPartial<I extends Exact<DeepPartial<Chunk>, I>>(object: I): Chunk {
     const message = createBaseChunk();
-    message.source =
-      object.source !== undefined && object.source !== null ? SourceReference.fromPartial(object.source) : undefined;
-    message.chunk =
-      object.chunk !== undefined && object.chunk !== null ? ChunkReference.fromPartial(object.chunk) : undefined;
+    message.source = (object.source !== undefined && object.source !== null)
+      ? SourceReference.fromPartial(object.source)
+      : undefined;
+    message.chunk = (object.chunk !== undefined && object.chunk !== null)
+      ? ChunkReference.fromPartial(object.chunk)
+      : undefined;
     message.chunkBody = object.chunkBody ?? "";
-    message.documentMetadata =
-      object.documentMetadata !== undefined && object.documentMetadata !== null
-        ? ChunkMetadata.fromPartial(object.documentMetadata)
-        : undefined;
+    message.documentMetadata = (object.documentMetadata !== undefined && object.documentMetadata !== null)
+      ? ChunkMetadata.fromPartial(object.documentMetadata)
+      : undefined;
     return message;
-  }
+  },
 };
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends globalThis.Array<infer U>
-    ? globalThis.Array<DeepPartial<U>>
-    : T extends ReadonlyArray<infer U>
-      ? ReadonlyArray<DeepPartial<U>>
-      : T extends {}
-        ? { [K in keyof T]?: DeepPartial<T[K]> }
-        : Partial<T>;
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
+  : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin
-  ? P
+export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {

@@ -7,18 +7,17 @@
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
 import {
+  type CallOptions,
   ChannelCredentials,
   Client,
-  makeGenericClientConstructor,
-  Metadata,
-  type CallOptions,
   type ClientOptions,
   type ClientUnaryCall,
   type handleUnaryCall,
+  makeGenericClientConstructor,
+  Metadata,
   type ServiceError,
-  type UntypedServiceImplementation
+  type UntypedServiceImplementation,
 } from "@grpc/grpc-js";
-
 import { Chunk, RelevantChunk } from "./chunks";
 import { Struct } from "./google/protobuf/struct";
 import { Timestamp } from "./google/protobuf/timestamp";
@@ -27,7 +26,9 @@ export const protobufPackage = "redactive.grpc.v2";
 
 export interface Query {
   /** Search query for semantic content */
-  semanticQuery?: string | undefined;
+  semanticQuery?:
+    | string
+    | undefined;
   /** Specific keywords to search for in source document */
   keywordQuery?: string | undefined;
 }
@@ -46,9 +47,13 @@ export interface Filters {
    */
   scope: string[];
   /** Timespan of response chunk's creation */
-  created?: TimeSpan | undefined;
+  created?:
+    | TimeSpan
+    | undefined;
   /** Timespan of response chunk's last modification */
-  modified?: TimeSpan | undefined;
+  modified?:
+    | TimeSpan
+    | undefined;
   /** List of user emails associated with response chunk */
   userEmails: string[];
   /** Include content from documents in trash */
@@ -57,9 +62,13 @@ export interface Filters {
 
 export interface SearchChunksRequest {
   /** How many results to try to return (maximum number of results) */
-  count?: number | undefined;
+  count?:
+    | number
+    | undefined;
   /** The query to execute */
-  query: Query | undefined;
+  query:
+    | Query
+    | undefined;
   /** Filters to apply to query */
   filters?: Filters | undefined;
 }
@@ -75,18 +84,26 @@ export interface SearchChunksResponse {
   /** Query was successful */
   success: boolean;
   /** Error message if query failed */
-  error?: { [key: string]: any } | undefined;
+  error?:
+    | { [key: string]: any }
+    | undefined;
   /** List of relevant chunks */
   relevantChunks: RelevantChunk[];
+  /** List of providers used for query */
+  providersUsed: string[];
 }
 
 export interface GetDocumentResponse {
   /** Query was successful */
   success: boolean;
   /** Error message if query failed */
-  error?: { [key: string]: any } | undefined;
+  error?:
+    | { [key: string]: any }
+    | undefined;
   /** List of relevant chunks */
   chunks: Chunk[];
+  /** List of providers used for query */
+  providersUsed: string[];
 }
 
 function createBaseQuery(): Query {
@@ -139,7 +156,7 @@ export const Query: MessageFns<Query> = {
   fromJSON(object: any): Query {
     return {
       semanticQuery: isSet(object.semanticQuery) ? globalThis.String(object.semanticQuery) : undefined,
-      keywordQuery: isSet(object.keywordQuery) ? globalThis.String(object.keywordQuery) : undefined
+      keywordQuery: isSet(object.keywordQuery) ? globalThis.String(object.keywordQuery) : undefined,
     };
   },
 
@@ -162,7 +179,7 @@ export const Query: MessageFns<Query> = {
     message.semanticQuery = object.semanticQuery ?? undefined;
     message.keywordQuery = object.keywordQuery ?? undefined;
     return message;
-  }
+  },
 };
 
 function createBaseTimeSpan(): TimeSpan {
@@ -215,7 +232,7 @@ export const TimeSpan: MessageFns<TimeSpan> = {
   fromJSON(object: any): TimeSpan {
     return {
       after: isSet(object.after) ? fromJsonTimestamp(object.after) : undefined,
-      before: isSet(object.before) ? fromJsonTimestamp(object.before) : undefined
+      before: isSet(object.before) ? fromJsonTimestamp(object.before) : undefined,
     };
   },
 
@@ -238,7 +255,7 @@ export const TimeSpan: MessageFns<TimeSpan> = {
     message.after = object.after ?? undefined;
     message.before = object.before ?? undefined;
     return message;
-  }
+  },
 };
 
 function createBaseFilters(): Filters {
@@ -331,7 +348,7 @@ export const Filters: MessageFns<Filters> = {
         : [],
       includeContentInTrash: isSet(object.includeContentInTrash)
         ? globalThis.Boolean(object.includeContentInTrash)
-        : undefined
+        : undefined,
     };
   },
 
@@ -361,14 +378,16 @@ export const Filters: MessageFns<Filters> = {
   fromPartial<I extends Exact<DeepPartial<Filters>, I>>(object: I): Filters {
     const message = createBaseFilters();
     message.scope = object.scope?.map((e) => e) || [];
-    message.created =
-      object.created !== undefined && object.created !== null ? TimeSpan.fromPartial(object.created) : undefined;
-    message.modified =
-      object.modified !== undefined && object.modified !== null ? TimeSpan.fromPartial(object.modified) : undefined;
+    message.created = (object.created !== undefined && object.created !== null)
+      ? TimeSpan.fromPartial(object.created)
+      : undefined;
+    message.modified = (object.modified !== undefined && object.modified !== null)
+      ? TimeSpan.fromPartial(object.modified)
+      : undefined;
     message.userEmails = object.userEmails?.map((e) => e) || [];
     message.includeContentInTrash = object.includeContentInTrash ?? undefined;
     return message;
-  }
+  },
 };
 
 function createBaseSearchChunksRequest(): SearchChunksRequest {
@@ -433,7 +452,7 @@ export const SearchChunksRequest: MessageFns<SearchChunksRequest> = {
     return {
       count: isSet(object.count) ? globalThis.Number(object.count) : undefined,
       query: isSet(object.query) ? Query.fromJSON(object.query) : undefined,
-      filters: isSet(object.filters) ? Filters.fromJSON(object.filters) : undefined
+      filters: isSet(object.filters) ? Filters.fromJSON(object.filters) : undefined,
     };
   },
 
@@ -457,11 +476,12 @@ export const SearchChunksRequest: MessageFns<SearchChunksRequest> = {
   fromPartial<I extends Exact<DeepPartial<SearchChunksRequest>, I>>(object: I): SearchChunksRequest {
     const message = createBaseSearchChunksRequest();
     message.count = object.count ?? undefined;
-    message.query = object.query !== undefined && object.query !== null ? Query.fromPartial(object.query) : undefined;
-    message.filters =
-      object.filters !== undefined && object.filters !== null ? Filters.fromPartial(object.filters) : undefined;
+    message.query = (object.query !== undefined && object.query !== null) ? Query.fromPartial(object.query) : undefined;
+    message.filters = (object.filters !== undefined && object.filters !== null)
+      ? Filters.fromPartial(object.filters)
+      : undefined;
     return message;
-  }
+  },
 };
 
 function createBaseGetDocumentRequest(): GetDocumentRequest {
@@ -514,7 +534,7 @@ export const GetDocumentRequest: MessageFns<GetDocumentRequest> = {
   fromJSON(object: any): GetDocumentRequest {
     return {
       ref: isSet(object.ref) ? globalThis.String(object.ref) : "",
-      filters: isSet(object.filters) ? Filters.fromJSON(object.filters) : undefined
+      filters: isSet(object.filters) ? Filters.fromJSON(object.filters) : undefined,
     };
   },
 
@@ -535,14 +555,15 @@ export const GetDocumentRequest: MessageFns<GetDocumentRequest> = {
   fromPartial<I extends Exact<DeepPartial<GetDocumentRequest>, I>>(object: I): GetDocumentRequest {
     const message = createBaseGetDocumentRequest();
     message.ref = object.ref ?? "";
-    message.filters =
-      object.filters !== undefined && object.filters !== null ? Filters.fromPartial(object.filters) : undefined;
+    message.filters = (object.filters !== undefined && object.filters !== null)
+      ? Filters.fromPartial(object.filters)
+      : undefined;
     return message;
-  }
+  },
 };
 
 function createBaseSearchChunksResponse(): SearchChunksResponse {
-  return { success: false, error: undefined, relevantChunks: [] };
+  return { success: false, error: undefined, relevantChunks: [], providersUsed: [] };
 }
 
 export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
@@ -555,6 +576,9 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
     }
     for (const v of message.relevantChunks) {
       RelevantChunk.encode(v!, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.providersUsed) {
+      writer.uint32(34).string(v!);
     }
     return writer;
   },
@@ -590,6 +614,14 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
           message.relevantChunks.push(RelevantChunk.decode(reader, reader.uint32()));
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.providersUsed.push(reader.string());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -605,7 +637,10 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
       error: isObject(object.error) ? object.error : undefined,
       relevantChunks: globalThis.Array.isArray(object?.relevantChunks)
         ? object.relevantChunks.map((e: any) => RelevantChunk.fromJSON(e))
-        : []
+        : [],
+      providersUsed: globalThis.Array.isArray(object?.providersUsed)
+        ? object.providersUsed.map((e: any) => globalThis.String(e))
+        : [],
     };
   },
 
@@ -620,6 +655,9 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
     if (message.relevantChunks?.length) {
       obj.relevantChunks = message.relevantChunks.map((e) => RelevantChunk.toJSON(e));
     }
+    if (message.providersUsed?.length) {
+      obj.providersUsed = message.providersUsed;
+    }
     return obj;
   },
 
@@ -631,12 +669,13 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
     message.success = object.success ?? false;
     message.error = object.error ?? undefined;
     message.relevantChunks = object.relevantChunks?.map((e) => RelevantChunk.fromPartial(e)) || [];
+    message.providersUsed = object.providersUsed?.map((e) => e) || [];
     return message;
-  }
+  },
 };
 
 function createBaseGetDocumentResponse(): GetDocumentResponse {
-  return { success: false, error: undefined, chunks: [] };
+  return { success: false, error: undefined, chunks: [], providersUsed: [] };
 }
 
 export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
@@ -649,6 +688,9 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     }
     for (const v of message.chunks) {
       Chunk.encode(v!, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.providersUsed) {
+      writer.uint32(34).string(v!);
     }
     return writer;
   },
@@ -684,6 +726,14 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
           message.chunks.push(Chunk.decode(reader, reader.uint32()));
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.providersUsed.push(reader.string());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -697,7 +747,10 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     return {
       success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
       error: isObject(object.error) ? object.error : undefined,
-      chunks: globalThis.Array.isArray(object?.chunks) ? object.chunks.map((e: any) => Chunk.fromJSON(e)) : []
+      chunks: globalThis.Array.isArray(object?.chunks) ? object.chunks.map((e: any) => Chunk.fromJSON(e)) : [],
+      providersUsed: globalThis.Array.isArray(object?.providersUsed)
+        ? object.providersUsed.map((e: any) => globalThis.String(e))
+        : [],
     };
   },
 
@@ -712,6 +765,9 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     if (message.chunks?.length) {
       obj.chunks = message.chunks.map((e) => Chunk.toJSON(e));
     }
+    if (message.providersUsed?.length) {
+      obj.providersUsed = message.providersUsed;
+    }
     return obj;
   },
 
@@ -723,8 +779,9 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     message.success = object.success ?? false;
     message.error = object.error ?? undefined;
     message.chunks = object.chunks?.map((e) => Chunk.fromPartial(e)) || [];
+    message.providersUsed = object.providersUsed?.map((e) => e) || [];
     return message;
-  }
+  },
 };
 
 export type SearchService = typeof SearchService;
@@ -737,7 +794,7 @@ export const SearchService = {
     requestSerialize: (value: SearchChunksRequest) => Buffer.from(SearchChunksRequest.encode(value).finish()),
     requestDeserialize: (value: Buffer) => SearchChunksRequest.decode(value),
     responseSerialize: (value: SearchChunksResponse) => Buffer.from(SearchChunksResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => SearchChunksResponse.decode(value)
+    responseDeserialize: (value: Buffer) => SearchChunksResponse.decode(value),
   },
   /** Query the index for all chunks of a specific document */
   getDocument: {
@@ -747,8 +804,8 @@ export const SearchService = {
     requestSerialize: (value: GetDocumentRequest) => Buffer.from(GetDocumentRequest.encode(value).finish()),
     requestDeserialize: (value: Buffer) => GetDocumentRequest.decode(value),
     responseSerialize: (value: GetDocumentResponse) => Buffer.from(GetDocumentResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => GetDocumentResponse.decode(value)
-  }
+    responseDeserialize: (value: Buffer) => GetDocumentResponse.decode(value),
+  },
 } as const;
 
 export interface SearchServer extends UntypedServiceImplementation {
@@ -762,34 +819,34 @@ export interface SearchClient extends Client {
   /** Query the index for relevant chunks */
   searchChunks(
     request: SearchChunksRequest,
-    callback: (error: ServiceError | null, response: SearchChunksResponse) => void
+    callback: (error: ServiceError | null, response: SearchChunksResponse) => void,
   ): ClientUnaryCall;
   searchChunks(
     request: SearchChunksRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: SearchChunksResponse) => void
+    callback: (error: ServiceError | null, response: SearchChunksResponse) => void,
   ): ClientUnaryCall;
   searchChunks(
     request: SearchChunksRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: SearchChunksResponse) => void
+    callback: (error: ServiceError | null, response: SearchChunksResponse) => void,
   ): ClientUnaryCall;
   /** Query the index for all chunks of a specific document */
   getDocument(
     request: GetDocumentRequest,
-    callback: (error: ServiceError | null, response: GetDocumentResponse) => void
+    callback: (error: ServiceError | null, response: GetDocumentResponse) => void,
   ): ClientUnaryCall;
   getDocument(
     request: GetDocumentRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: GetDocumentResponse) => void
+    callback: (error: ServiceError | null, response: GetDocumentResponse) => void,
   ): ClientUnaryCall;
   getDocument(
     request: GetDocumentRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: GetDocumentResponse) => void
+    callback: (error: ServiceError | null, response: GetDocumentResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -801,19 +858,14 @@ export const SearchClient = makeGenericClientConstructor(SearchService, "redacti
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends globalThis.Array<infer U>
-    ? globalThis.Array<DeepPartial<U>>
-    : T extends ReadonlyArray<infer U>
-      ? ReadonlyArray<DeepPartial<U>>
-      : T extends {}
-        ? { [K in keyof T]?: DeepPartial<T[K]> }
-        : Partial<T>;
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
+  : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin
-  ? P
+export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {

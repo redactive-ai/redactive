@@ -28,28 +28,32 @@ describe("Service client", () => {
       modified: { after: new Date() },
       includeContentInTrash: true
     };
-    const expectedResponse: Chunk[] = Array.from({ length: 5 }, (_, i) => ({
-      source: {
-        system: `system-${i}`,
-        systemVersion: `systemVersion-${i}`,
-        documentId: `documentId-${i}`,
-        documentVersion: `documentVersion-${i}`,
-        connectionId: `connectionId-${i}`,
-        documentName: `documentName-${i}`,
-        documentPath: `documentPath-${i}`
-      } as SourceReference,
-      chunk: {
-        chunkHash: `chunkHash-${i}`,
-        chunkId: `chunkId-${i}`,
-        chunkingVersion: `chunkingVersion-${i}`
-      } as ChunkReference,
-      chunkBody: `chunkBody-${i}`,
-      documentMetadata: {
-        createdAt: undefined,
-        link: undefined,
-        modifiedAt: undefined
-      }
-    }));
+    const expectedResponse: GetDocumentResponse = GetDocumentResponse.fromJSON({
+      chunks: Array.from({ length: 5 }, (_, i) => ({
+        source: {
+          system: `system-${i}`,
+          systemVersion: `systemVersion-${i}`,
+          documentId: `documentId-${i}`,
+          documentVersion: `documentVersion-${i}`,
+          connectionId: `connectionId-${i}`,
+          documentName: `documentName-${i}`,
+          documentPath: `documentPath-${i}`
+        } as SourceReference,
+        chunk: {
+          chunkHash: `chunkHash-${i}`,
+          chunkId: `chunkId-${i}`,
+          chunkingVersion: `chunkingVersion-${i}`
+        } as ChunkReference,
+        chunkBody: `chunkBody-${i}`,
+        documentMetadata: {
+          createdAt: undefined,
+          link: undefined,
+          modifiedAt: undefined
+        }
+      })),
+      success: true,
+      providersUsed: ["confluence", "sharepoint"]
+    });
 
     // Mock the _getClient method of SearchClient to return a mock gRPC client
     vi.spyOn(SearchClient.prototype, "_getClient").mockReturnValue({
@@ -57,7 +61,7 @@ describe("Service client", () => {
         _request: GetDocumentRequest,
         _metadata: Metadata,
         callback: (error: ServiceError | null, response: GetDocumentResponse) => void
-      ) => callback(null, { success: true, chunks: expectedResponse } as GetDocumentResponse)
+      ) => callback(null, expectedResponse)
     } as unknown as SearchServiceClient);
 
     const client = new SearchClient();
@@ -77,31 +81,37 @@ describe("Service client", () => {
       modified: { after: new Date() },
       includeContentInTrash: true
     };
-    const expectedResponse: RelevantChunk[] = Array.from({ length: count }, (_, i) => ({
-      source: {
-        system: `system-${i}`,
-        systemVersion: `systemVersion-${i}`,
-        documentId: `documentId-${i}`,
-        documentVersion: `documentVersion-${i}`,
-        connectionId: `connectionId-${i}`,
-        documentName: `documentName-${i}`,
-        documentPath: `documentPath-${i}`
-      } as SourceReference,
-      chunk: {
-        chunkHash: `chunkHash-${i}`,
-        chunkId: `chunkId-${i}`,
-        chunkingVersion: `chunkingVersion-${i}`
-      } as ChunkReference,
-      chunkBody: `chunkBody-${i}`,
-      documentMetadata: {
-        createdAt: undefined,
-        link: undefined,
-        modifiedAt: undefined
-      },
-      relevance: {
-        similarityScore: 1.0
-      } as RelevantChunk_Relevance
-    }));
+    const expectedResponse: SearchChunksResponse = SearchChunksResponse.fromJSON(
+      {
+        relevantChunks: Array.from({ length: count }, (_, i) => ({
+          source: {
+            system: `system-${i}`,
+            systemVersion: `systemVersion-${i}`,
+            documentId: `documentId-${i}`,
+            documentVersion: `documentVersion-${i}`,
+            connectionId: `connectionId-${i}`,
+            documentName: `documentName-${i}`,
+            documentPath: `documentPath-${i}`
+          } as SourceReference,
+          chunk: {
+            chunkHash: `chunkHash-${i}`,
+            chunkId: `chunkId-${i}`,
+            chunkingVersion: `chunkingVersion-${i}`
+          } as ChunkReference,
+          chunkBody: `chunkBody-${i}`,
+          documentMetadata: {
+            createdAt: undefined,
+            link: undefined,
+            modifiedAt: undefined
+          },
+          relevance: {
+            similarityScore: 1.0
+          } as RelevantChunk_Relevance
+        })),
+        success: true,
+        providersUsed: ["confluence", "sharepoint"]
+      }
+    );
 
     // Mock the _getClient method of SearchClient to return a mock gRPC client
     vi.spyOn(SearchClient.prototype, "_getClient").mockReturnValue({
@@ -109,7 +119,7 @@ describe("Service client", () => {
         _request: SearchChunksRequest,
         _metadata: Metadata,
         callback: (error: ServiceError | null, response: SearchChunksResponse) => void
-      ) => callback(null, SearchChunksResponse.fromJSON({ relevantChunks: expectedResponse }))
+      ) => callback(null, expectedResponse)
     } as unknown as SearchServiceClient);
 
     // Create an instance of SearchClient
