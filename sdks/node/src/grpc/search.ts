@@ -78,6 +78,8 @@ export interface SearchChunksResponse {
   error?: { [key: string]: any } | undefined;
   /** List of relevant chunks */
   relevantChunks: RelevantChunk[];
+  /** List of providers used for query */
+  providersUsed: string[];
 }
 
 export interface GetDocumentResponse {
@@ -87,6 +89,8 @@ export interface GetDocumentResponse {
   error?: { [key: string]: any } | undefined;
   /** List of relevant chunks */
   chunks: Chunk[];
+  /** List of providers used for query */
+  providersUsed: string[];
 }
 
 function createBaseQuery(): Query {
@@ -542,7 +546,7 @@ export const GetDocumentRequest: MessageFns<GetDocumentRequest> = {
 };
 
 function createBaseSearchChunksResponse(): SearchChunksResponse {
-  return { success: false, error: undefined, relevantChunks: [] };
+  return { success: false, error: undefined, relevantChunks: [], providersUsed: [] };
 }
 
 export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
@@ -555,6 +559,9 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
     }
     for (const v of message.relevantChunks) {
       RelevantChunk.encode(v!, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.providersUsed) {
+      writer.uint32(34).string(v!);
     }
     return writer;
   },
@@ -590,6 +597,14 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
           message.relevantChunks.push(RelevantChunk.decode(reader, reader.uint32()));
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.providersUsed.push(reader.string());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -605,6 +620,9 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
       error: isObject(object.error) ? object.error : undefined,
       relevantChunks: globalThis.Array.isArray(object?.relevantChunks)
         ? object.relevantChunks.map((e: any) => RelevantChunk.fromJSON(e))
+        : [],
+      providersUsed: globalThis.Array.isArray(object?.providersUsed)
+        ? object.providersUsed.map((e: any) => globalThis.String(e))
         : []
     };
   },
@@ -620,6 +638,9 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
     if (message.relevantChunks?.length) {
       obj.relevantChunks = message.relevantChunks.map((e) => RelevantChunk.toJSON(e));
     }
+    if (message.providersUsed?.length) {
+      obj.providersUsed = message.providersUsed;
+    }
     return obj;
   },
 
@@ -631,12 +652,13 @@ export const SearchChunksResponse: MessageFns<SearchChunksResponse> = {
     message.success = object.success ?? false;
     message.error = object.error ?? undefined;
     message.relevantChunks = object.relevantChunks?.map((e) => RelevantChunk.fromPartial(e)) || [];
+    message.providersUsed = object.providersUsed?.map((e) => e) || [];
     return message;
   }
 };
 
 function createBaseGetDocumentResponse(): GetDocumentResponse {
-  return { success: false, error: undefined, chunks: [] };
+  return { success: false, error: undefined, chunks: [], providersUsed: [] };
 }
 
 export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
@@ -649,6 +671,9 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     }
     for (const v of message.chunks) {
       Chunk.encode(v!, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.providersUsed) {
+      writer.uint32(34).string(v!);
     }
     return writer;
   },
@@ -684,6 +709,14 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
           message.chunks.push(Chunk.decode(reader, reader.uint32()));
           continue;
         }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.providersUsed.push(reader.string());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -697,7 +730,10 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     return {
       success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
       error: isObject(object.error) ? object.error : undefined,
-      chunks: globalThis.Array.isArray(object?.chunks) ? object.chunks.map((e: any) => Chunk.fromJSON(e)) : []
+      chunks: globalThis.Array.isArray(object?.chunks) ? object.chunks.map((e: any) => Chunk.fromJSON(e)) : [],
+      providersUsed: globalThis.Array.isArray(object?.providersUsed)
+        ? object.providersUsed.map((e: any) => globalThis.String(e))
+        : []
     };
   },
 
@@ -712,6 +748,9 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     if (message.chunks?.length) {
       obj.chunks = message.chunks.map((e) => Chunk.toJSON(e));
     }
+    if (message.providersUsed?.length) {
+      obj.providersUsed = message.providersUsed;
+    }
     return obj;
   },
 
@@ -723,6 +762,7 @@ export const GetDocumentResponse: MessageFns<GetDocumentResponse> = {
     message.success = object.success ?? false;
     message.error = object.error ?? undefined;
     message.chunks = object.chunks?.map((e) => Chunk.fromPartial(e)) || [];
+    message.providersUsed = object.providersUsed?.map((e) => e) || [];
     return message;
   }
 };

@@ -7,7 +7,7 @@ from typing import Annotated, Any
 import jwt
 
 from redactive.auth_client import AuthClient
-from redactive.grpc.v2 import Chunk, Filters, RelevantChunk
+from redactive.grpc.v2 import Filters, GetDocumentResponse, SearchChunksResponse
 from redactive.search_client import SearchClient
 
 
@@ -151,7 +151,7 @@ class MultiUserClient:
 
     async def search_chunks(
         self, user_id: str, query: str, count: int = 10, filters: Filters | dict[str, Any] | None = None
-    ) -> list[RelevantChunk]:
+    ) -> SearchChunksResponse:
         """
         Query for relevant chunks based on a semantic query.
 
@@ -169,7 +169,7 @@ class MultiUserClient:
         id_token = await self._get_id_token(user_id)
         return await self.search_client.search_chunks(id_token, query, count, filters=filters)
 
-    async def get_document(self, user_id: str, ref: str) -> list[Chunk]:
+    async def get_document(self, user_id: str, ref: str) -> GetDocumentResponse:
         """
         Get chunks from a document by its URL.
 

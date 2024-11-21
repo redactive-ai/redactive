@@ -203,6 +203,9 @@ class SearchChunksResponse(betterproto.Message):
     relevant_chunks: List["RelevantChunk"] = betterproto.message_field(3)
     """List of relevant chunks"""
 
+    providers_used: List[str] = betterproto.string_field(4)
+    """List of providers used for query"""
+
 
 @dataclass(eq=False, repr=False)
 class GetDocumentResponse(betterproto.Message):
@@ -216,6 +219,9 @@ class GetDocumentResponse(betterproto.Message):
 
     chunks: List["Chunk"] = betterproto.message_field(3)
     """List of relevant chunks"""
+
+    providers_used: List[str] = betterproto.string_field(4)
+    """List of providers used for query"""
 
 
 class SearchStub(betterproto.ServiceStub):

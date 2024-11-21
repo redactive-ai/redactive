@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { beforeEach, describe, expect, it, Mock, Mocked, MockedFunction, vi } from "vitest";
 
 import { AuthClient } from "./authClient";
-import { Chunk, RelevantChunk } from "./grpc/chunks";
+import { GetDocumentResponse, SearchChunksResponse } from "./grpc/search";
 import { MultiUserClient, UserData } from "./multiUserClient";
 import { SearchClient } from "./searchClient";
 
@@ -151,7 +151,11 @@ describe("MultiUserClient", () => {
     const query = "query";
     const idToken = "idToken123";
     const refreshToken = "refreshToken123";
-    const chunks = [{ chunk: "chunk1" }, { chunk: "chunk2" }];
+    const response = SearchChunksResponse.fromJSON({
+      relevantChunks: [{ chunk: "chunk1" }, { chunk: "chunk2" }],
+      success: true,
+      providersUsed: ["confluence"]
+    });
 
     const expiredUserData: UserData = {
       idToken,
@@ -166,12 +170,12 @@ describe("MultiUserClient", () => {
 
     readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
     multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
-    mockSearchClient.searchChunks.mockResolvedValue(chunks as unknown as RelevantChunk[]);
+    mockSearchClient.searchChunks.mockResolvedValue(response);
 
     multiUserClient.searchClient = mockSearchClient;
     const result = await multiUserClient.searchChunks({ userId, query });
 
-    expect(result).toEqual(chunks);
+    expect(result).toEqual(response);
     expect(mockSearchClient.searchChunks).toHaveBeenCalledWith({ accessToken: idToken, query, count: 10 });
   });
 
@@ -180,7 +184,11 @@ describe("MultiUserClient", () => {
     const documentName = "test-document";
     const idToken = "idToken123";
     const refreshToken = "refreshToken123";
-    const chunks = [{ chunk: "chunk1" }, { chunk: "chunk2" }];
+    const response = GetDocumentResponse.fromJSON({
+      chunks: [{ chunk: "chunk1" }, { chunk: "chunk2" }],
+      success: true,
+      providersUsed: ["confluence"]
+    });
 
     const expiredUserData: UserData = {
       idToken,
@@ -195,12 +203,12 @@ describe("MultiUserClient", () => {
 
     readUserData.mockResolvedValueOnce(expiredUserData).mockResolvedValueOnce(refreshedUserData);
     multiUserClient._refreshUserData = vi.fn().mockResolvedValue(refreshedUserData);
-    mockSearchClient.getDocument.mockResolvedValue(chunks as unknown as Chunk[]);
+    mockSearchClient.getDocument.mockResolvedValue(response);
 
     multiUserClient.searchClient = mockSearchClient;
     const result = await multiUserClient.getDocument({ userId, ref: documentName });
 
-    expect(result).toEqual(chunks);
+    expect(result).toEqual(response);
     expect(mockSearchClient.getDocument).toHaveBeenCalledWith({ accessToken: idToken, ref: documentName });
   });
 });

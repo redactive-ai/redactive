@@ -64,6 +64,8 @@ message SearchChunksResponse {
     optional google.protobuf.Struct error = 2;
     // List of relevant chunks
     repeated RelevantChunk relevant_chunks = 3;
+    // List of providers used for query
+    repeated string providers_used = 4;
 }
 
 message GetDocumentResponse {
@@ -73,4 +75,6 @@ message GetDocumentResponse {
     optional google.protobuf.Struct error = 2;
     // List of relevant chunks
     repeated Chunk chunks = 3;
+    // List of providers used for query
+    repeated string providers_used = 4;
 }

@@ -1,6 +1,5 @@
 import { Client, credentials, Metadata } from "@grpc/grpc-js";
 
-import { Chunk, RelevantChunk } from "./grpc/chunks";
 import {
   Filters,
   GetDocumentRequest,
@@ -60,7 +59,7 @@ export class SearchClient {
    * @param filters - An object of filters for querying. Optional.
    * @returns list of relevant chunks.
    */
-  async searchChunks({ accessToken, query, count = 10, filters }: SearchChunksParams): Promise<RelevantChunk[]> {
+  async searchChunks({ accessToken, query, count = 10, filters }: SearchChunksParams): Promise<SearchChunksResponse> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);
     requestMetadata.set("User-Agent", "redactive-sdk-node");
@@ -84,7 +83,7 @@ export class SearchClient {
         return resolve(response);
       });
     });
-    return response.relevantChunks;
+    return response;
   }
 
   /**
@@ -94,7 +93,7 @@ export class SearchClient {
    * @param filters - The filters for querying documents. Optional. Only applicable for getting by document name.
    * @returns The complete list of chunks for the matching document.
    */
-  async getDocument({ accessToken, ref, filters }: GetDocumentParams): Promise<Chunk[]> {
+  async getDocument({ accessToken, ref, filters }: GetDocumentParams): Promise<GetDocumentResponse> {
     const requestMetadata = new Metadata();
     requestMetadata.set("Authorization", `Bearer ${accessToken}`);
     requestMetadata.set("User-Agent", "redactive-sdk-node");
@@ -116,6 +115,6 @@ export class SearchClient {
         return resolve(response);
       });
     });
-    return response.chunks;
+    return response;
   }
 }

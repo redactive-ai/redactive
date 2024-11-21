@@ -4,12 +4,12 @@ from grpclib.client import Channel
 
 from redactive._connection_mode import get_default_grpc_host_and_port as _get_default_grpc_host_and_port
 from redactive.grpc.v2 import (
-    Chunk,
     Filters,
     GetDocumentRequest,
+    GetDocumentResponse,
     Query,
-    RelevantChunk,
     SearchChunksRequest,
+    SearchChunksResponse,
     SearchStub,
 )
 
@@ -42,7 +42,7 @@ class SearchClient:
         query: str,
         count: int = 10,
         filters: Filters | dict[str, Any] | None = None,
-    ) -> list[RelevantChunk]:
+    ) -> SearchChunksResponse:
         """
         Query for relevant chunks based on a semantic query.
 
@@ -67,14 +67,13 @@ class SearchClient:
                 _filters = Filters(**filters)
 
             request = SearchChunksRequest(count=count, query=Query(semantic_query=query), filters=_filters)
-            response = await stub.search_chunks(request)
-            return response.relevant_chunks
+            return await stub.search_chunks(request)
 
     async def get_document(
         self,
         access_token: str,
         ref: str,
-    ) -> list[Chunk]:
+    ) -> GetDocumentResponse:
         """
         Query for chunks by document name.
 
@@ -89,5 +88,4 @@ class SearchClient:
             stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
 
             request = GetDocumentRequest(ref=ref)
-            response = await stub.get_document(request)
-            return response.chunks
+            return await stub.get_document(request)

@@ -205,7 +205,7 @@ To test changes, run:
 pnpm test
 ```
 
-To build Python SDK, run:
+To build Node SDK, run:
 
 ```sh
 pnpm build
