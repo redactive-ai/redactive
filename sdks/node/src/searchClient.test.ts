@@ -1,7 +1,7 @@
 import { Metadata, ServiceError } from "@grpc/grpc-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Chunk, ChunkReference, RelevantChunk, RelevantChunk_Relevance, SourceReference } from "./grpc/chunks";
+import { ChunkReference, RelevantChunk_Relevance, SourceReference } from "./grpc/chunks";
 import {
   Filters,
   GetDocumentRequest,

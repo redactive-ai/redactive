@@ -3,7 +3,6 @@ import { randomUUID } from "crypto";
 import { beforeEach, describe, expect, it, Mock, Mocked, MockedFunction, vi } from "vitest";
 
 import { AuthClient } from "./authClient";
-import { Chunk, RelevantChunk } from "./grpc/chunks";
 import { GetDocumentResponse, SearchChunksResponse } from "./grpc/search";
 import { MultiUserClient, UserData } from "./multiUserClient";
 import { SearchClient } from "./searchClient";
