@@ -4,9 +4,9 @@ import { beforeEach, describe, expect, it, Mock, Mocked, MockedFunction, vi } fr
 
 import { AuthClient } from "./authClient";
 import { Chunk, RelevantChunk } from "./grpc/chunks";
+import { GetDocumentResponse, SearchChunksResponse } from "./grpc/search";
 import { MultiUserClient, UserData } from "./multiUserClient";
 import { SearchClient } from "./searchClient";
-import { GetDocumentResponse, SearchChunksResponse } from "./grpc/search";
 
 vi.mock("./authClient");
 vi.mock("./searchClient");
@@ -152,7 +152,11 @@ describe("MultiUserClient", () => {
     const query = "query";
     const idToken = "idToken123";
     const refreshToken = "refreshToken123";
-    const response = SearchChunksResponse.fromJSON({relevantChunks: [{ chunk: "chunk1" }, { chunk: "chunk2" }], success: true, providersUsed: ["confluence"]});
+    const response = SearchChunksResponse.fromJSON({
+      relevantChunks: [{ chunk: "chunk1" }, { chunk: "chunk2" }],
+      success: true,
+      providersUsed: ["confluence"]
+    });
 
     const expiredUserData: UserData = {
       idToken,
@@ -181,7 +185,11 @@ describe("MultiUserClient", () => {
     const documentName = "test-document";
     const idToken = "idToken123";
     const refreshToken = "refreshToken123";
-    const response = GetDocumentResponse.fromJSON({chunks: [{ chunk: "chunk1" }, { chunk: "chunk2" }], success: true, providersUsed: ["confluence"]});
+    const response = GetDocumentResponse.fromJSON({
+      chunks: [{ chunk: "chunk1" }, { chunk: "chunk2" }],
+      success: true,
+      providersUsed: ["confluence"]
+    });
 
     const expiredUserData: UserData = {
       idToken,

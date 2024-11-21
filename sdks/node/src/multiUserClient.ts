@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 import { AuthClient } from "./authClient";
-import { GetDocumentParams, SearchChunksParams, SearchClient } from "./searchClient";
 import { GetDocumentResponse, SearchChunksResponse } from "./grpc/search";
+import { GetDocumentParams, SearchChunksParams, SearchClient } from "./searchClient";
 
 export interface UserData {
   signInState?: string;
@@ -151,7 +151,12 @@ export class MultiUserClient {
    * @param filters - An object of filters for querying. Optional.
    * @returns list of relevant chunks.
    */
-  async searchChunks({ userId, query, count = 10, filters }: MultiUserSearchChunksParams): Promise<SearchChunksResponse> {
+  async searchChunks({
+    userId,
+    query,
+    count = 10,
+    filters
+  }: MultiUserSearchChunksParams): Promise<SearchChunksResponse> {
     let userData = await this.readUserData(userId);
     if (!userData || !userData.refreshToken) {
       throw new Error(`No valid Redactive session for user '${userId}'`);

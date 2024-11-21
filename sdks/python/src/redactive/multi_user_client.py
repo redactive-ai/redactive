@@ -7,7 +7,7 @@ from typing import Annotated, Any
 import jwt
 
 from redactive.auth_client import AuthClient
-from redactive.grpc.v2 import Chunk, Filters, GetDocumentResponse, RelevantChunk, SearchChunksResponse
+from redactive.grpc.v2 import Filters, GetDocumentResponse, SearchChunksResponse
 from redactive.search_client import SearchClient
 
 

@@ -17,7 +17,6 @@ import betterproto.lib.google.protobuf as betterproto_lib_google_protobuf
 import grpclib
 from betterproto.grpc.grpclib_server import ServiceBase
 
-
 if TYPE_CHECKING:
     import grpclib.server
     from betterproto.grpc.grpclib_client import MetadataLike
@@ -26,14 +25,10 @@ if TYPE_CHECKING:
 
 @dataclass(eq=False, repr=False)
 class ChunkMetadata(betterproto.Message):
-    created_at: Optional[datetime] = betterproto.message_field(
-        1, optional=True, group="_created_at"
-    )
+    created_at: Optional[datetime] = betterproto.message_field(1, optional=True, group="_created_at")
     """Chunk content's creation timestamp"""
 
-    modified_at: Optional[datetime] = betterproto.message_field(
-        2, optional=True, group="_modified_at"
-    )
+    modified_at: Optional[datetime] = betterproto.message_field(2, optional=True, group="_modified_at")
     """Chunk content's last modified timestamp"""
 
     link: Optional[str] = betterproto.string_field(3, optional=True, group="_link")
@@ -65,9 +60,7 @@ class SourceReference(betterproto.Message):
     sharepoint file hash
     """
 
-    document_path: Optional[str] = betterproto.string_field(
-        6, optional=True, group="_document_path"
-    )
+    document_path: Optional[str] = betterproto.string_field(6, optional=True, group="_document_path")
     """
     Document path in the source system e.g.
     "redactiveai.atlassian.net/Engineering/Onboarding Guide" or
@@ -75,9 +68,7 @@ class SourceReference(betterproto.Message):
     Guide.pdf"
     """
 
-    document_name: Optional[str] = betterproto.string_field(
-        7, optional=True, group="_document_name"
-    )
+    document_name: Optional[str] = betterproto.string_field(7, optional=True, group="_document_name")
     """Document name in the source system e.g. "document.txt"""
 
 
@@ -138,25 +129,17 @@ class Chunk(betterproto.Message):
 
 @dataclass(eq=False, repr=False)
 class Query(betterproto.Message):
-    semantic_query: Optional[str] = betterproto.string_field(
-        1, optional=True, group="_semantic_query"
-    )
+    semantic_query: Optional[str] = betterproto.string_field(1, optional=True, group="_semantic_query")
     """Search query for semantic content"""
 
-    keyword_query: Optional[str] = betterproto.string_field(
-        2, optional=True, group="_keyword_query"
-    )
+    keyword_query: Optional[str] = betterproto.string_field(2, optional=True, group="_keyword_query")
     """Specific keywords to search for in source document"""
 
 
 @dataclass(eq=False, repr=False)
 class TimeSpan(betterproto.Message):
-    after: Optional[datetime] = betterproto.message_field(
-        1, optional=True, group="_after"
-    )
-    before: Optional[datetime] = betterproto.message_field(
-        2, optional=True, group="_before"
-    )
+    after: Optional[datetime] = betterproto.message_field(1, optional=True, group="_after")
+    before: Optional[datetime] = betterproto.message_field(2, optional=True, group="_before")
 
 
 @dataclass(eq=False, repr=False)
@@ -171,14 +154,10 @@ class Filters(betterproto.Message):
     Documents/Engineering/Onboarding Guide.pdf'
     """
 
-    created: Optional["TimeSpan"] = betterproto.message_field(
-        2, optional=True, group="_created"
-    )
+    created: Optional["TimeSpan"] = betterproto.message_field(2, optional=True, group="_created")
     """Timespan of response chunk's creation"""
 
-    modified: Optional["TimeSpan"] = betterproto.message_field(
-        3, optional=True, group="_modified"
-    )
+    modified: Optional["TimeSpan"] = betterproto.message_field(3, optional=True, group="_modified")
     """Timespan of response chunk's last modification"""
 
     user_emails: List[str] = betterproto.string_field(4)
@@ -198,9 +177,7 @@ class SearchChunksRequest(betterproto.Message):
     query: "Query" = betterproto.message_field(2)
     """The query to execute"""
 
-    filters: Optional["Filters"] = betterproto.message_field(
-        3, optional=True, group="_filters"
-    )
+    filters: Optional["Filters"] = betterproto.message_field(3, optional=True, group="_filters")
     """Filters to apply to query"""
 
 
@@ -209,9 +186,7 @@ class GetDocumentRequest(betterproto.Message):
     ref: str = betterproto.string_field(1)
     """A reference to the document to retrieve"""
 
-    filters: Optional["Filters"] = betterproto.message_field(
-        2, optional=True, group="_filters"
-    )
+    filters: Optional["Filters"] = betterproto.message_field(2, optional=True, group="_filters")
     """Query filters (only really for GetDocByTitle)"""
 
 
@@ -220,8 +195,8 @@ class SearchChunksResponse(betterproto.Message):
     success: bool = betterproto.bool_field(1)
     """Query was successful"""
 
-    error: Optional["betterproto_lib_google_protobuf.Struct"] = (
-        betterproto.message_field(2, optional=True, group="_error")
+    error: Optional["betterproto_lib_google_protobuf.Struct"] = betterproto.message_field(
+        2, optional=True, group="_error"
     )
     """Error message if query failed"""
 
@@ -237,8 +212,8 @@ class GetDocumentResponse(betterproto.Message):
     success: bool = betterproto.bool_field(1)
     """Query was successful"""
 
-    error: Optional["betterproto_lib_google_protobuf.Struct"] = (
-        betterproto.message_field(2, optional=True, group="_error")
+    error: Optional["betterproto_lib_google_protobuf.Struct"] = betterproto.message_field(
+        2, optional=True, group="_error"
     )
     """Error message if query failed"""
 
@@ -256,7 +231,7 @@ class SearchStub(betterproto.ServiceStub):
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
+        metadata: Optional["MetadataLike"] = None,
     ) -> "SearchChunksResponse":
         return await self._unary_unary(
             "/redactive.grpc.v2.Search/SearchChunks",
@@ -273,7 +248,7 @@ class SearchStub(betterproto.ServiceStub):
         *,
         timeout: Optional[float] = None,
         deadline: Optional["Deadline"] = None,
-        metadata: Optional["MetadataLike"] = None
+        metadata: Optional["MetadataLike"] = None,
     ) -> "GetDocumentResponse":
         return await self._unary_unary(
             "/redactive.grpc.v2.Search/GetDocument",
@@ -286,15 +261,10 @@ class SearchStub(betterproto.ServiceStub):
 
 
 class SearchBase(ServiceBase):
-
-    async def search_chunks(
-        self, search_chunks_request: "SearchChunksRequest"
-    ) -> "SearchChunksResponse":
+    async def search_chunks(self, search_chunks_request: "SearchChunksRequest") -> "SearchChunksResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
-    async def get_document(
-        self, get_document_request: "GetDocumentRequest"
-    ) -> "GetDocumentResponse":
+    async def get_document(self, get_document_request: "GetDocumentRequest") -> "GetDocumentResponse":
         raise grpclib.GRPCError(grpclib.const.Status.UNIMPLEMENTED)
 
     async def __rpc_search_chunks(

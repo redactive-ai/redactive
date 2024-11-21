@@ -81,37 +81,35 @@ describe("Service client", () => {
       modified: { after: new Date() },
       includeContentInTrash: true
     };
-    const expectedResponse: SearchChunksResponse = SearchChunksResponse.fromJSON(
-      {
-        relevantChunks: Array.from({ length: count }, (_, i) => ({
-          source: {
-            system: `system-${i}`,
-            systemVersion: `systemVersion-${i}`,
-            documentId: `documentId-${i}`,
-            documentVersion: `documentVersion-${i}`,
-            connectionId: `connectionId-${i}`,
-            documentName: `documentName-${i}`,
-            documentPath: `documentPath-${i}`
-          } as SourceReference,
-          chunk: {
-            chunkHash: `chunkHash-${i}`,
-            chunkId: `chunkId-${i}`,
-            chunkingVersion: `chunkingVersion-${i}`
-          } as ChunkReference,
-          chunkBody: `chunkBody-${i}`,
-          documentMetadata: {
-            createdAt: undefined,
-            link: undefined,
-            modifiedAt: undefined
-          },
-          relevance: {
-            similarityScore: 1.0
-          } as RelevantChunk_Relevance
-        })),
-        success: true,
-        providersUsed: ["confluence", "sharepoint"]
-      }
-    );
+    const expectedResponse: SearchChunksResponse = SearchChunksResponse.fromJSON({
+      relevantChunks: Array.from({ length: count }, (_, i) => ({
+        source: {
+          system: `system-${i}`,
+          systemVersion: `systemVersion-${i}`,
+          documentId: `documentId-${i}`,
+          documentVersion: `documentVersion-${i}`,
+          connectionId: `connectionId-${i}`,
+          documentName: `documentName-${i}`,
+          documentPath: `documentPath-${i}`
+        } as SourceReference,
+        chunk: {
+          chunkHash: `chunkHash-${i}`,
+          chunkId: `chunkId-${i}`,
+          chunkingVersion: `chunkingVersion-${i}`
+        } as ChunkReference,
+        chunkBody: `chunkBody-${i}`,
+        documentMetadata: {
+          createdAt: undefined,
+          link: undefined,
+          modifiedAt: undefined
+        },
+        relevance: {
+          similarityScore: 1.0
+        } as RelevantChunk_Relevance
+      })),
+      success: true,
+      providersUsed: ["confluence", "sharepoint"]
+    });
 
     // Mock the _getClient method of SearchClient to return a mock gRPC client
     vi.spyOn(SearchClient.prototype, "_getClient").mockReturnValue({

@@ -67,8 +67,7 @@ class SearchClient:
                 _filters = Filters(**filters)
 
             request = SearchChunksRequest(count=count, query=Query(semantic_query=query), filters=_filters)
-            response = await stub.search_chunks(request)
-            return response
+            return await stub.search_chunks(request)
 
     async def get_document(
         self,
@@ -89,5 +88,4 @@ class SearchClient:
             stub = SearchStub(channel, metadata=({"authorization": f"Bearer {access_token}"}))
 
             request = GetDocumentRequest(ref=ref)
-            response = await stub.get_document(request)
-            return response
+            return await stub.get_document(request)
