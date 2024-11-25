@@ -8,7 +8,7 @@ from redactive._connection_mode import get_default_http_endpoint as _get_default
 
 class ListConnectionsResponse(BaseModel):
     user_id: str
-    connections: list[str]
+    current_connections: list[str]
 
 
 class ExchangeTokenResponse(BaseModel):
@@ -108,8 +108,7 @@ class AuthClient:
         :return: An object containing the user ID and current connections.
         :rtype: UserConnections
         """
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = await self._client.get("/api/auth/connections", headers=headers)
+        response = await self._client.get("/api/auth/connections", auth=BearerAuth(access_token))
 
         if response.status_code != http.HTTPStatus.OK:
             raise httpx.RequestError(response.text)
