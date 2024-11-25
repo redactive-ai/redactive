@@ -108,8 +108,7 @@ class AuthClient:
         :return: An object containing the user ID and current connections.
         :rtype: UserConnections
         """
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = await self._client.get("/api/auth/connections", headers=headers)
+        response = await self._client.get("/api/auth/connections", auth=BearerAuth(access_token))
 
         if response.status_code != http.HTTPStatus.OK:
             raise httpx.RequestError(response.text)
