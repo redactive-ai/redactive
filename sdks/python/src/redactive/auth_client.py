@@ -8,7 +8,7 @@ from redactive._connection_mode import get_default_http_endpoint as _get_default
 
 class ListConnectionsResponse(BaseModel):
     user_id: str
-    connections: list[str]
+    current_connections: list[str]
 
 
 class ExchangeTokenResponse(BaseModel):
