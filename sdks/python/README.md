@@ -55,12 +55,12 @@ sign_in_url = await client.begin_connection(
     provider=provider, redirect_uri=redirect_uri
 )
 
-# Now redirect your user to sign_in_url 
+# Now redirect your user to sign_in_url
 ```
 
 The user will be redirected back to your app's configured redirect uri after they have completed the steps on
 the data provider's OAuth consent page. There will be a signin code present in the `code` parameter of the query string e.g.
-`https://your-redirect-page.com?code=abcde12345`. 
+`https://your-redirect-page.com?code=abcde12345`.
 
 This code may be exchanged for a user access token (which the user may use to issue queries against their data):
 
@@ -81,7 +81,6 @@ assert "confluence" in response.connections # ✅
 ```
 
 Use the `list_connections` method to keep your user's connection status up to date, and provide mechanisms to re-connect data sources.
-
 
 ### SearchClient
 
@@ -123,8 +122,8 @@ message Filters {
 }
 ```
 
-The query will only return results which match _ALL_ filter predicates i.e. if multiple fields are populated in the filter object, 
-the resulting filter is the logical 'AND' of all the fields. If a data source provider does not support a filter-type, then no 
+The query will only return results which match _ALL_ filter predicates i.e. if multiple fields are populated in the filter object,
+the resulting filter is the logical 'AND' of all the fields. If a data source provider does not support a filter-type, then no
 results from that provider are returned.
 
 Filters may be populated and provided to a query in the following way for the Python SDK:
@@ -156,7 +155,6 @@ client.search_chunks(
     filters=filters
 )
 ```
-
 
 #### Document Fetch
 
