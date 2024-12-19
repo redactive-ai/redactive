@@ -148,7 +148,7 @@ async def test_refresh_user_data(multi_user_client: MultiUserClient, mock_auth_c
     mock_auth_client.exchange_tokens.return_value = mock.AsyncMock(
         idToken=id_token, refreshToken=refresh_token, expiresIn=expires_in
     )
-    mock_auth_client.list_connections.return_value = mock.AsyncMock(connections=connections)
+    mock_auth_client.list_connections.return_value = mock.AsyncMock(current_connections=connections)
 
     multi_user_client.auth_client = mock_auth_client
     multi_user_client.read_user_data.return_value = UserData(sign_in_state="state123")

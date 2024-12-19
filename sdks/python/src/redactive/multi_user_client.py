@@ -89,7 +89,7 @@ class MultiUserClient:
             refresh_token=tokens.refreshToken,
             id_token=tokens.idToken,
             id_token_expiry=datetime.now(UTC) + timedelta(seconds=tokens.expiresIn - 10),
-            connections=connections.connections,
+            connections=connections.current_connections,
         )
         await self.write_user_data(user_id, user_data)
         return user_data
@@ -175,8 +175,8 @@ class MultiUserClient:
 
         :param user_id: The ID of the user.
         :type user_id: str
-        :param url: The URL to the document for retrieving chunks.
-        :type url: str
+        :param ref: A reference to the document we are retrieving.
+        :type ref: str
         :return: The complete list of chunks for the document.
         :rtype: list[Chunk]
         """
