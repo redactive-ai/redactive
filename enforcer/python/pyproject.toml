@@ -1,0 +1,45 @@
+[project]
+name = "redactive-enforcer"
+readme = "README.md"
+version = "0.1.0"
+description = "Redactive Permission Enforcer Python SDK"
+authors = [{ name = "Redactive ai", email = "support@redactive.ai" }]
+keywords = []
+requires-python = ">=3.11"
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+]
+
+[project.optional-dependencies]
+#tests = ["pytest", "pytest-asyncio", "pytest-httpx"]  # TODO
+opensearch = [
+    "opensearch-py>=2.8.0",
+]
+all = ["redactive-enforcer[opensearch]"]
+
+[project.urls]
+Homepage = "https://github.com/redactive-ai/redactive/tree/main/enforcer"
+Issues = "https://github.com/redactive-ai/redactive/labels/sdk:python"
+Source = "https://github.com/redactive-ai/redactive/tree/main/enforcer"
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "standard"
+
+[tool.ruff]
+line-length = 120
+include = ["src/*", "tests/*"]
+
+[tool.ruff.lint]
+extend-select = [
+    "I",  # isort
+    "UP", # pyupgrade
+]
+
